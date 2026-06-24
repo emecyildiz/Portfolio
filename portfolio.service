@@ -1,0 +1,38 @@
+﻿# /etc/systemd/system/portfolio.service
+# Kopyala: cp portfolio.service /etc/systemd/system/
+# Aktif et: systemctl enable portfolio && systemctl start portfolio
+# Log:      journalctl -u portfolio -f
+
+[Unit]
+Description=Portfolio ASP.NET Core uygulaması
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=notify
+# Uygulamanın publish edildiği klasör
+WorkingDirectory=/var/www/portfolio
+
+# dotnet publish çıktısındaki dll adı
+ExecStart=/usr/bin/dotnet /var/www/portfolio/Portfolio.dll
+
+# Bağlantı bilgisi environment variable ile — appsettings.json'a yazma
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://localhost:5000
+Environment=ConnectionStrings__DefaultConnection=Host=localhost;Port=5432;Database=portfolio_db;Username=portfolio_user;Password=GUCLU_SIFRE_BURAYA
+
+# Servis çöküp kalkarsa 10 saniye bekle
+Restart=on-failure
+RestartSec=10
+
+# Güvenlik — root ile çalıştırma
+User=www-data
+Group=www-data
+
+# Log çıktısı journalctl'e
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=portfolio
+
+[Install]
+WantedBy=multi-user.target
