@@ -1,0 +1,40 @@
+﻿version: '3.8'
+
+services:
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"          # Geliştirmede açık — pgAdmin veya DBeaver ile bağlanabilirsin
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10            # 10 kez dener (50 saniye), hazır olana kadar web başlamaz
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile    # Visual Studio'nun oluşturduğu Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    volumes:
+      # wwwroot/uploads klasörü container dışına çıkar — container silinse bile görseller kalır
+      - uploads:/app/wwwroot/uploads
+
+volumes:
+  pgdata:
+  uploads:

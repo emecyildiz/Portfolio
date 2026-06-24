@@ -2,7 +2,7 @@
 
 namespace Portfolio.Models
 {
-    public class ContentModels
+    public class HomelabPost
     {
         public int Id { get; set; }
 

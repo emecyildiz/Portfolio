@@ -1,18 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
+using Portfolio.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions =>
+        npgsql =>
         {
-            // Migration assembly — proje adýnla eþleþmeli
-            npgsqlOptions.MigrationsAssembly("Portfolio");
-
-            // Baðlantý koptuðunda otomatik yeniden dene (VPS için önemli)
-            npgsqlOptions.EnableRetryOnFailure(
+            npgsql.MigrationsAssembly("Portfolio");
+            npgsql.EnableRetryOnFailure(
                 maxRetryCount: 3,
                 maxRetryDelay: TimeSpan.FromSeconds(5),
                 errorCodesToAdd: null
@@ -24,15 +22,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// builder.Services.AddScoped<ISlugService, SlugService>();
-// builder.Services.AddScoped<IMediaService, MediaService>();
-// builder.Services.AddScoped<IReadingTimeService, ReadingTimeService>();
-// builder.Services.AddScoped<IAuditService, AuditService>();
-// builder.Services.AddScoped<IViewCountService, ViewCountService>();
-// builder.Services.AddMemoryCache(); // Kategori listesi için
+builder.Services.AddScoped<ISlugService, SlugService>();
+builder.Services.AddScoped<IReadingTimeService, ReadingTimeService>();
+builder.Services.AddScoped<IViewCountService, ViewCountService>();
+builder.Services.AddScoped<AuditService, AuditService>();
+builder.Services.AddScoped<MediaService, MediaService>();
+builder.Services.AddMemoryCache();
 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -53,9 +57,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Migration'ý startup'ta otomatik uygula (opsiyonel — prod'da dikkatli kullan)
-// using var scope = app.Services.CreateScope();
-// var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-// db.Database.Migrate();
+
 
 app.Run();
