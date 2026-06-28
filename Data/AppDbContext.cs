@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Portfolio.Models;
 using Portfolio.Models.Enums;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Portfolio.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

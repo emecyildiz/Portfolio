@@ -1,0 +1,97 @@
+﻿@model List<Portfolio.Models.Category>
+@{
+    ViewData["Title"] = "Kategoriler";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h2 class="text-2xl font-bold text-white">Kategoriler</h2>
+        <p class="text-gray-500 mt-1">Bölüm görünürlüklerini buradan yönet</p>
+    </div>
+    <a href="@Url.Action("Create", "Category", new { area = "Admin" })"
+       class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+        + Yeni Kategori
+    </a>
+</div>
+
+<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-gray-800">
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Sıra</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Ad</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Slug</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Durum</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Özel</th>
+                <th class="text-right px-6 py-3 text-gray-400 font-medium">İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cat in Model)
+            {
+                <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition">
+                    <td class="px-6 py-4 text-gray-400">@cat.SortOrder</td>
+                    <td class="px-6 py-4 text-white font-medium">@cat.Name</td>
+                    <td class="px-6 py-4 text-gray-400 font-mono text-xs">/@cat.Slug</td>
+                    <td class="px-6 py-4">
+                        @if (cat.Status == Portfolio.Models.Enums.VisibilityStatus.Public)
+                        {
+                            <span class="bg-green-900/40 text-green-400 text-xs px-2 py-1 rounded-full">Yayında</span>
+                        }
+                        else
+                        {
+                            <span class="bg-gray-800 text-gray-500 text-xs px-2 py-1 rounded-full">Gizli</span>
+                        }
+                    </td>
+                    <td class="px-6 py-4">
+                        @if (cat.IsPrivate)
+                        {
+                            <span class="bg-purple-900/40 text-purple-400 text-xs px-2 py-1 rounded-full">Özel</span>
+                        }
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                        <!-- Görünürlük toggle -->
+                        <form method="post"
+                              action="@Url.Action("Toggle", "Category", new { area = "Admin", id = cat.Id })">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="text-xs px-3 py-1.5 rounded-lg border transition
+                                        @(cat.Status == Portfolio.Models.Enums.VisibilityStatus.Public
+                                                                                ? "border-green-800 text-green-400 hover:bg-green-900/30"
+                                                                                : "border-gray-700 text-gray-400 hover:bg-gray-800")">
+                                @(cat.Status == Portfolio.Models.Enums.VisibilityStatus.Public ? "Gizle" : "Yayınla")
+                            </button>
+                        </form>
+
+                            <!-- Düzenle -->
+                            <a href="@Url.Action("Edit", "Category", new { area = "Admin", id = cat.Id })"
+                               class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
+                                Düzenle
+                            </a>
+
+                            <!-- Sil -->
+                            <form method="post"
+                                  action="@Url.Action("Delete", "Category", new { area = "Admin", id = cat.Id })"
+                                  onsubmit="return confirm('@cat.Name kategorisini silmek istediğine emin misin?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
+                                    Sil
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                        }
+        </tbody>
+    </table>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-16 text-gray-600">
+            Henüz kategori yok. Yeni kategori ekle.
+        </div>
+    }
+</div>

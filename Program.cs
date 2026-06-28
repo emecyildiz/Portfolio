@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var adminPath = builder.Configuration["AdminPath"] ?? "panel";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
@@ -17,7 +20,35 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             );
         }
     )
+    
 );
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    // Þifre kurallarý
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 12;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+
+    // Hesap kilitleme — 5 yanlýþ denemede 15 dakika kilt
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+// Cookie ayarlarý
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = $"/{adminPath}/account/login";
+    options.LogoutPath = $"/{adminPath}/account/logout";
+    options.AccessDeniedPath = $"/{adminPath}/account/login";
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -25,9 +56,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ISlugService, SlugService>();
 builder.Services.AddScoped<IReadingTimeService, ReadingTimeService>();
 builder.Services.AddScoped<IViewCountService, ViewCountService>();
-builder.Services.AddScoped<AuditService, AuditService>();
-builder.Services.AddScoped<MediaService, MediaService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddMemoryCache();
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"));
 
 
 var app = builder.Build();
@@ -36,6 +69,36 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
+
+    // Admin kullanýcýsý seed
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    var adminEmail = builder.Configuration["AdminEmail"] ?? "admin@portfolio.local";
+    var adminPassword = builder.Configuration["AdminPassword"] ?? "Admin123!@#";
+
+    if (await userManager.FindByEmailAsync(adminEmail) is null)
+    {
+        var admin = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+        var result = await userManager.CreateAsync(admin, adminPassword);
+
+        if (!result.Succeeded)
+        {
+            // Hatalarý log'a yaz
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine($"SEED HATASI: {error.Code} — {error.Description}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Admin kullanýcýsý oluþturuldu.");
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -51,11 +114,19 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
+
+app.MapControllerRoute(
+    name: "admin",
+    pattern: $"{adminPath}/{{controller=Dashboard}}/{{action=Index}}/{{id?}}",
+    defaults: new { area = "Admin" }
+);
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
 
 
 

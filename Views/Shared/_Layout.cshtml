@@ -3,10 +3,24 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Portfolio</title>
+    <title>@ViewData["Title"] - Portfolio Admin</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Portfolio.styles.css" asp-append-version="true" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E3A5F',
+                        secondary: '#2D6A9F',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body>
     <header>

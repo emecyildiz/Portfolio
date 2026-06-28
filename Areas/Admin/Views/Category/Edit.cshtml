@@ -1,0 +1,62 @@
+﻿@model Portfolio.Models.Category
+@{
+    ViewData["Title"] = "Kategori Düzenle";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-white">Kategori Düzenle</h2>
+</div>
+
+<div class="max-w-2xl bg-gray-900 border border-gray-800 rounded-xl p-6">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+        <input asp-for="CreatedAt" type="hidden" />
+
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Ad</label>
+            <input asp-for="Name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Slug</label>
+            <input asp-for="Slug" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Açıklama</label>
+            <textarea asp-for="Description" rows="3"
+                      class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">İkon Sınıfı</label>
+            <input asp-for="IconClass" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Sıra</label>
+            <input asp-for="SortOrder" type="number"
+                   class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div class="mb-6 flex items-center gap-6">
+            <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                <input asp-for="IsPrivate" type="checkbox" class="w-4 h-4 rounded" />
+                Özel (sadece admin görsün)
+            </label>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+                Güncelle
+            </button>
+            <a href="@Url.Action("Index", "Category", new { area = "Admin" })"
+               class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-6 py-2.5 rounded-lg transition">
+                İptal
+            </a>
+        </div>
+    </form>
+</div>
