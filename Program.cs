@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Services;
 
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+
 var builder = WebApplication.CreateBuilder(args);
 var adminPath = builder.Configuration["AdminPath"] ?? "panel";
 
@@ -86,6 +88,7 @@ using (var scope = app.Services.CreateScope())
         };
         var result = await userManager.CreateAsync(admin, adminPassword);
 
+
         if (!result.Succeeded)
         {
             // Hatalarý log'a yaz
@@ -98,6 +101,25 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Admin kullanýcýsý oluþturuldu.");
         }
+
+    }
+
+    // Kategorileri seed et — yoksa oluþtur
+    if (!await db.Categories.AnyAsync())
+    {
+        var categories = new List<Portfolio.Models.Category>
+    {
+        new() { Name = "Siber Güvenlik", Slug = "security", IconClass = "ti ti-shield", SortOrder = 1, Status = Portfolio.Models.Enums.VisibilityStatus.Public },
+        new() { Name = "Elektronik", Slug = "electronics", IconClass = "ti ti-cpu", SortOrder = 2, Status = Portfolio.Models.Enums.VisibilityStatus.Public },
+        new() { Name = "Web Uygulamalarý", Slug = "webapps", IconClass = "ti ti-browser", SortOrder = 3, Status = Portfolio.Models.Enums.VisibilityStatus.Public },
+        new() { Name = "Homelab", Slug = "homelab", IconClass = "ti ti-server", SortOrder = 4, Status = Portfolio.Models.Enums.VisibilityStatus.Public },
+        new() { Name = "Blog", Slug = "blog", IconClass = "ti ti-pencil", SortOrder = 5, Status = Portfolio.Models.Enums.VisibilityStatus.Public },
+        new() { Name = "Ekip & Hackathon", Slug = "team", IconClass = "ti ti-users", SortOrder = 6, Status = Portfolio.Models.Enums.VisibilityStatus.Public },
+        new() { Name = "Notlar", Slug = "notes", IconClass = "ti ti-notes", SortOrder = 7, Status = Portfolio.Models.Enums.VisibilityStatus.Private, IsPrivate = true },
+    };
+
+        db.Categories.AddRange(categories);
+        await db.SaveChangesAsync();
     }
 }
 

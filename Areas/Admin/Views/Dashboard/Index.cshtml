@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Portfolio.Models.ViewModels.DashboardViewModel
+@{
     ViewData["Title"] = "Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
@@ -8,21 +9,42 @@
     <p class="text-gray-500 mt-1">Hoş geldin.</p>
 </div>
 
-<div class="grid grid-cols-4 gap-4">
+<div class="grid grid-cols-4 gap-4 mb-8">
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
         <p class="text-sm text-gray-500">Projeler</p>
-        <p class="text-3xl font-bold text-white mt-1">0</p>
+        <p class="text-3xl font-bold text-white mt-1">@Model.ProjectCount</p>
     </div>
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
         <p class="text-sm text-gray-500">Güvenlik Araştırmaları</p>
-        <p class="text-3xl font-bold text-white mt-1">0</p>
+        <p class="text-3xl font-bold text-white mt-1">@Model.SecurityCount</p>
     </div>
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
         <p class="text-sm text-gray-500">Blog Yazıları</p>
-        <p class="text-3xl font-bold text-white mt-1">0</p>
+        <p class="text-3xl font-bold text-white mt-1">@Model.BlogCount</p>
     </div>
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
         <p class="text-sm text-gray-500">Okunmamış Mesajlar</p>
-        <p class="text-3xl font-bold text-white mt-1">0</p>
+        <p class="text-3xl font-bold text-white mt-1">@Model.UnreadMessages</p>
+    </div>
+</div>
+
+<!-- Kategori durumları -->
+<div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+    <h3 class="text-sm font-medium text-gray-400 mb-4">Bölüm Durumları</h3>
+    <div class="space-y-2">
+        @foreach (var cat in Model.RecentCategories)
+        {
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-300">@cat.Name</span>
+                @if (cat.Status == Portfolio.Models.Enums.VisibilityStatus.Public)
+                {
+                    <span class="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full">Yayında</span>
+                }
+                else
+                {
+                    <span class="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full">Gizli</span>
+                }
+            </div>
+        }
     </div>
 </div>

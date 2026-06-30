@@ -9,14 +9,10 @@ namespace Portfolio.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Authorize]
-public class CategoryController : Controller
+public class CategoryController : AdminBaseController
 {
-    private readonly AppDbContext _db;
 
-    public CategoryController(AppDbContext db)
-    {
-        _db = db;
-    }
+    public CategoryController(AppDbContext db) : base(db) { }
 
     // Liste
     public async Task<IActionResult> Index()
@@ -63,8 +59,20 @@ public class CategoryController : Controller
         if (id != model.Id) return BadRequest();
         if (!ModelState.IsValid) return View(model);
 
-        model.UpdatedAt = DateTime.UtcNow;
-        _db.Categories.Update(model);
+        // Veritabanındaki mevcut kaydı al
+        var existing = await _db.Categories.FindAsync(id);
+        if (existing == null) return NotFound();
+
+        // Sadece değişen alanları güncelle — DateTime sorununu önler
+        existing.Name = model.Name;
+        existing.Slug = model.Slug;
+        existing.Description = model.Description;
+        existing.IconClass = model.IconClass;
+        existing.SortOrder = model.SortOrder;
+        existing.IsPrivate = model.IsPrivate;
+        existing.Status = model.Status;
+        existing.UpdatedAt = DateTime.UtcNow;
+
         await _db.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));

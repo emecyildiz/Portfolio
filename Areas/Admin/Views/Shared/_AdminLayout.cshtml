@@ -21,13 +21,14 @@
 <body class="bg-gray-950 text-gray-100 min-h-screen flex">
 
     <!-- Sidebar -->
+    <!-- Sidebar -->
     <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col fixed h-full">
         <div class="p-6 border-b border-gray-800">
             <h1 class="text-lg font-bold text-white">Admin Panel</h1>
             <p class="text-xs text-gray-500 mt-1">Portfolio Yönetimi</p>
         </div>
 
-        <nav class="flex-1 p-4 space-y-1">
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
             <a href="/money/dashboard"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Dashboard
@@ -36,30 +37,42 @@
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Kategoriler
             </a>
-            <a href="/money/project"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
-                Projeler
-            </a>
-            <a href="/money/security"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
-                Güvenlik Araştırmaları
-            </a>
-            <a href="/money/homelab"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
-                Homelab
-            </a>
-            <a href="/money/blog"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
-                Blog
-            </a>
-            <a href="/money/team"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
-                Ekip Projeleri
-            </a>
-            <a href="/money/note"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
-                Notlar
-            </a>
+
+            <div class="pt-2 pb-1">
+                <p class="text-xs text-gray-600 px-3 uppercase tracking-wider">İçerikler</p>
+            </div>
+
+            @if (ViewBag.Categories != null)
+            {
+                foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.Categories)
+                {
+                    var url = cat.Slug switch
+                    {
+                        "security" => "/money/security",
+                        "electronics" => "/money/project",
+                        "webapps" => "/money/project",
+                        "homelab" => "/money/homelab",
+                        "blog" => "/money/blog",
+                        "team" => "/money/team",
+                        "notes" => "/money/note",
+                        _ => $"/money/category/edit/{cat.Id}"
+                    };
+
+                    <a href="@url"
+                       class="flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
+                        <span>@cat.Name</span>
+                        @if (cat.Status != Portfolio.Models.Enums.VisibilityStatus.Public)
+                        {
+                            <span class="text-xs text-gray-600">gizli</span>
+                        }
+                    </a>
+                }
+            }
+
+            <div class="pt-2 pb-1">
+                <p class="text-xs text-gray-600 px-3 uppercase tracking-wider">Diğer</p>
+            </div>
+
             <a href="/money/service"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Hizmetler
