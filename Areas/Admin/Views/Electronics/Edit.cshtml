@@ -1,0 +1,178 @@
+﻿@model Portfolio.Models.Project
+@{
+    ViewData["Title"] = "Projeyi Düzenle";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var extra = ViewBag.Extra as Portfolio.Models.ExtraData.ElectronicsExtraData ?? new Portfolio.Models.ExtraData.ElectronicsExtraData();
+    var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new List<Portfolio.Models.Media>();
+}
+
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-white">Projeyi Düzenle</h2>
+    <p class="text-gray-500 mt-1">/@Model.Slug</p>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+
+<form method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
+    <div class="grid grid-cols-3 gap-6">
+
+        <div class="col-span-2 space-y-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <h3 class="text-sm font-medium text-gray-400">İçerik</h3>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <input asp-for="Title"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Özet</label>
+                    <textarea asp-for="Summary" rows="2"
+                              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <textarea asp-for="Content" id="content-editor"></textarea>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <h3 class="text-sm font-medium text-gray-400">Teknik Detaylar</h3>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Mikrodenetleyici</label>
+                    <input name="Microcontroller" value="@extra.Microcontroller"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Bileşenler</label>
+                    <input name="Components" value="@string.Join(", ", extra.Components ?? new List<string>())"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Programlama Dili</label>
+                    <input name="ProgrammingLanguage" value="@extra.ProgrammingLanguage"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Devre Şeması URL</label>
+                    <input name="SchematicUrl" value="@extra.SchematicUrl"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                    <input name="IsOpenSource" type="checkbox" class="w-4 h-4 rounded"
+                           @(extra.IsOpenSource == true ? "checked" : "") />
+                    Açık kaynak
+                </label>
+            </div>
+
+            <!-- Mevcut görseller -->
+            @if (images.Any())
+            {
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-sm font-medium text-gray-400 mb-4">Mevcut Görseller</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        @foreach (var img in images)
+                        {
+                            <div class="relative group">
+                                <img src="@img.Url" alt="@img.AltText"
+                                     class="w-full h-32 object-cover rounded-lg @(img.IsCover ? "ring-2 ring-blue-500" : "")" />
+                                @if (img.IsCover)
+                                {
+                                    <span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">Kapak</span>
+                                }
+                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center gap-2">
+                                    <form method="post" action="@Url.Action("SetCover", "Electronics", new { area = "Admin" })">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="mediaId" value="@img.Id" />
+                                        <input type="hidden" name="projectId" value="@Model.Id" />
+                                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Kapak</button>
+                                    </form>
+                                    <form method="post" action="@Url.Action("DeleteImage", "Electronics", new { area = "Admin" })">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="mediaId" value="@img.Id" />
+                                        <input type="hidden" name="projectId" value="@Model.Id" />
+                                        <button type="submit" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Sil</button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Yeni görsel ekle -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h3 class="text-sm font-medium text-gray-400 mb-4">Yeni Görsel Ekle</h3>
+                <input name="Images" type="file" multiple accept="image/*"
+                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
+            </div>
+        </div>
+
+        <!-- Sağ — Ayarlar -->
+        <div class="space-y-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <select asp-for="Status" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                    </select>
+                </div>
+
+                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                    <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
+                    Ana sayfada öne çıkar
+                </label>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">GitHub</label>
+                    <input asp-for="GithubUrl"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Canlı Demo</label>
+                    <input asp-for="LiveDemoUrl"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div class="pt-2 border-t border-gray-800 text-xs text-gray-600 space-y-1">
+                    <p>Oluşturuldu: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
+                    <p>Görüntülenme: @Model.ViewCount</p>
+                    <p>Okuma süresi: @Model.ReadingTimeMinutes dk</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
+                    Güncelle
+                </button>
+                <a href="@Url.Action("Index", "Electronics", new { area = "Admin" })"
+                   class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
+                    İptal
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    new EasyMDE({
+        element: document.getElementById('content-editor'),
+        spellChecker: false,
+        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
+    });
+</script>

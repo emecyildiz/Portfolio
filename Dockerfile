@@ -27,5 +27,12 @@ RUN dotnet publish "./Portfolio.csproj" -c $BUILD_CONFIGURATION -o /app/publish 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-RUN mkdir -p /app/dataprotection-keys && chown -R app:app /app/dataprotection-keys
+
+USER root
+RUN mkdir -p /app/dataprotection-keys && \
+    mkdir -p /app/wwwroot/uploads && \
+    chown -R $APP_UID /app/dataprotection-keys && \
+    chown -R $APP_UID /app/wwwroot/uploads
+USER $APP_UID
+
 ENTRYPOINT ["dotnet", "Portfolio.dll"]
