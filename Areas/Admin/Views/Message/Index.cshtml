@@ -1,0 +1,87 @@
+﻿@model List<Portfolio.Models.ContactMessage>
+@{
+    ViewData["Title"] = "Mesajlar";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-white">Mesajlar</h2>
+    <p class="text-gray-500 mt-1">
+        @Model.Count(m => !m.IsRead) okunmamış mesaj
+    </p>
+</div>
+
+<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-gray-800">
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Gönderen</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Konu</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Hizmet</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Durum</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Tarih</th>
+                <th class="text-right px-6 py-3 text-gray-400 font-medium">İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in Model)
+            {
+                <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition
+                               @(!m.IsRead ? "bg-blue-950/20" : "")">
+                    <td class="px-6 py-4">
+                        <p class="text-white font-medium @(!m.IsRead ? "font-semibold" : "")">
+                            @(!m.IsRead ? "● " : "")@m.Name
+                        </p>
+                        <p class="text-gray-500 text-xs mt-0.5">@m.Email</p>
+                    </td>
+                    <td class="px-6 py-4 text-gray-400 text-xs">
+                        @(m.Subject ?? "—")
+                    </td>
+                    <td class="px-6 py-4 text-gray-500 text-xs">
+                        @(m.Service?.Title ?? "—")
+                    </td>
+                    <td class="px-6 py-4">
+                        @{
+                            var statusClass = m.Status switch
+                            {
+                                Portfolio.Models.Enums.ContactStatus.New => "bg-blue-900/40 text-blue-400",
+                                Portfolio.Models.Enums.ContactStatus.Read => "bg-gray-800 text-gray-500",
+                                Portfolio.Models.Enums.ContactStatus.Replied => "bg-green-900/40 text-green-400",
+                                Portfolio.Models.Enums.ContactStatus.Archived => "bg-gray-800 text-gray-600",
+                                Portfolio.Models.Enums.ContactStatus.Spam => "bg-red-900/40 text-red-400",
+                                _ => "bg-gray-800 text-gray-500"
+                            };
+                        }
+                        <span class="text-xs px-2 py-1 rounded-full @statusClass">@m.Status</span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500 text-xs">
+                        @m.CreatedAt.ToString("dd MMM yyyy HH:mm")
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="@Url.Action("Detail", "Message", new { area = "Admin", id = m.Id })"
+                               class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
+                                Oku
+                            </a>
+                            <form method="post" action="@Url.Action("Delete", "Message", new { area = "Admin", id = m.Id })"
+                                  onsubmit="return confirm('Bu mesajı silmek istediğine emin misin?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
+                                    Sil
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-16 text-gray-600">
+            Henüz mesaj yok.
+        </div>
+    }
+</div>

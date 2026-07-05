@@ -48,6 +48,8 @@ public class ElectronicsController : AdminBaseController
         string? ProgrammingLanguage, bool IsOpenSource,
         List<IFormFile>? Images)
     {
+        if (!ModelState.IsValid)      // ← bunu ekle
+            return View(model);
         // Elektronik kategorisini bul
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "electronics");
         if (category == null)

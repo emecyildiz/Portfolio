@@ -40,6 +40,9 @@ public class SecurityController : AdminBaseController
     public async Task<IActionResult> Create(SecurityResearch model,
         string? ToolsUsed, List<IFormFile>? Images)
     {
+        if (!ModelState.IsValid)      // ← bunu ekle
+            return View(model);
+
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "security");
         if (category == null)
         {

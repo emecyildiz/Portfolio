@@ -1,0 +1,89 @@
+﻿@model Portfolio.Models.Note
+@{
+    ViewData["Title"] = "Not Düzenle";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-white">Not Düzenle</h2>
+</div>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
+    <div class="max-w-2xl space-y-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                <input asp-for="Title"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">İçerik</label>
+                <textarea asp-for="Content" rows="6"
+                          class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 font-mono"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Not Türü</label>
+                    <select asp-for="NoteType"
+                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.NoteType>()"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Öncelik</label>
+                    <select asp-for="Priority"
+                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.NotePriority>()"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                    </select>
+                </div>
+            </div>
+
+            <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                <input asp-for="IsTodo" type="checkbox" class="w-4 h-4 rounded" id="isTodoCheck" />
+                Yapılacak listesi
+            </label>
+
+            <div id="todoFields" class="@(Model.IsTodo ? "" : "hidden") space-y-3">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Son Tarih</label>
+                    <input asp-for="DueDate" type="date"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                    <input asp-for="IsCompleted" type="checkbox" class="w-4 h-4 rounded" />
+                    Tamamlandı
+                </label>
+            </div>
+
+            <div class="pt-2 border-t border-gray-800 text-xs text-gray-600">
+                <p>Oluşturuldu: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+                Güncelle
+            </button>
+            <a href="@Url.Action("Index", "Note", new { area = "Admin" })"
+               class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-6 py-2.5 rounded-lg transition">
+                İptal
+            </a>
+        </div>
+    </div>
+</form>
+
+<script>
+    const isTodoCheck = document.getElementById('isTodoCheck');
+    const todoFields = document.getElementById('todoFields');
+
+    isTodoCheck.addEventListener('change', function() {
+        todoFields.classList.toggle('hidden', !this.checked);
+    });
+</script>

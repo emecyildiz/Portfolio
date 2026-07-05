@@ -44,6 +44,9 @@ public class WebAppsController : AdminBaseController
         string? Subdomain, bool IsSchoolProject,
         List<IFormFile>? Images)
     {
+        if (!ModelState.IsValid)      // ← bunu ekle
+            return View(model);
+
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "webapps");
         if (category == null)
         {

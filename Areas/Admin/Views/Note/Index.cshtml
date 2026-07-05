@@ -1,0 +1,126 @@
+﻿@model List<Portfolio.Models.Note>
+@{
+    ViewData["Title"] = "Notlar";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h2 class="text-2xl font-bold text-white">Notlar</h2>
+        <p class="text-gray-500 mt-1">Kişisel notlar ve yapılacaklar</p>
+    </div>
+    <a href="@Url.Action("Create", "Note", new { area = "Admin" })"
+       class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+        + Yeni Not
+    </a>
+</div>
+
+<!-- Todo'lar -->
+@{
+    var todos = Model.Where(n => n.IsTodo).OrderBy(n => n.IsCompleted).ThenBy(n => n.DueDate).ToList();
+    var notes = Model.Where(n => !n.IsTodo).ToList();
+}
+
+@if (todos.Any())
+{
+    <div class="mb-6">
+        <h3 class="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Yapılacaklar</h3>
+        <div class="space-y-2">
+            @foreach (var todo in todos)
+            {
+                <div class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center justify-between
+                                    @(todo.IsCompleted ? "opacity-50" : "")">
+                    <div class="flex items-center gap-3">
+                        <form method="post" action="@Url.Action("ToggleComplete", "Note", new { area = "Admin", id = todo.Id })">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="w-5 h-5 rounded border-2 flex items-center justify-center transition
+                                            @(todo.IsCompleted ? "bg-green-600 border-green-600" : "border-gray-600 hover:border-green-500")">
+                                @if (todo.IsCompleted)
+                                {
+                                    <span class="text-white text-xs">✓</span>
+                                }
+                            </button>
+                        </form>
+                        <div>
+                            <p class="text-white text-sm @(todo.IsCompleted ? "line-through" : "")">@todo.Title</p>
+                            @if (todo.DueDate.HasValue)
+                            {
+                                <p class="text-xs text-gray-500 mt-0.5">Son tarih: @todo.DueDate.Value.ToString("dd MMM yyyy")</p>
+                            }
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        @{
+                            var priorityClass = todo.Priority switch
+                            {
+                                Portfolio.Models.Enums.NotePriority.Critical => "bg-red-900/40 text-red-400",
+                                Portfolio.Models.Enums.NotePriority.High => "bg-amber-900/40 text-amber-400",
+                                Portfolio.Models.Enums.NotePriority.Normal => "bg-gray-800 text-gray-400",
+                                Portfolio.Models.Enums.NotePriority.Low => "bg-gray-800 text-gray-600",
+                                _ => "bg-gray-800 text-gray-400"
+                            };
+                        }
+                        <span class="text-xs px-2 py-1 rounded-full @priorityClass">@todo.Priority</span>
+                        <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = todo.Id })"
+                           class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
+                            Düzenle
+                        </a>
+                        <form method="post" action="@Url.Action("Delete", "Note", new { area = "Admin", id = todo.Id })"
+                              onsubmit="return confirm('Bu notu silmek istediğine emin misin?')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
+                                Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Notlar -->
+@if (notes.Any())
+{
+    <div>
+        <h3 class="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Notlar</h3>
+        <div class="grid grid-cols-2 gap-4">
+            @foreach (var note in notes)
+            {
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <p class="text-white font-medium text-sm">@note.Title</p>
+                            <span class="text-xs text-gray-600">@note.NoteType</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = note.Id })"
+                               class="text-xs text-gray-500 hover:text-gray-300 transition">Düzenle</a>
+                            <form method="post" action="@Url.Action("Delete", "Note", new { area = "Admin", id = note.Id })"
+                                  onsubmit="return confirm('Bu notu silmek istediğine emin misin?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="text-xs text-red-500 hover:text-red-400 transition">Sil</button>
+                            </form>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(note.Content))
+                    {
+                        <p class="text-gray-500 text-xs line-clamp-3">
+                            @(note.Content.Length > 150 ? note.Content[..150] + "..." : note.Content)
+                        </p>
+                    }
+                    <p class="text-gray-700 text-xs mt-3">@note.CreatedAt.ToString("dd MMM yyyy")</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="text-center py-16 text-gray-600">
+        Henüz not yok.
+    </div>
+}

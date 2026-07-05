@@ -22,6 +22,9 @@ public class SlugService : ISlugService
 
     public string Generate(string title)
     {
+        if (string.IsNullOrWhiteSpace(title))
+            return string.Empty;
+
         var normalized = title
             .ToLowerInvariant()
             .Replace('ş', 's').Replace('ğ', 'g').Replace('ı', 'i')

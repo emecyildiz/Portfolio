@@ -1,4 +1,5 @@
 ﻿using Portfolio.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Portfolio.Models
 {
@@ -6,6 +7,8 @@ namespace Portfolio.Models
     {
         public int Id { get; set; }
 
+
+        [Required(ErrorMessage = "Başlık zorunlu")]
         public string Title { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;           // unique index
 

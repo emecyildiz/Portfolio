@@ -1,0 +1,236 @@
+﻿@model Portfolio.Models.TeamProject
+@{
+    ViewData["Title"] = "Ekip Projesi Düzenle";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var members = ViewBag.Members as List<Portfolio.Models.ExtraData.TeamMember> ?? new();
+    var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
+    var membersJson = System.Text.Json.JsonSerializer.Serialize(members);
+}
+
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-white">Ekip Projesi Düzenle</h2>
+    <p class="text-gray-500 mt-1">/@Model.Slug</p>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+
+<form method="post" enctype="multipart/form-data" id="mainForm">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+    <input type="hidden" name="TeamMembersJson" id="teamMembersJson" />
+
+    <div class="grid grid-cols-3 gap-6">
+        <div class="col-span-2 space-y-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <h3 class="text-sm font-medium text-gray-400">İçerik</h3>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <input asp-for="Title"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Özet</label>
+                    <textarea asp-for="Summary" rows="2"
+                              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <textarea asp-for="Content" id="content-editor"></textarea>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <h3 class="text-sm font-medium text-gray-400">Etkinlik Bilgileri</h3>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Etkinlik Adı</label>
+                        <input asp-for="EventName"
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Etkinlik Tarihi</label>
+                        <input asp-for="EventDate" type="date"
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Benim Rolüm</label>
+                        <input asp-for="MyRole"
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Sonuç / Ödül</label>
+                        <input asp-for="Outcome"
+                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Etkinlik URL</label>
+                    <input asp-for="EventUrl"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+            </div>
+
+            <!-- Ekip üyeleri -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-medium text-gray-400">Ekip Üyeleri</h3>
+                    <button type="button" onclick="addMember()"
+                            class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
+                        + Üye Ekle
+                    </button>
+                </div>
+                <div id="members-container" class="space-y-3"></div>
+            </div>
+
+            @if (images.Any())
+            {
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-sm font-medium text-gray-400 mb-4">Mevcut Görseller</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        @foreach (var img in images)
+                        {
+                            <div class="relative group">
+                                <img src="@img.Url" alt="@img.AltText"
+                                     class="w-full h-32 object-cover rounded-lg @(img.IsCover ? "ring-2 ring-blue-500" : "")" />
+                                @if (img.IsCover)
+                                {
+                                    <span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">Kapak</span>
+                                }
+                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center gap-2">
+                                    <form method="post" action="@Url.Action("SetCover", "Team", new { area = "Admin" })">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="mediaId" value="@img.Id" />
+                                        <input type="hidden" name="projectId" value="@Model.Id" />
+                                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Kapak</button>
+                                    </form>
+                                    <form method="post" action="@Url.Action("DeleteImage", "Team", new { area = "Admin" })">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="mediaId" value="@img.Id" />
+                                        <input type="hidden" name="projectId" value="@Model.Id" />
+                                        <button type="submit" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Sil</button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                <h3 class="text-sm font-medium text-gray-400 mb-4">Yeni Görsel Ekle</h3>
+                <input name="Images" type="file" multiple accept="image/*"
+                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <select asp-for="Status"
+                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                    </select>
+                </div>
+
+                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                    <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
+                    Ana sayfada öne çıkar
+                </label>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">GitHub</label>
+                    <input asp-for="GithubUrl"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Canlı Demo</label>
+                    <input asp-for="LiveDemoUrl"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div class="pt-2 border-t border-gray-800 text-xs text-gray-600 space-y-1">
+                    <p>Oluşturuldu: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
+                    <p>Görüntülenme: @Model.ViewCount</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
+                    Güncelle
+                </button>
+                <a href="@Url.Action("Index", "Team", new { area = "Admin" })"
+                   class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
+                    İptal
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    let members = @Html.Raw(membersJson);
+
+    function addMember() {
+        members.push({ name: '', role: '', github_url: '', linkedin_url: '' });
+        renderMembers();
+    }
+
+    function removeMember(index) {
+        members.splice(index, 1);
+        renderMembers();
+    }
+
+    function renderMembers() {
+        const container = document.getElementById('members-container');
+        container.innerHTML = members.map((m, i) => `
+            <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500">Üye ${i + 1}</span>
+                    <button type="button" onclick="removeMember(${i})"
+                            class="text-xs text-red-400 hover:text-red-300">Kaldır</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input placeholder="Ad Soyad" value="${m.name || ''}"
+                           oninput="members[${i}].name = this.value"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    <input placeholder="Rol" value="${m.role || ''}"
+                           oninput="members[${i}].role = this.value"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    <input placeholder="GitHub URL" value="${m.githubUrl || m.github_url || ''}"
+                           oninput="members[${i}].github_url = this.value"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    <input placeholder="LinkedIn URL" value="${m.linkedinUrl || m.linkedin_url || ''}"
+                           oninput="members[${i}].linkedin_url = this.value"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Sayfa açılırken mevcut üyeleri göster
+    renderMembers();
+
+    document.getElementById('mainForm').addEventListener('submit', function() {
+        document.getElementById('teamMembersJson').value = JSON.stringify(members);
+    });
+
+    new EasyMDE({
+        element: document.getElementById('content-editor'),
+        spellChecker: false,
+        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
+    });
+</script>

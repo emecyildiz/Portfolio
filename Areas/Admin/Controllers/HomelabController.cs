@@ -40,6 +40,9 @@ public class HomelabController : AdminBaseController
     public async Task<IActionResult> Create(HomelabPost model,
         string? HardwareUsed, string? SoftwareUsed, List<IFormFile>? Images)
     {
+        if (!ModelState.IsValid)      // ← bunu ekle
+            return View(model);
+
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "homelab");
         if (category == null)
         {
