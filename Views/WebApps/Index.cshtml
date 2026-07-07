@@ -1,0 +1,84 @@
+﻿@model List<Portfolio.Models.Project>
+@{
+    ViewData["Title"] = "Web Uygulamaları";
+    ViewData["Description"] = "Okul projeleri, ekip çalışmaları ve web uygulama geliştirme";
+}
+
+<div class="max-w-6xl mx-auto px-6 py-16">
+    <div class="mb-12">
+        <p class="font-mono text-purple-400 text-sm mb-2">// web apps</p>
+        <h1 class="text-4xl font-bold text-white mb-4">Web Uygulamaları</h1>
+        <p class="text-gray-400 max-w-2xl">
+            Okul projeleri, ekip çalışmaları ve bireysel geliştirdiğim web uygulamaları.
+        </p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 text-gray-600">
+            <p class="font-mono">// henüz proje yok</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @foreach (var p in Model)
+            {
+                <a href="/webapps/@p.Slug"
+                   class="bg-gray-900 border border-gray-800 hover:border-purple-900/50 rounded-xl overflow-hidden transition group">
+                    @if (!string.IsNullOrEmpty(p.CoverImageUrl))
+                    {
+                        <img src="@p.CoverImageUrl" alt="@p.Title"
+                             class="w-full h-48 object-cover group-hover:opacity-80 transition" />
+                    }
+                    else
+                    {
+                        <div class="w-full h-48 bg-gray-800 flex items-center justify-center">
+                            <span class="font-mono text-gray-600 text-sm">// no image</span>
+                        </div>
+                    }
+                    <div class="p-5">
+                        @{
+                            var extra = new Portfolio.Models.ExtraData.WebAppExtraData();
+                            if (!string.IsNullOrEmpty(p.ExtraData))
+                                extra = System.Text.Json.JsonSerializer.Deserialize<Portfolio.Models.ExtraData.WebAppExtraData>(p.ExtraData) ?? extra;
+                        }
+
+                        <h2 class="text-white font-semibold mb-2 group-hover:text-purple-300 transition">
+                            @p.Title
+                        </h2>
+                        <p class="text-gray-500 text-sm line-clamp-2 mb-4">@p.Summary</p>
+
+                        @if (extra.TechStack?.Any() ?? false)
+                        {
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                @foreach (var tech in extra.TechStack!.Take(4))
+                                {
+                                    <span class="font-mono text-xs bg-gray-800 text-purple-300 px-2 py-0.5 rounded">
+                                        @tech
+                                    </span>
+                                }
+                            </div>
+                        }
+
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-800">
+                            <span class="text-xs text-gray-600">
+                                @(p.PublishedAt?.ToString("dd MMM yyyy") ?? "")
+                            </span>
+                            <div class="flex gap-2">
+                                @if (!string.IsNullOrEmpty(p.LiveDemoUrl))
+                                {
+                                    <span class="text-xs text-green-400">● Canlı</span>
+                                }
+                                @if (extra.IsSchoolProject == true)
+                                {
+                                    <span class="text-xs text-gray-600">Okul</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

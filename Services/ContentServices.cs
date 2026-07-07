@@ -122,9 +122,18 @@ public class ViewCountService : IViewCountService
 
     public async Task IncrementAsync(string table, int id)
     {
-        // EF tracking yok — raw SQL ile direkt artır
+        var tableName = table switch
+        {
+            "Project" => "Projects",
+            "SecurityResearch" => "SecurityResearches",
+            "HomelabPost" => "HomelabPosts",
+            "BlogPost" => "BlogPosts",
+            "TeamProject" => "TeamProjects",
+            _ => table
+        };
+
         await _db.Database.ExecuteSqlRawAsync(
-            $"UPDATE \"{table}\" SET view_count = view_count + 1 WHERE id = {{0}}", id
+            $"UPDATE \"{tableName}\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {{0}}", id
         );
     }
 }

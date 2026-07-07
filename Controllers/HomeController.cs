@@ -1,32 +1,50 @@
-using System.Diagnostics;
+using Markdig;
 using Microsoft.AspNetCore.Mvc;
-using Portfolio.Models;
+using Microsoft.EntityFrameworkCore;
+using Portfolio.Data;
+using Portfolio.Models.Enums;
+using Portfolio.Models.ViewModels;
 
-namespace Portfolio.Controllers
+namespace Portfolio.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly AppDbContext _db;
+
+    public HomeController(AppDbContext db)
     {
-        private readonly ILogger<HomeController> _logger;
+        _db = db;
+    }
 
-        public HomeController(ILogger<HomeController> logger)
+    public async Task<IActionResult> Index()
+    {
+        var model = new HomepageViewModel
         {
-            _logger = logger;
-        }
+            FeaturedProjects = await _db.Projects
+                .Include(p => p.Category)
+                .Where(p => p.IsFeatured)
+                .OrderBy(p => p.SortOrder)
+                .Take(6)
+                .ToListAsync(),
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+            FeaturedSecurity = await _db.SecurityResearches
+                .Where(s => s.IsFeatured)
+                .OrderByDescending(s => s.PublishedAt)
+                .Take(3)
+                .ToListAsync(),
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+            FeaturedHomelab = await _db.HomelabPosts
+                .Where(h => h.IsFeatured)
+                .OrderByDescending(h => h.PublishedAt)
+                .Take(3)
+                .ToListAsync(),
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+            RecentBlog = await _db.BlogPosts
+                .OrderByDescending(b => b.PublishedAt)
+                .Take(4)
+                .ToListAsync(),
+        };
+
+        return View(model);
     }
 }

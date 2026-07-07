@@ -1,0 +1,101 @@
+﻿@model List<Portfolio.Models.SecurityResearch>
+@{
+    ViewData["Title"] = "Güvenlik Araştırmaları";
+    ViewData["Description"] = "Malware analizi, donanım açıkları, RF güvenliği ve ağ saldırıları üzerine araştırmalar";
+    var currentType = ViewBag.CurrentType as string;
+}
+
+<div class="max-w-6xl mx-auto px-6 py-16">
+
+    <!-- Header -->
+    <div class="mb-12">
+        <p class="font-mono text-red-400 text-sm mb-2">// security research</p>
+        <h1 class="text-4xl font-bold text-white mb-4">Güvenlik Araştırmaları</h1>
+        <p class="text-gray-400 max-w-2xl">
+            Malware analizi, donanım güvenlik açıkları, RF saldırıları ve ağ güvenliği üzerine yaptığım araştırmalar.
+        </p>
+    </div>
+
+    <!-- Filtreler -->
+    <div class="flex flex-wrap gap-2 mb-10">
+        <a href="/security"
+           class="text-xs px-3 py-1.5 rounded-full border transition
+                  @(string.IsNullOrEmpty(currentType) ? "border-red-600 text-red-400 bg-red-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
+            Tümü
+        </a>
+        @foreach (var type in Enum.GetValues<Portfolio.Models.Enums.ResearchType>())
+        {
+            <a href="/security?type=@type"
+               class="text-xs px-3 py-1.5 rounded-full border transition
+                          @(currentType == type.ToString() ? "border-red-600 text-red-400 bg-red-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
+                @type
+            </a>
+        }
+    </div>
+
+    <!-- Liste -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 text-gray-600">
+            <p class="font-mono">// henüz araştırma yok</p>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var r in Model)
+            {
+                <a href="/security/@r.Slug"
+                   class="block bg-gray-900 border border-gray-800 hover:border-red-900/50 rounded-xl p-6 transition group">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                @if (!string.IsNullOrEmpty(r.SeverityLevel))
+                                {
+                                    var sevColor = r.SeverityLevel switch
+                                    {
+                                        "critical" => "text-red-400 bg-red-900/30 border-red-900",
+                                        "high" => "text-orange-400 bg-orange-900/30 border-orange-900",
+                                        "medium" => "text-amber-400 bg-amber-900/30 border-amber-900",
+                                        "low" => "text-blue-400 bg-blue-900/30 border-blue-900",
+                                        _ => "text-gray-400 bg-gray-800 border-gray-700"
+                                    };
+                                    <span class="font-mono text-xs px-2 py-0.5 rounded border @sevColor">
+                                        @r.SeverityLevel.ToUpper()
+                                    </span>
+                                }
+                                <span class="text-xs text-gray-600 font-mono">@r.ResearchType</span>
+                                @if (!string.IsNullOrEmpty(r.TargetCategory))
+                                {
+                                    <span class="text-xs text-gray-600">· @r.TargetCategory</span>
+                                }
+                                @if (!string.IsNullOrEmpty(r.CveId))
+                                {
+                                    <span class="font-mono text-xs text-red-400 bg-red-900/20 px-2 py-0.5 rounded">@r.CveId</span>
+                                }
+                            </div>
+                            <h2 class="text-white font-semibold text-lg mb-2 group-hover:text-red-300 transition">
+                                @r.Title
+                            </h2>
+                            <p class="text-gray-500 text-sm leading-relaxed">@r.Summary</p>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(r.CoverImageUrl))
+                        {
+                            <img src="@r.CoverImageUrl" alt="@r.Title"
+                                 class="w-24 h-24 object-cover rounded-lg flex-shrink-0 opacity-70 group-hover:opacity-100 transition" />
+                        }
+                    </div>
+
+                    <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-800">
+                        <span class="text-xs text-gray-600">
+                            @(r.PublishedAt?.ToString("dd MMM yyyy") ?? "")
+                        </span>
+                        <span class="text-xs text-gray-600">@r.ReadingTimeMinutes dk okuma</span>
+                        <span class="text-xs text-gray-700 ml-auto">@r.ViewCount görüntülenme</span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

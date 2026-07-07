@@ -1,12 +1,10 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Portfolio Admin</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Portfolio.styles.css" asp-append-version="true" />
+    <meta name="description" content="@ViewData["Description"]" />
+    <title>@ViewData["Title"] — Portfolyo</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,50 +12,141 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1E3A5F',
-                        secondary: '#2D6A9F',
+                        accent: {
+                            blue:   '#3B82F6',
+                            purple: '#8B5CF6',
+                            teal:   '#14B8A6',
+                            red:    '#EF4444',
+                            amber:  '#F59E0B',
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
                     }
                 }
             }
         }
     </script>
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Portfolio</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Portfolio - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- JetBrains Mono — kod hissi için -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Glow effect */
+        .glow-blue { box-shadow: 0 0 20px rgba(59,130,246,0.15); }
+        .glow-purple { box-shadow: 0 0 20px rgba(139,92,246,0.15); }
+
+        /* Nav link hover */
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        /* Fade in */
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800/50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+
+            <!-- Logo -->
+            <a href="/" class="font-mono text-lg font-bold gradient-text">
+                ~/portfolyo
+            </a>
+
+            <!-- Desktop Nav -->
+            <div class="hidden md:flex items-center gap-8">
+                <a href="/" class="nav-link text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
+                <a href="/security" class="nav-link text-sm text-gray-400 hover:text-white transition">Güvenlik</a>
+                <a href="/electronics" class="nav-link text-sm text-gray-400 hover:text-white transition">Elektronik</a>
+                <a href="/webapps" class="nav-link text-sm text-gray-400 hover:text-white transition">Web Apps</a>
+                <a href="/homelab" class="nav-link text-sm text-gray-400 hover:text-white transition">Homelab</a>
+                <a href="/blog" class="nav-link text-sm text-gray-400 hover:text-white transition">Blog</a>
+                <a href="/hire" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition font-medium">
+                    İşe Al
+                </a>
+            </div>
+
+            <!-- Mobile menu button -->
+            <button id="mobileMenuBtn" class="md:hidden text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Nav -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-gray-800 px-6 py-4 space-y-3">
+            <a href="/" class="block text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
+            <a href="/security" class="block text-sm text-gray-400 hover:text-white transition">Güvenlik</a>
+            <a href="/electronics" class="block text-sm text-gray-400 hover:text-white transition">Elektronik</a>
+            <a href="/webapps" class="block text-sm text-gray-400 hover:text-white transition">Web Apps</a>
+            <a href="/homelab" class="block text-sm text-gray-400 hover:text-white transition">Homelab</a>
+            <a href="/blog" class="block text-sm text-gray-400 hover:text-white transition">Blog</a>
+            <a href="/hire" class="block text-sm text-blue-400 hover:text-blue-300 transition">İşe Al</a>
+        </div>
+    </nav>
+
+    <!-- İçerik -->
+    <main class="flex-1 pt-16 fade-in">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800/50 mt-20">
+        <div class="max-w-6xl mx-auto px-6 py-10">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="font-mono text-sm text-gray-600">~/portfolyo</p>
+                <div class="flex items-center gap-6">
+                    <a href="https://github.com" target="_blank"
+                       class="text-gray-600 hover:text-white transition text-sm">GitHub</a>
+                    <a href="https://linkedin.com" target="_blank"
+                       class="text-gray-600 hover:text-white transition text-sm">LinkedIn</a>
+                    <a href="mailto:email@email.com"
+                       class="text-gray-600 hover:text-white transition text-sm">E-posta</a>
+                </div>
+                <p class="text-gray-700 text-xs font-mono">© 2026</p>
+            </div>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

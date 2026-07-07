@@ -150,6 +150,41 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}"
 );
 
+app.MapControllerRoute(
+    name: "security_detail",
+    pattern: "security/{slug}",
+    defaults: new { controller = "Security", action = "Detail" }
+);
+
+app.MapControllerRoute(
+    name: "security",
+    pattern: "security",
+    defaults: new { controller = "Security", action = "Index" }
+);
+app.MapControllerRoute(
+    name: "electronics_detail",
+    pattern: "electronics/{slug}",
+    defaults: new { controller = "Electronics", action = "Detail" }
+);
+
+app.MapControllerRoute(
+    name: "electronics",
+    pattern: "electronics",
+    defaults: new { controller = "Electronics", action = "Index" }
+);
+
+app.MapControllerRoute(
+    name: "webapps_detail",
+    pattern: "webapps/{slug}",
+    defaults: new { controller = "WebApps", action = "Detail" }
+);
+
+app.MapControllerRoute(
+    name: "webapps",
+    pattern: "webapps",
+    defaults: new { controller = "WebApps", action = "Index" }
+);
+
 
 
 app.Run();
