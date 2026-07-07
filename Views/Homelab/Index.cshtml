@@ -1,0 +1,73 @@
+﻿@model List<Portfolio.Models.HomelabPost>
+@{
+    ViewData["Title"] = "Homelab";
+    ViewData["Description"] = "Ağ yapılandırması, sistem yönetimi ve güvenlik testleri";
+    var currentTopic = ViewBag.CurrentTopic as string;
+}
+
+<div class="max-w-6xl mx-auto px-6 py-16">
+    <div class="mb-12">
+        <p class="font-mono text-teal-400 text-sm mb-2">// homelab</p>
+        <h1 class="text-4xl font-bold text-white mb-4">Homelab</h1>
+        <p class="text-gray-400 max-w-2xl">
+            Ev ağımda kurduğum altyapı, güvenlik yapılandırmaları ve sistem yönetimi çalışmaları.
+        </p>
+    </div>
+
+    <!-- Filtreler -->
+    <div class="flex flex-wrap gap-2 mb-10">
+        <a href="/homelab"
+           class="text-xs px-3 py-1.5 rounded-full border transition
+                  @(string.IsNullOrEmpty(currentTopic) ? "border-teal-600 text-teal-400 bg-teal-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
+            Tümü
+        </a>
+        @foreach (var topic in Enum.GetValues<Portfolio.Models.Enums.HomelabTopic>())
+        {
+            <a href="/homelab?topic=@topic"
+               class="text-xs px-3 py-1.5 rounded-full border transition
+                          @(currentTopic == topic.ToString() ? "border-teal-600 text-teal-400 bg-teal-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
+                @topic
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 text-gray-600">
+            <p class="font-mono">// henüz yazı yok</p>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var h in Model)
+            {
+                <a href="/homelab/@h.Slug"
+                   class="block bg-gray-900 border border-gray-800 hover:border-teal-900/50 rounded-xl p-6 transition group">
+                    <div class="flex items-start gap-6">
+                        @if (!string.IsNullOrEmpty(h.CoverImageUrl))
+                        {
+                            <img src="@h.CoverImageUrl" alt="@h.Title"
+                                 class="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
+                        }
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs text-teal-400">@h.Topic</span>
+                            </div>
+                            <h2 class="text-white font-semibold text-lg mb-2 group-hover:text-teal-300 transition">
+                                @h.Title
+                            </h2>
+                            <p class="text-gray-500 text-sm">@h.Summary</p>
+
+                            <div class="flex items-center gap-4 mt-4 text-xs text-gray-600">
+                                <span>@(h.PublishedAt?.ToString("dd MMM yyyy") ?? "")</span>
+                                <span>@h.ReadingTimeMinutes dk okuma</span>
+                                <span>@h.ViewCount görüntülenme</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

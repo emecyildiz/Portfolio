@@ -1,0 +1,47 @@
+﻿@model List<Portfolio.Models.BlogPost>
+@{
+    ViewData["Title"] = "Blog";
+    ViewData["Description"] = "Günlük çalışmalar, öğrenilen konular ve teknik yazılar";
+}
+
+<div class="max-w-4xl mx-auto px-6 py-16">
+    <div class="mb-12">
+        <p class="font-mono text-purple-400 text-sm mb-2">// blog</p>
+        <h1 class="text-4xl font-bold text-white mb-4">Blog</h1>
+        <p class="text-gray-400">Günlük çalışmalar, öğrenilen konular ve teknik notlar.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 text-gray-600">
+            <p class="font-mono">// henüz yazı yok</p>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-6">
+            @foreach (var b in Model)
+            {
+                <a href="/blog/@b.Slug"
+                   class="block group">
+                    <div class="flex items-start gap-6 py-6 border-b border-gray-800/50 hover:border-gray-700 transition">
+                        @if (!string.IsNullOrEmpty(b.CoverImageUrl))
+                        {
+                            <img src="@b.CoverImageUrl" alt="@b.Title"
+                                 class="w-20 h-20 object-cover rounded-lg flex-shrink-0" />
+                        }
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-600 font-mono mb-2">
+                                @(b.PublishedAt?.ToString("dd MMM yyyy") ?? "") · @b.ReadingTimeMinutes dk
+                            </p>
+                            <h2 class="text-white font-semibold text-xl mb-2 group-hover:text-purple-300 transition">
+                                @b.Title
+                            </h2>
+                            <p class="text-gray-500 text-sm leading-relaxed">@b.Summary</p>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

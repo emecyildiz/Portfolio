@@ -184,6 +184,29 @@ app.MapControllerRoute(
     pattern: "webapps",
     defaults: new { controller = "WebApps", action = "Index" }
 );
+app.MapControllerRoute(
+    name: "homelab_detail",
+    pattern: "homelab/{slug}",
+    defaults: new { controller = "Homelab", action = "Detail" }
+);
+
+app.MapControllerRoute(
+    name: "homelab",
+    pattern: "homelab",
+    defaults: new { controller = "Homelab", action = "Index" }
+);
+
+app.MapControllerRoute(
+    name: "blog_detail",
+    pattern: "blog/{slug}",
+    defaults: new { controller = "Blog", action = "Detail" }
+);
+
+app.MapControllerRoute(
+    name: "blog",
+    pattern: "blog",
+    defaults: new { controller = "Blog", action = "Index" }
+);
 
 
 

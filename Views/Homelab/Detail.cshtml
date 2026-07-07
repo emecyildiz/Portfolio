@@ -1,0 +1,144 @@
+﻿@model Portfolio.Models.HomelabPost
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["Description"] = Model.Summary;
+    var hardware = ViewBag.Hardware as List<string> ?? new();
+    var software = ViewBag.Software as List<string> ?? new();
+    var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
+    var related = ViewBag.Related as List<Portfolio.Models.HomelabPost> ?? new();
+}
+
+<div class="max-w-4xl mx-auto px-6 py-16">
+
+    <div class="flex items-center gap-2 text-sm text-gray-600 mb-8 font-mono">
+        <a href="/" class="hover:text-white transition">~</a>
+        <span>/</span>
+        <a href="/homelab" class="hover:text-white transition">homelab</a>
+        <span>/</span>
+        <span class="text-gray-400">@Model.Slug</span>
+    </div>
+
+    <div class="mb-10">
+        <div class="flex items-center gap-2 mb-4">
+            <span class="font-mono text-xs text-teal-400 bg-teal-900/20 px-2 py-1 rounded">@Model.Topic</span>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">@Model.Title</h1>
+        <p class="text-gray-400 text-lg">@Model.Summary</p>
+
+        <div class="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-600">
+            <span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "")</span>
+            <span>@Model.ReadingTimeMinutes dk okuma</span>
+            <span>@Model.ViewCount görüntülenme</span>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <img src="@Model.CoverImageUrl" alt="@Model.Title"
+             class="w-full rounded-xl mb-10 border border-gray-800" />
+    }
+
+    <!-- Donanım / Yazılım kartı -->
+    @if (hardware.Any() || software.Any())
+    {
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10">
+            <p class="text-xs text-gray-600 font-mono mb-4">// kurulum</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                @if (hardware.Any())
+                {
+                    <div>
+                        <p class="text-xs text-gray-600 mb-3">Donanım</p>
+                        <div class="space-y-1">
+                            @foreach (var hw in hardware)
+                            {
+                                <div class="flex items-center gap-2">
+                                    <span class="text-teal-400 text-xs">▸</span>
+                                    <span class="font-mono text-sm text-gray-300">@hw</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                @if (software.Any())
+                {
+                    <div>
+                        <p class="text-xs text-gray-600 mb-3">Yazılım</p>
+                        <div class="space-y-1">
+                            @foreach (var sw in software)
+                            {
+                                <div class="flex items-center gap-2">
+                                    <span class="text-teal-400 text-xs">▸</span>
+                                    <span class="font-mono text-sm text-gray-300">@sw</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Ağ diyagramı -->
+    @if (!string.IsNullOrEmpty(Model.NetworkDiagramUrl))
+    {
+        <div class="mb-10">
+            <p class="text-xs text-gray-600 font-mono mb-3">// ağ topolojisi</p>
+            <img src="@Model.NetworkDiagramUrl" alt="Ağ Topolojisi"
+                 class="w-full rounded-xl border border-gray-800" />
+        </div>
+    }
+
+    <div class="prose prose-invert prose-lg max-w-none
+                prose-headings:text-white prose-headings:font-bold
+                prose-p:text-gray-400 prose-p:leading-relaxed
+                prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+                prose-code:text-green-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-code:text-sm
+                prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
+                prose-strong:text-white prose-li:text-gray-400">
+        @Html.Raw(ViewBag.ContentHtml)
+    </div>
+
+    @if (images.Any())
+    {
+        <div class="mt-12">
+            <h3 class="text-sm font-mono text-gray-600 mb-4">// görseller</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                @foreach (var img in images)
+                {
+                    <div>
+                        <img src="@img.Url" alt="@img.AltText"
+                             class="w-full rounded-lg border border-gray-800 hover:border-gray-600 transition" />
+                        @if (!string.IsNullOrEmpty(img.Caption))
+                        {
+                            <p class="text-xs text-gray-600 mt-1 text-center">@img.Caption</p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (related.Any())
+    {
+        <div class="mt-16 pt-8 border-t border-gray-800">
+            <h3 class="text-sm font-mono text-gray-600 mb-6">// ilgili yazılar</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                @foreach (var r in related)
+                {
+                    <a href="/homelab/@r.Slug"
+                       class="bg-gray-900 border border-gray-800 hover:border-teal-900/50 rounded-xl p-4 transition group">
+                        <span class="font-mono text-xs text-teal-400">@r.Topic</span>
+                        <h4 class="text-white text-sm font-medium group-hover:text-teal-300 transition mt-1 mb-1">@r.Title</h4>
+                        <p class="text-gray-600 text-xs line-clamp-2">@r.Summary</p>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="mt-12 pt-8 border-t border-gray-800">
+        <a href="/homelab" class="text-sm text-gray-500 hover:text-white transition font-mono">
+            ← /homelab
+        </a>
+    </div>
+</div>
