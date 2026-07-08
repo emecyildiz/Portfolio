@@ -1,0 +1,132 @@
+﻿@model Portfolio.Models.TeamProject
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["Description"] = Model.Summary;
+    var members = ViewBag.Members as List<Portfolio.Models.ExtraData.TeamMember> ?? new();
+    var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
+}
+
+<div class="max-w-4xl mx-auto px-6 py-16">
+
+    <div class="flex items-center gap-2 text-sm text-gray-600 mb-8 font-mono">
+        <a href="/" class="hover:text-white transition">~</a>
+        <span>/</span>
+        <a href="/team" class="hover:text-white transition">team</a>
+        <span>/</span>
+        <span class="text-gray-400">@Model.Slug</span>
+    </div>
+
+    <div class="mb-10">
+        @if (!string.IsNullOrEmpty(Model.EventName))
+        {
+            <p class="font-mono text-amber-400 text-sm mb-3">@Model.EventName</p>
+        }
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">@Model.Title</h1>
+        <p class="text-gray-400 text-lg">@Model.Summary</p>
+
+        <div class="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-600">
+            @if (Model.EventDate.HasValue)
+            {
+                <span>@Model.EventDate.Value.ToString("dd MMMM yyyy")</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.Outcome))
+            {
+                <span class="text-amber-400 bg-amber-900/20 px-2 py-0.5 rounded text-xs">@Model.Outcome</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.GithubUrl))
+            {
+                <a href="@Model.GithubUrl" target="_blank"
+                   class="text-blue-400 hover:text-blue-300 transition">GitHub →</a>
+            }
+            @if (!string.IsNullOrEmpty(Model.LiveDemoUrl))
+            {
+                <a href="@Model.LiveDemoUrl" target="_blank"
+                   class="text-green-400 hover:text-green-300 transition">Demo →</a>
+            }
+            @if (!string.IsNullOrEmpty(Model.EventUrl))
+            {
+                <a href="@Model.EventUrl" target="_blank"
+                   class="text-amber-400 hover:text-amber-300 transition">Etkinlik →</a>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <img src="@Model.CoverImageUrl" alt="@Model.Title"
+             class="w-full rounded-xl mb-10 border border-gray-800" />
+    }
+
+    <!-- Proje bilgileri -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10">
+        <p class="text-xs text-gray-600 font-mono mb-4">// proje bilgileri</p>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <p class="text-xs text-gray-600 mb-1">Benim Rolüm</p>
+                <p class="text-gray-300 text-sm">@Model.MyRole</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-600 mb-1">Ekip Büyüklüğü</p>
+                <p class="text-gray-300 text-sm">@members.Count kişi</p>
+            </div>
+        </div>
+
+        @if (members.Any())
+        {
+            <div class="pt-4 border-t border-gray-800">
+                <p class="text-xs text-gray-600 mb-3">Ekip Üyeleri</p>
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var member in members)
+                    {
+                        <div class="bg-gray-800 rounded-lg px-3 py-2">
+                            <p class="text-white text-sm font-medium">@member.Name</p>
+                            <p class="text-gray-500 text-xs">@member.Role</p>
+                            <div class="flex gap-2 mt-1">
+                                @if (!string.IsNullOrEmpty(member.GithubUrl))
+                                {
+                                    <a href="@member.GithubUrl" target="_blank"
+                                       class="text-xs text-blue-400 hover:text-blue-300 transition">GitHub</a>
+                                }
+                                @if (!string.IsNullOrEmpty(member.LinkedinUrl))
+                                {
+                                    <a href="@member.LinkedinUrl" target="_blank"
+                                       class="text-xs text-blue-400 hover:text-blue-300 transition">LinkedIn</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="prose prose-invert prose-lg max-w-none
+                prose-headings:text-white prose-headings:font-bold
+                prose-p:text-gray-400 prose-p:leading-relaxed
+                prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+                prose-code:text-green-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-code:text-sm
+                prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
+                prose-strong:text-white prose-li:text-gray-400">
+        @Html.Raw(ViewBag.ContentHtml)
+    </div>
+
+    @if (images.Any())
+    {
+        <div class="mt-12">
+            <h3 class="text-sm font-mono text-gray-600 mb-4">// görseller</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                @foreach (var img in images)
+                {
+                    <img src="@img.Url" alt="@img.AltText"
+                         class="w-full rounded-lg border border-gray-800 hover:border-gray-600 transition" />
+                }
+            </div>
+        </div>
+    }
+
+    <div class="mt-12 pt-8 border-t border-gray-800">
+        <a href="/team" class="text-sm text-gray-500 hover:text-white transition font-mono">
+            ← /team
+        </a>
+    </div>
+</div>

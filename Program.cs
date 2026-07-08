@@ -207,7 +207,29 @@ app.MapControllerRoute(
     pattern: "blog",
     defaults: new { controller = "Blog", action = "Index" }
 );
+app.MapControllerRoute(
+    name: "team_detail",
+    pattern: "team/{slug}",
+    defaults: new { controller = "Team", action = "Detail" }
+);
 
+app.MapControllerRoute(
+    name: "team",
+    pattern: "team",
+    defaults: new { controller = "Team", action = "Index" }
+);
+
+app.MapControllerRoute(
+    name: "hire_contact",
+    pattern: "hire/contact",
+    defaults: new { controller = "Hire", action = "Contact" }
+);
+
+app.MapControllerRoute(
+    name: "hire",
+    pattern: "hire",
+    defaults: new { controller = "Hire", action = "Index" }
+);
 
 
 app.Run();

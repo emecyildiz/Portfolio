@@ -1,0 +1,66 @@
+﻿@model List<Portfolio.Models.TeamProject>
+@{
+    ViewData["Title"] = "Ekip Projeleri";
+    ViewData["Description"] = "Hackathonlar ve ekip çalışmaları";
+}
+
+<div class="max-w-6xl mx-auto px-6 py-16">
+    <div class="mb-12">
+        <p class="font-mono text-amber-400 text-sm mb-2">// team projects</p>
+        <h1 class="text-4xl font-bold text-white mb-4">Ekip Projeleri</h1>
+        <p class="text-gray-400 max-w-2xl">
+            Hackathonlar ve ekip çalışmalarında geliştirdiğim projeler.
+        </p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 text-gray-600">
+            <p class="font-mono">// henüz proje yok</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @foreach (var p in Model)
+            {
+                <a href="/team/@p.Slug"
+                   class="bg-gray-900 border border-gray-800 hover:border-amber-900/50 rounded-xl overflow-hidden transition group">
+                    @if (!string.IsNullOrEmpty(p.CoverImageUrl))
+                    {
+                        <img src="@p.CoverImageUrl" alt="@p.Title"
+                             class="w-full h-48 object-cover group-hover:opacity-80 transition" />
+                    }
+                    else
+                    {
+                        <div class="w-full h-48 bg-gray-800 flex items-center justify-center">
+                            <span class="font-mono text-gray-600 text-sm">// no image</span>
+                        </div>
+                    }
+                    <div class="p-5">
+                        @if (!string.IsNullOrEmpty(p.EventName))
+                        {
+                            <p class="font-mono text-xs text-amber-400 mb-2">@p.EventName</p>
+                        }
+                        <h2 class="text-white font-semibold mb-2 group-hover:text-amber-300 transition">
+                            @p.Title
+                        </h2>
+                        <p class="text-gray-500 text-sm line-clamp-2 mb-4">@p.Summary</p>
+
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-800">
+                            <span class="text-xs text-gray-600">
+                                @(p.EventDate?.ToString("MMM yyyy") ?? "")
+                            </span>
+                            @if (!string.IsNullOrEmpty(p.Outcome))
+                            {
+                                <span class="text-xs text-amber-400 bg-amber-900/20 px-2 py-0.5 rounded">
+                                    @p.Outcome
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>
