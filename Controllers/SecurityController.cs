@@ -7,20 +7,25 @@ using Portfolio.Services;
 
 namespace Portfolio.Controllers;
 
-public class SecurityController : Controller
+public class SecurityController : BaseController
 {
-    private readonly AppDbContext _db;
     private readonly IViewCountService _viewCount;
 
-    public SecurityController(AppDbContext db, IViewCountService viewCount)
+    public SecurityController(AppDbContext db, IViewCountService viewCount) : base(db)
     {
-        _db = db;
         _viewCount = viewCount;
     }
 
     // Liste sayfası — /security
     public async Task<IActionResult> Index(string? type)
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "security");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var query = _db.SecurityResearches
             .Include(s => s.Category)
             .AsQueryable();
@@ -40,6 +45,13 @@ public class SecurityController : Controller
     // Detay sayfası — /security/{slug}
     public async Task<IActionResult> Detail(string slug)
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "security");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var research = await _db.SecurityResearches
             .Include(s => s.Category)
             .FirstOrDefaultAsync(s => s.Slug == slug);

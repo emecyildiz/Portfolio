@@ -2,23 +2,29 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
+using Portfolio.Models.Enums;
 using Portfolio.Services;
 
 namespace Portfolio.Controllers;
 
-public class BlogController : Controller
+public class BlogController : BaseController
 {
-    private readonly AppDbContext _db;
     private readonly IViewCountService _viewCount;
 
-    public BlogController(AppDbContext db, IViewCountService viewCount)
+    public BlogController(AppDbContext db, IViewCountService viewCount) : base (db)
     {
-        _db = db;
         _viewCount = viewCount;
     }
 
     public async Task<IActionResult> Index()
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "blog");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var posts = await _db.BlogPosts
             .Include(b => b.Category)
             .OrderByDescending(b => b.PublishedAt)
@@ -29,6 +35,13 @@ public class BlogController : Controller
 
     public async Task<IActionResult> Detail(string slug)
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "blog");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var post = await _db.BlogPosts
             .Include(b => b.Category)
             .FirstOrDefaultAsync(b => b.Slug == slug);

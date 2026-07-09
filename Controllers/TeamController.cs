@@ -2,25 +2,31 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
+using Portfolio.Models.Enums;
 using Portfolio.Models.ExtraData;
 using Portfolio.Services;
 using System.Text.Json;
 
 namespace Portfolio.Controllers;
 
-public class TeamController : Controller
+public class TeamController : BaseController
 {
-    private readonly AppDbContext _db;
     private readonly IViewCountService _viewCount;
 
-    public TeamController(AppDbContext db, IViewCountService viewCount)
+    public TeamController(AppDbContext db, IViewCountService viewCount) : base(db)
     {
-        _db = db;
         _viewCount = viewCount;
     }
 
     public async Task<IActionResult> Index()
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "team");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var projects = await _db.TeamProjects
             .Include(t => t.Category)
             .OrderByDescending(t => t.EventDate)
@@ -31,6 +37,13 @@ public class TeamController : Controller
 
     public async Task<IActionResult> Detail(string slug)
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "team");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var project = await _db.TeamProjects
             .Include(t => t.Category)
             .FirstOrDefaultAsync(t => t.Slug == slug);

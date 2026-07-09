@@ -7,17 +7,16 @@ using Portfolio.Services;
 
 namespace Portfolio.Controllers;
 
-public class HireController : Controller
+public class HireController : BaseController
 {
-    private readonly AppDbContext _db;
 
-    public HireController(AppDbContext db)
+    public HireController(AppDbContext db) : base(db)
     {
-        _db = db;
     }
 
     public async Task<IActionResult> Index()
     {
+
         var services = await _db.Services
             .Where(s => s.Status == VisibilityStatus.Public)
             .Include(s => s.References)
@@ -32,6 +31,7 @@ public class HireController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Contact(ContactMessage model, int? serviceId)
     {
+
         if (string.IsNullOrWhiteSpace(model.Name) ||
             string.IsNullOrWhiteSpace(model.Email) ||
             string.IsNullOrWhiteSpace(model.Message))

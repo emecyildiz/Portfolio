@@ -145,10 +145,7 @@ app.MapControllerRoute(
     pattern: $"{adminPath}/{{controller=Dashboard}}/{{action=Index}}/{{id?}}",
     defaults: new { area = "Admin" }
 );
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"
-);
+
 
 app.MapControllerRoute(
     name: "security_detail",
@@ -229,6 +226,11 @@ app.MapControllerRoute(
     name: "hire",
     pattern: "hire",
     defaults: new { controller = "Hire", action = "Index" }
+);
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
 );
 
 

@@ -87,14 +87,63 @@
             <!-- Desktop Nav -->
             <div class="hidden md:flex items-center gap-8">
                 <a href="/" class="nav-link text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
-                <a href="/security" class="nav-link text-sm text-gray-400 hover:text-white transition">Güvenlik</a>
-                <a href="/electronics" class="nav-link text-sm text-gray-400 hover:text-white transition">Elektronik</a>
-                <a href="/webapps" class="nav-link text-sm text-gray-400 hover:text-white transition">Web Apps</a>
-                <a href="/homelab" class="nav-link text-sm text-gray-400 hover:text-white transition">Homelab</a>
-                <a href="/blog" class="nav-link text-sm text-gray-400 hover:text-white transition">Blog</a>
+
+                @if (ViewBag.NavCategories != null)
+                {
+                    @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
+                    {
+                        var url = cat.Slug switch
+                        {
+                            "security" => "/security",
+                            "electronics" => "/electronics",
+                            "webapps" => "/webapps",
+                            "homelab" => "/homelab",
+                            "blog" => "/blog",
+                            "team" => "/team",
+                            _ => $"/{cat.Slug}"
+                        };
+                        var label = cat.Slug switch
+                        {
+                            "security" => "Güvenlik",
+                            "electronics" => "Elektronik",
+                            "webapps" => "Web Apps",
+                            "homelab" => "Homelab",
+                            "blog" => "Blog",
+                            "team" => "Ekip",
+                            _ => cat.Name
+                        };
+                        <a href="@url" class="nav-link text-sm text-gray-400 hover:text-white transition">@label</a>
+                    }
+                }
+
                 <a href="/hire" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition font-medium">
                     İşe Al
                 </a>
+            </div>
+
+            <!-- Mobile Nav -->
+            <div id="mobileMenu" class="hidden md:hidden border-t border-gray-800 px-6 py-4 space-y-3">
+                <a href="/" class="block text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
+
+                @if (ViewBag.NavCategories != null)
+                {
+                    @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
+                    {
+                        var url = cat.Slug switch
+                        {
+                            "security" => "/security",
+                            "electronics" => "/electronics",
+                            "webapps" => "/webapps",
+                            "homelab" => "/homelab",
+                            "blog" => "/blog",
+                            "team" => "/team",
+                            _ => $"/{cat.Slug}"
+                        };
+                        <a href="@url" class="block text-sm text-gray-400 hover:text-white transition">@cat.Name</a>
+                    }
+                }
+
+                <a href="/hire" class="block text-sm text-blue-400 hover:text-blue-300 transition">İşe Al</a>
             </div>
 
             <!-- Mobile menu button -->

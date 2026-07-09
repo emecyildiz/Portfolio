@@ -8,19 +8,24 @@ using System.Text.Json;
 
 namespace Portfolio.Controllers;
 
-public class HomelabController : Controller
+public class HomelabController : BaseController
 {
-    private readonly AppDbContext _db;
     private readonly IViewCountService _viewCount;
 
-    public HomelabController(AppDbContext db, IViewCountService viewCount)
+    public HomelabController(AppDbContext db, IViewCountService viewCount) : base(db)
     {
-        _db = db;
         _viewCount = viewCount;
     }
 
     public async Task<IActionResult> Index(string? topic)
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "homelab");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var query = _db.HomelabPosts
             .Include(h => h.Category)
             .AsQueryable();
@@ -38,6 +43,13 @@ public class HomelabController : Controller
 
     public async Task<IActionResult> Detail(string slug)
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "homelab");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var post = await _db.HomelabPosts
             .Include(h => h.Category)
             .FirstOrDefaultAsync(h => h.Slug == slug);

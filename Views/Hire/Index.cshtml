@@ -32,7 +32,11 @@
                         </div>
                     }
                     <h3 class="text-white font-semibold text-lg mb-2">@service.Title</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">@service.Description</p>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4">@service.Description</p>
+                    <button onclick="selectService(@service.Id, '@service.Title')"
+                            class="text-sm text-blue-400 hover:text-blue-300 transition">
+                        Bu hizmet için başvur →
+                    </button>
                 </div>
             }
         </div>
@@ -58,7 +62,7 @@
             </div>
         }
 
-        <form method="post" action="/hire/contact" class="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-4">
+        <form method="post" asp-controller="Hire" asp-action="Contact" asp-route-area="" class="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-4">
             @Html.AntiForgeryToken()
 
             <div class="grid grid-cols-2 gap-4">
@@ -87,7 +91,7 @@
             {
                 <div>
                     <label class="block text-sm text-gray-400 mb-1">İlgilendiğin Hizmet</label>
-                    <select name="serviceId"
+                    <select name="serviceId" id="serviceSelect"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition">
                         <option value="">Seçiniz (opsiyonel)</option>
                         @foreach (var s in services)
@@ -112,3 +116,10 @@
         </form>
     </div>
 </div>
+<script>
+    function selectService(id, title) {
+        document.getElementById('serviceSelect').value = id;
+        document.querySelector('input[name="Subject"]').value = title + ' hakkında';
+        document.querySelector('form[action*="contact"]').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>

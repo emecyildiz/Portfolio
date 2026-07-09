@@ -7,17 +7,16 @@ using Portfolio.Models.ViewModels;
 
 namespace Portfolio.Controllers;
 
-public class HomeController : Controller
+public class HomeController : BaseController
 {
-    private readonly AppDbContext _db;
 
-    public HomeController(AppDbContext db)
+    public HomeController(AppDbContext db) : base(db)
     {
-        _db = db;
     }
 
     public async Task<IActionResult> Index()
     {
+
         var model = new HomepageViewModel
         {
             FeaturedProjects = await _db.Projects

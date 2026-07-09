@@ -2,25 +2,31 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
+using Portfolio.Models.Enums;
 using Portfolio.Models.ExtraData;
 using Portfolio.Services;
 using System.Text.Json;
 
 namespace Portfolio.Controllers;
 
-public class ElectronicsController : Controller
+public class ElectronicsController : BaseController
 {
-    private readonly AppDbContext _db;
     private readonly IViewCountService _viewCount;
 
-    public ElectronicsController(AppDbContext db, IViewCountService viewCount)
+    public ElectronicsController(AppDbContext db, IViewCountService viewCount) : base(db)
     {
-        _db = db;
         _viewCount = viewCount;
     }
 
     public async Task<IActionResult> Index()
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "electronics");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var projects = await _db.Projects
             .Include(p => p.Category)
             .Where(p => p.Category.Slug == "electronics")
@@ -32,6 +38,13 @@ public class ElectronicsController : Controller
 
     public async Task<IActionResult> Detail(string slug)
     {
+        var category = await _db.Categories
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(c => c.Slug == "electronics");
+
+        if (category == null || category.Status != VisibilityStatus.Public)
+            return View("CategoryUnavailable");
+
         var project = await _db.Projects
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.Slug == slug && p.Category.Slug == "electronics");

@@ -36,46 +36,62 @@ public class TeamController : AdminBaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(TeamProject model,
-        string? TeamMembersJson, List<IFormFile>? Images)
+    string? TeamMembersJson, List<IFormFile>? Images)
     {
-        if (!ModelState.IsValid)      // ← bunu ekle
-            return View(model);
-
-        var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "team");
-        if (category == null)
+        if (!ModelState.IsValid)
         {
-            ModelState.AddModelError("", "Ekip kategorisi bulunamadı.");
+            var errors = ModelState
+                .Where(x => x.Value?.Errors.Count > 0)
+                .Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}")
+                .ToList();
+
+            TempData["Error"] = "Form hataları: " + string.Join(" | ", errors);
             return View(model);
         }
 
-        model.CategoryId = category.Id;
-        model.Slug = await _slugService.GenerateUniqueAsync(model.Title, "TeamProjects");
-        model.CreatedAt = DateTime.UtcNow;
-        model.UpdatedAt = DateTime.UtcNow;
-
-        // Ekip üyelerini JSON olarak kaydet
-        if (!string.IsNullOrEmpty(TeamMembersJson))
-            model.TeamMembers = TeamMembersJson;
-
-        _db.TeamProjects.Add(model);
-        await _db.SaveChangesAsync();
-
-        if (Images != null && Images.Any())
+        try
         {
-            foreach (var file in Images.Where(f => f.Length > 0))
-                await _media.SaveAsync(file, "team_project", model.Id);
-
-            var firstMedia = await _db.Media
-                .FirstOrDefaultAsync(m => m.EntityType == "team_project" && m.EntityId == model.Id);
-            if (firstMedia != null)
+            var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "team");
+            if (category == null)
             {
-                firstMedia.IsCover = true;
-                model.CoverImageUrl = firstMedia.Url;
-                await _db.SaveChangesAsync();
+                TempData["Error"] = "Ekip kategorisi bulunamadı. Önce 'team' slug'ına sahip kategori oluştur.";
+                return View(model);
             }
-        }
 
-        return RedirectToAction(nameof(Index));
+            model.CategoryId = category.Id;
+            model.Slug = await _slugService.GenerateUniqueAsync(model.Title, "TeamProjects");
+            model.CreatedAt = DateTime.UtcNow;
+            model.UpdatedAt = DateTime.UtcNow;
+
+            if (!string.IsNullOrEmpty(TeamMembersJson))
+                model.TeamMembers = TeamMembersJson;
+
+            _db.TeamProjects.Add(model);
+            await _db.SaveChangesAsync();
+
+            if (Images != null && Images.Any())
+            {
+                foreach (var file in Images.Where(f => f.Length > 0))
+                    await _media.SaveAsync(file, "team_project", model.Id);
+
+                var firstMedia = await _db.Media
+                    .FirstOrDefaultAsync(m => m.EntityType == "team_project" && m.EntityId == model.Id);
+                if (firstMedia != null)
+                {
+                    firstMedia.IsCover = true;
+                    model.CoverImageUrl = firstMedia.Url;
+                    await _db.SaveChangesAsync();
+                }
+            }
+
+            TempData["Success"] = "Ekip projesi oluşturuldu.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Hata: {ex.Message}";
+            return View(model);
+        }
     }
 
     public async Task<IActionResult> Edit(int id)
