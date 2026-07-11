@@ -26,7 +26,25 @@
                 İşe Al
             </a>
         </div>
+        <!-- Şu an ne yapıyorum -->
+        <!-- Şu an ne yapıyorum -->
+        @if (ViewBag.CurrentlyWorking != null)
+        {
+            var working = ViewBag.CurrentlyWorking as Portfolio.Models.Note;
+            <div class="mt-6">
+                <div class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-3 inline-flex items-center gap-3 max-w-full">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span class="text-xs text-gray-500 font-mono">şu an üzerinde çalışıyorum:</span>
+                    <span class="text-sm text-gray-300">@working!.Title</span>
+                </div>
+            </div>
+        }
     </div>
+
+    
 
     <!-- Terminal animasyonu -->
     <div class="mt-16 bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl font-mono text-sm">
@@ -185,6 +203,48 @@
                         </p>
                     </div>
                 </a>
+            }
+        </div>
+    </section>
+}
+
+<!-- Sertifikalar -->
+@{
+    var certs = ViewBag.Certificates as List<Portfolio.Models.Certificate> ?? new();
+}
+@if (certs.Any())
+{
+    <section class="max-w-6xl mx-auto px-6 py-16 border-t border-gray-800/50">
+        <div class="mb-8">
+            <p class="font-mono text-amber-400 text-xs mb-1">// certifications</p>
+            <h2 class="text-2xl font-bold text-white">Sertifikalar</h2>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @foreach (var cert in certs)
+            {
+                <div class="bg-gray-900 border border-gray-800 hover:border-amber-900/50 rounded-xl p-5 transition text-center">
+                    @if (!string.IsNullOrEmpty(cert.ImageUrl))
+                    {
+                        <img src="@cert.ImageUrl" alt="@cert.Title" class="w-16 h-16 mx-auto mb-3 object-contain" />
+                    }
+                    else
+                    {
+                        <div class="w-16 h-16 mx-auto mb-3 bg-amber-900/20 rounded-full flex items-center justify-center">
+                            <span class="text-amber-400 text-2xl">🎖</span>
+                        </div>
+                    }
+                    <h3 class="text-white text-sm font-medium mb-1">@cert.Title</h3>
+                    <p class="text-gray-600 text-xs">@cert.Issuer</p>
+                    <p class="text-gray-700 text-xs mt-1">@cert.IssuedDate.ToString("MMM yyyy")</p>
+                    @if (!string.IsNullOrEmpty(cert.CredentialUrl))
+                    {
+                        <a href="@cert.CredentialUrl" target="_blank"
+                           class="text-xs text-blue-400 hover:text-blue-300 transition mt-2 inline-block">
+                            Doğrula →
+                        </a>
+                    }
+                </div>
             }
         </div>
     </section>

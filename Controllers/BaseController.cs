@@ -22,6 +22,11 @@ public class BaseController : Controller
             .OrderBy(c => c.SortOrder)
             .ToListAsync();
 
+        ViewBag.NavPages = await _db.Pages
+        .Where(p => p.ShowInNav)
+        .OrderBy(p => p.SortOrder)
+        .ToListAsync();
+
         await next();
     }
 }

@@ -1,0 +1,89 @@
+﻿@model List<Portfolio.Models.Page>
+@{
+    ViewData["Title"] = "Sayfalar";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h2 class="text-2xl font-bold text-white">Sayfalar</h2>
+        <p class="text-gray-500 mt-1">Hakkımda, SSS gibi statik sayfalar — kod yazmadan eklenir</p>
+    </div>
+    <a href="@Url.Action("Create", "Page", new { area = "Admin" })"
+       class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+        + Yeni Sayfa
+    </a>
+</div>
+
+<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-gray-800">
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Başlık</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">URL</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Navbar</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Durum</th>
+                <th class="text-right px-6 py-3 text-gray-400 font-medium">İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition">
+                    <td class="px-6 py-4 text-white font-medium">@p.Title</td>
+                    <td class="px-6 py-4 text-gray-500 text-xs font-mono">/pages/@p.Slug</td>
+                    <td class="px-6 py-4">
+                        @if (p.ShowInNav)
+                        {
+                            <span class="text-green-400 text-xs">✓ Görünür</span>
+                        }
+                        else
+                        {
+                            <span class="text-gray-600 text-xs">—</span>
+                        }
+                    </td>
+                    <td class="px-6 py-4">
+                        @if (p.Status == Portfolio.Models.Enums.VisibilityStatus.Public)
+                        {
+                            <span class="bg-green-900/40 text-green-400 text-xs px-2 py-1 rounded-full">Yayında</span>
+                        }
+                        else
+                        {
+                            <span class="bg-gray-800 text-gray-500 text-xs px-2 py-1 rounded-full">Taslak</span>
+                        }
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                        <form method="post" action="@Url.Action("Toggle", "Page", new { area = "Admin", id = p.Id })">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="text-xs px-3 py-1.5 rounded-lg border transition
+                                        @(p.Status == Portfolio.Models.Enums.VisibilityStatus.Public
+                                                                                ? "border-green-800 text-green-400 hover:bg-green-900/30"
+                                                                                : "border-gray-700 text-gray-400 hover:bg-gray-800")">
+                                @(p.Status == Portfolio.Models.Enums.VisibilityStatus.Public ? "Gizle" : "Yayınla")
+                            </button>
+                        </form>
+                        <a href="@Url.Action("Edit", "Page", new { area = "Admin", id = p.Id })"
+                           class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
+                            Düzenle
+                        </a>
+                        <form method="post" action="@Url.Action("Delete", "Page", new { area = "Admin", id = p.Id })"
+                              onsubmit="return confirm('Bu sayfayı silmek istediğine emin misin?')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
+                                Sil
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+                        }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <div class="text-center py-16 text-gray-600">Henüz sayfa yok.</div>
+    }
+</div>

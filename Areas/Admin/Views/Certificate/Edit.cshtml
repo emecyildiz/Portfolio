@@ -1,0 +1,79 @@
+﻿@model Portfolio.Models.Certificate
+@{
+    ViewData["Title"] = "Sertifikayı Düzenle";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-white">Sertifikayı Düzenle</h2>
+</div>
+
+<div class="max-w-xl bg-gray-900 border border-gray-800 rounded-xl p-6">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Sertifika Adı</label>
+                <input asp-for="Title"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Veren Kurum</label>
+                <input asp-for="Issuer"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Alınma Tarihi</label>
+                    <input asp-for="IssuedDate" type="date"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Son Kullanma</label>
+                    <input asp-for="ExpiryDate" type="date"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Sertifika Numarası</label>
+                <input asp-for="CredentialId"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Doğrulama Linki</label>
+                <input asp-for="CredentialUrl"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Rozet Görseli URL</label>
+                <input asp-for="ImageUrl"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Sıra</label>
+                <input asp-for="SortOrder" type="number"
+                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                <select asp-for="Status"
+                        asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                </select>
+            </div>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+                Güncelle
+            </button>
+            <a href="@Url.Action("Index", "Certificate", new { area = "Admin" })"
+               class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-6 py-2.5 rounded-lg transition">
+                İptal
+            </a>
+        </div>
+    </form>
+</div>

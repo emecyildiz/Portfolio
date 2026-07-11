@@ -16,7 +16,6 @@ public class HomeController : BaseController
 
     public async Task<IActionResult> Index()
     {
-
         var model = new HomepageViewModel
         {
             FeaturedProjects = await _db.Projects
@@ -43,6 +42,18 @@ public class HomeController : BaseController
                 .Take(4)
                 .ToListAsync(),
         };
+
+        // "Þu an ne yapýyorum" — admin panelinden Notes'a High/Critical öncelikli, tamamlanmamýþ todo eklenirse burada görünür
+        ViewBag.CurrentlyWorking = await _db.Notes
+            .Where(n => n.IsTodo && !n.IsCompleted &&
+                   (n.Priority == Portfolio.Models.Enums.NotePriority.High ||
+                    n.Priority == Portfolio.Models.Enums.NotePriority.Critical))
+            .OrderByDescending(n => n.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        ViewBag.Certificates = await _db.Certificates
+            .OrderBy(c => c.SortOrder)
+            .ToListAsync();
 
         return View(model);
     }

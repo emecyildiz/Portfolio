@@ -1,0 +1,5 @@
+﻿Contact: mailto:senin@email.com
+Contact: https://siteadi.com/hire
+Preferred-Languages: tr, en
+Canonical: https://siteadi.com/.well-known/security.txt
+Expires: 2027-01-01T00:00:00.000Z

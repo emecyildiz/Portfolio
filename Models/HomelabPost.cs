@@ -1,4 +1,5 @@
-﻿using Portfolio.Models.Enums;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Portfolio.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Portfolio.Models
@@ -37,6 +38,7 @@ namespace Portfolio.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public int CategoryId { get; set; }
+        [ValidateNever]
         public Category Category { get; set; } = null!;
 
         public ICollection<Media> Images { get; set; } = new List<Media>();
@@ -68,6 +70,7 @@ namespace Portfolio.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public int CategoryId { get; set; }
+        [ValidateNever]
         public Category Category { get; set; } = null!;
 
         public ICollection<Media> Images { get; set; } = new List<Media>();
@@ -111,6 +114,7 @@ namespace Portfolio.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public int CategoryId { get; set; }
+        [ValidateNever]
         public Category Category { get; set; } = null!;
 
         public ICollection<Media> Images { get; set; } = new List<Media>();

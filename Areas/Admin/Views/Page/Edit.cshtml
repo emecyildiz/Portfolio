@@ -1,0 +1,89 @@
+﻿@model Portfolio.Models.Page
+@{
+    ViewData["Title"] = "Sayfayı Düzenle";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-white">Sayfayı Düzenle</h2>
+    <p class="text-gray-500 mt-1">/pages/@Model.Slug</p>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
+    <div class="grid grid-cols-3 gap-6">
+        <div class="col-span-2 space-y-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <input asp-for="Title"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <textarea asp-for="Content" id="content-editor"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Kapak Görseli URL</label>
+                    <input asp-for="CoverImageUrl"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <select asp-for="Status"
+                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                    </select>
+                </div>
+
+                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                    <input asp-for="ShowInNav" type="checkbox" class="w-4 h-4 rounded" />
+                    Navbar'da göster
+                </label>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Sıra</label>
+                    <input asp-for="SortOrder" type="number"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div class="pt-2 border-t border-gray-800 text-xs text-gray-600">
+                    <p>Oluşturuldu: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
+                    Güncelle
+                </button>
+                <a href="@Url.Action("Index", "Page", new { area = "Admin" })"
+                   class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
+                    İptal
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    new EasyMDE({
+        element: document.getElementById('content-editor'),
+        spellChecker: false,
+        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
+    });
+</script>

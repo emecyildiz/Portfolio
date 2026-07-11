@@ -8,15 +8,30 @@
 
     <!-- Header -->
     <div class="text-center mb-16">
-        <p class="font-mono text-blue-400 text-sm mb-3">// hire me</p>
+        <div class="flex items-center justify-center gap-3 mb-3">
+            <p class="font-mono text-blue-400 text-sm">// hire me</p>
+            <button onclick="openTrackModal()"
+                    class="text-xs border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white px-3 py-1 rounded-full transition">
+                Talep Sorgula
+            </button>
+        </div>
         <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
             Birlikte çalışalım
         </h1>
-        <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+        <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-6">
             Siber güvenlik danışmanlığı, ağ güvenliği ve elektronik proje geliştirme konularında
             profesyonel destek sunuyorum.
         </p>
+
+        @if (ViewBag.CvUrl != null)
+        {
+            <a href="@ViewBag.CvUrl" download
+               class="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white text-sm px-5 py-2.5 rounded-lg transition">
+                📄 CV İndir
+            </a>
+        }
     </div>
+
 
     <!-- Hizmetler -->
     @if (services.Any())
@@ -115,6 +130,75 @@
             </button>
         </form>
     </div>
+    <!-- Talep Sorgula Modal -->
+    <div id="trackModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full relative">
+            <button onclick="closeTrackModal()"
+                    class="absolute top-4 right-4 text-gray-500 hover:text-white transition">
+                ✕
+            </button>
+
+            <div class="text-center mb-6">
+                <p class="font-mono text-gray-600 text-sm mb-2">// track</p>
+                <h3 class="text-lg font-bold text-white">Talep Sorgula</h3>
+            </div>
+
+            @if (TempData["Success"] != null && TempData["TicketNumber"] != null)
+            {
+                <div class="bg-green-900/30 border border-green-800 rounded-xl p-4 mb-6 text-center">
+                    <p class="text-green-400 text-sm mb-2">✓ Talebin alındı!</p>
+                    <p class="text-xs text-gray-500 mb-2">Bilet numaran:</p>
+                    <p class="font-mono text-white text-sm bg-gray-800 rounded-lg px-3 py-2 select-all">
+                        @TempData["TicketNumber"]
+                    </p>
+                    <p class="text-xs text-gray-600 mt-2">Bu numarayı sakla, talebini sorgulamak için kullanacaksın.</p>
+                </div>
+            }
+
+            @if (TempData["TrackError"] != null)
+            {
+                <div class="bg-red-900/30 border border-red-800 text-red-400 rounded-xl p-4 mb-6 text-sm text-center">
+                    @TempData["TrackError"]
+                </div>
+            }
+
+            @if (ViewBag.TrackedMessage != null)
+            {
+                var tracked = ViewBag.TrackedMessage as Portfolio.Models.ContactMessage;
+                var statusText = tracked!.Status switch
+                {
+                    Portfolio.Models.Enums.ContactStatus.New => "Alındı, henüz incelenmedi",
+                    Portfolio.Models.Enums.ContactStatus.Read => "İncelendi",
+                    Portfolio.Models.Enums.ContactStatus.Replied => "Yanıtlandı — e-postanı kontrol et",
+                    Portfolio.Models.Enums.ContactStatus.Archived => "Arşivlendi",
+                    Portfolio.Models.Enums.ContactStatus.Spam => "İşlem yapılmadı",
+                    _ => "Bilinmiyor"
+                };
+                var statusColor = tracked.Status switch
+                {
+                    Portfolio.Models.Enums.ContactStatus.Replied => "text-green-400 bg-green-900/30",
+                    Portfolio.Models.Enums.ContactStatus.New => "text-blue-400 bg-blue-900/30",
+                    _ => "text-gray-400 bg-gray-800"
+                };
+
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6">
+                    <p class="text-xs text-gray-600 mb-2">@tracked.CreatedAt.ToString("dd MMM yyyy HH:mm") tarihli talep</p>
+                    <span class="text-sm px-3 py-1 rounded-full @statusColor">@statusText</span>
+                </div>
+            }
+
+            <form method="post" action="/hire/track" class="flex gap-2">
+                @Html.AntiForgeryToken()
+                <input name="ticketNumber" type="text" required
+                       placeholder="Bilet numaranı yapıştır"
+                       class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-blue-500 transition" />
+                <button type="submit"
+                        class="bg-gray-800 hover:bg-gray-700 text-white text-sm px-5 py-2.5 rounded-lg transition">
+                    Sorgula
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 <script>
     function selectService(id, title) {
@@ -122,4 +206,27 @@
         document.querySelector('input[name="Subject"]').value = title + ' hakkında';
         document.querySelector('form[action*="contact"]').scrollIntoView({ behavior: 'smooth' });
     }
+
+    function openTrackModal() {
+        document.getElementById('trackModal').classList.remove('hidden');
+    }
+
+    function closeTrackModal() {
+        document.getElementById('trackModal').classList.add('hidden');
+    }
+
+    // Sunucudan sonuç geldiyse (TempData) modal'ı otomatik aç
+    @if (TempData["Success"] != null || TempData["TrackError"] != null || ViewBag.TrackedMessage != null)
+    {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                openTrackModal();
+            });
+            </text>
+    }
+
+    // Modal dışına tıklayınca kapat
+    document.getElementById('trackModal').addEventListener('click', function(e) {
+        if (e.target === this) closeTrackModal();
+    });
 </script>

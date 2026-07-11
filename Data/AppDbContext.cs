@@ -23,6 +23,9 @@ namespace Portfolio.Data
         public DbSet<ServiceReference> ServiceReferences => Set<ServiceReference>();
         public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<Page> Pages => Set<Page>();
+        public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
+        public DbSet<Certificate> Certificates => Set<Certificate>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,6 +51,12 @@ namespace Portfolio.Data
             modelBuilder.Entity<TeamProject>().HasQueryFilter(t =>
                 t.Status == VisibilityStatus.Public &&
                 t.Category.Status == VisibilityStatus.Public);
+
+            modelBuilder.Entity<Page>().HasQueryFilter(p =>
+                p.Status == VisibilityStatus.Public);
+
+            modelBuilder.Entity<Certificate>().HasQueryFilter(c =>
+                c.Status == VisibilityStatus.Public);
 
             // SecurityResearch için çift kontrol — DisclosureStatus da zorunlu
             modelBuilder.Entity<SecurityResearch>().HasQueryFilter(s =>
@@ -97,6 +106,12 @@ namespace Portfolio.Data
 
             modelBuilder.Entity<AuditLog>()
                 .Property(a => a.Action).HasConversion<string>();
+
+            modelBuilder.Entity<Page>()
+                .Property(p => p.Status).HasConversion<string>();
+
+            modelBuilder.Entity<Certificate>()
+                .Property(c => c.Status).HasConversion<string>();
 
             // ── JSONB sütunları (PostgreSQL) ──────────────────────────────────
             // EF Core bu sütunları string olarak görür, PostgreSQL jsonb tipi
@@ -179,6 +194,8 @@ namespace Portfolio.Data
                 .HasIndex(t => t.Slug).IsUnique();
             modelBuilder.Entity<Tag>()
                 .HasIndex(t => t.Name).IsUnique();
+            modelBuilder.Entity<Page>()
+                .HasIndex(p => p.Slug).IsUnique();
 
             // ── Composite index'ler ───────────────────────────────────────────
             // Ana sayfa sorgusu — featured + public + category
@@ -202,6 +219,8 @@ namespace Portfolio.Data
 
             modelBuilder.Entity<ContactMessage>()
                 .Property(c => c.IpAddress).HasMaxLength(45); // IPv6 max
+
+            
         }
 
         // ── SaveChanges Override — AuditLog otomasyonu ────────────────────────
@@ -237,6 +256,8 @@ namespace Portfolio.Data
                 else if (entry.Entity is Category c) c.UpdatedAt = DateTime.UtcNow;
                 else if (entry.Entity is Service sv) sv.UpdatedAt = DateTime.UtcNow;
                 else if (entry.Entity is Note n) n.UpdatedAt = DateTime.UtcNow;
+                else if (entry.Entity is Page pg) pg.UpdatedAt = DateTime.UtcNow;
+                else if (entry.Entity is Certificate cert) cert.UpdatedAt = DateTime.UtcNow;
             }
         }
     }

@@ -75,12 +75,11 @@ namespace Portfolio.Models
         public int ServiceId { get; set; }
         public Service Service { get; set; } = null!;
 
-        // "project" | "security_research" | "homelab_post" | "team_project"
         public string RefType { get; set; } = string.Empty;
         public int RefId { get; set; }
 
         public int DisplayOrder { get; set; } = 0;
-        public string? CustomLabel { get; set; }                   // Otomatik title yerine özel etiket
+        public string? CustomLabel { get; set; }                   
     }
 
     // ── İletişim ──────────────────────────────────────────────────────────────
@@ -88,6 +87,7 @@ namespace Portfolio.Models
     public class ContactMessage
     {
         public int Id { get; set; }
+        public Guid TicketNumber { get; set; } = Guid.NewGuid();  
 
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
@@ -126,5 +126,12 @@ namespace Portfolio.Models
         public string? NewValues { get; set; }                   // JSON — değişmeden sonraki hali
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public class SiteSettings
+    {
+        public int Id { get; set; }
+        public string? CvFileUrl { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

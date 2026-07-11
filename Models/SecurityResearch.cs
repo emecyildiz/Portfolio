@@ -1,4 +1,5 @@
-﻿using Portfolio.Models.Enums;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Portfolio.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Portfolio.Models
@@ -45,6 +46,7 @@ namespace Portfolio.Models
 
         // FK
         public int CategoryId { get; set; }
+        [ValidateNever]
         public Category Category { get; set; } = null!;
 
         // Navigation

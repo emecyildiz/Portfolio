@@ -147,7 +147,7 @@
     let members = [];
 
     function addMember() {
-        members.push({ name: '', role: '', github_url: '', linkedin_url: '' });
+        members.push({ Name: '', Role: '', Github_url: '', Linkedin_url: '' });
         renderMembers();
     }
 
@@ -156,7 +156,7 @@
         renderMembers();
     }
 
-    function renderMembers() {
+        function renderMembers() {
         const container = document.getElementById('members-container');
         container.innerHTML = members.map((m, i) => `
             <div class="bg-gray-800 rounded-lg p-4 space-y-3">
@@ -166,17 +166,17 @@
                             class="text-xs text-red-400 hover:text-red-300">Kaldır</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <input placeholder="Ad Soyad" value="${m.name}"
-                           oninput="members[${i}].name = this.value"
+                    <input placeholder="Ad Soyad" value="${m.Name || ''}"
+                           oninput="members[${i}].Name = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="Rol" value="${m.role}"
-                           oninput="members[${i}].role = this.value"
+                    <input placeholder="Rol" value="${m.Role || ''}"
+                           oninput="members[${i}].Role = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="GitHub URL" value="${m.github_url}"
-                           oninput="members[${i}].github_url = this.value"
+                    <input placeholder="GitHub URL" value="${m.GithubUrl || ''}"
+                           oninput="members[${i}].GithubUrl = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="LinkedIn URL" value="${m.linkedin_url}"
-                           oninput="members[${i}].linkedin_url = this.value"
+                    <input placeholder="LinkedIn URL" value="${m.LinkedinUrl || ''}"
+                           oninput="members[${i}].LinkedinUrl = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
             </div>

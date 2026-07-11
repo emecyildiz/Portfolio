@@ -139,6 +139,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();  
+
 
 app.MapControllerRoute(
     name: "admin",
@@ -221,12 +223,24 @@ app.MapControllerRoute(
     pattern: "hire/contact",
     defaults: new { controller = "Hire", action = "Contact" }
 );
+app.MapControllerRoute(
+    name: "hire_track",
+    pattern: "hire/track",
+    defaults: new { controller = "Hire", action = "TrackTicket" }
+);
 
 app.MapControllerRoute(
     name: "hire",
     pattern: "hire",
     defaults: new { controller = "Hire", action = "Index" }
 );
+
+app.MapControllerRoute(
+    name: "page_detail",
+    pattern: "pages/{slug}",
+    defaults: new { controller = "Page", action = "Detail" }
+);
+
 
 app.MapControllerRoute(
     name: "default",

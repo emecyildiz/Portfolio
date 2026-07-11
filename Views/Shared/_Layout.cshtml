@@ -115,6 +115,13 @@
                         <a href="@url" class="nav-link text-sm text-gray-400 hover:text-white transition">@label</a>
                     }
                 }
+                @if (ViewBag.NavPages != null)
+                {
+                    @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
+                    {
+                        <a href="/pages/@navPage.Slug" class="nav-link text-sm text-gray-400 hover:text-white transition">@navPage.Title</a>
+                    }
+                }
 
                 <a href="/hire" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition font-medium">
                     İşe Al
