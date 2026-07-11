@@ -1,0 +1,66 @@
+﻿@model List<Portfolio.Models.ViewModels.SearchResultItem>
+@{
+    ViewData["Title"] = "Arama";
+    var query = ViewBag.Query as string;
+}
+
+<div class="max-w-3xl mx-auto px-6 py-16">
+
+    <!-- Arama kutusu -->
+    <div class="mb-12">
+        <p class="font-mono text-blue-400 text-sm mb-4">// search</p>
+        <form method="get" action="/search" class="flex gap-2">
+            <input type="text" name="q" value="@query" autofocus
+                   placeholder="Ne arıyorsun?"
+                   class="flex-1 bg-gray-900 border border-gray-800 rounded-lg px-5 py-3 text-white text-base focus:outline-none focus:border-blue-500 transition" />
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition">
+                Ara
+            </button>
+        </form>
+    </div>
+
+    @if (string.IsNullOrWhiteSpace(query))
+    {
+        <div class="text-center py-20 text-gray-600">
+            <p class="font-mono">// aramak için yukarıya bir şeyler yaz</p>
+        </div>
+    }
+    else if (!Model.Any())
+    {
+        <div class="text-center py-20 text-gray-600">
+            <p class="font-mono">// "@query" için sonuç bulunamadı</p>
+        </div>
+    }
+    else
+    {
+        <p class="text-sm text-gray-500 mb-6">
+            "<span class="text-white">@query</span>" için @Model.Count sonuç bulundu
+        </p>
+
+        <div class="space-y-3">
+            @foreach (var item in Model)
+            {
+                <a href="@item.Url"
+                   class="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition group">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs px-2 py-0.5 rounded border font-mono @item.ColorClass">
+                            @item.TypeLabel
+                        </span>
+                        @if (item.Date.HasValue)
+                        {
+                            <span class="text-xs text-gray-600">@item.Date.Value.ToString("dd MMM yyyy")</span>
+                        }
+                    </div>
+                    <h3 class="text-white font-medium group-hover:text-blue-300 transition mb-1">
+                        @item.Title
+                    </h3>
+                    @if (!string.IsNullOrEmpty(item.Summary))
+                    {
+                        <p class="text-gray-500 text-sm line-clamp-2">@item.Summary</p>
+                    }
+                </a>
+            }
+        </div>
+    }
+</div>

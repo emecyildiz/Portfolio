@@ -4,14 +4,17 @@ using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models.Enums;
 using Portfolio.Models.ViewModels;
+using Portfolio.Services;
 
 namespace Portfolio.Controllers;
 
 public class HomeController : BaseController
 {
+    private readonly IActivityService _activity;
 
-    public HomeController(AppDbContext db) : base(db)
+    public HomeController(AppDbContext db, IActivityService activity) : base(db)
     {
+        _activity = activity;
     }
 
     public async Task<IActionResult> Index()
@@ -43,17 +46,18 @@ public class HomeController : BaseController
                 .ToListAsync(),
         };
 
-        // "Þu an ne yapýyorum" — admin panelinden Notes'a High/Critical öncelikli, tamamlanmamýþ todo eklenirse burada görünür
         ViewBag.CurrentlyWorking = await _db.Notes
             .Where(n => n.IsTodo && !n.IsCompleted &&
-                   (n.Priority == Portfolio.Models.Enums.NotePriority.High ||
-                    n.Priority == Portfolio.Models.Enums.NotePriority.Critical))
+                   (n.Priority == NotePriority.High || n.Priority == NotePriority.Critical))
             .OrderByDescending(n => n.CreatedAt)
             .FirstOrDefaultAsync();
 
         ViewBag.Certificates = await _db.Certificates
             .OrderBy(c => c.SortOrder)
             .ToListAsync();
+
+        // Timeline widget — son 6 aktivite
+        ViewBag.RecentActivity = await _activity.GetRecentActivityAsync(_db, 6);
 
         return View(model);
     }

@@ -11,6 +11,8 @@ namespace Portfolio.Models
 
         public NoteType NoteType { get; set; } = NoteType.Idea;
 
+        public string? RelatedUrl { get; set; }    // "şu an çalışıyorum" widget'ı için opsiyonel link
+
         // Todo modunda bu alanlar aktif
         public bool IsTodo { get; set; } = false;
         public bool IsCompleted { get; set; } = false;

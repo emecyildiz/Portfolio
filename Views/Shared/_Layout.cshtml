@@ -85,72 +85,68 @@
             </a>
 
             <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-8">
+            <div class="hidden md:flex items-center gap-6">
                 <a href="/" class="nav-link text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
 
-                @if (ViewBag.NavCategories != null)
-                {
-                    @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
-                    {
-                        var url = cat.Slug switch
+                <!-- İçerik dropdown -->
+                <div class="relative group">
+                    <button class="nav-link text-sm text-gray-400 hover:text-white transition flex items-center gap-1">
+                        İçerikler
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="absolute top-full left-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl">
+                        @if (ViewBag.NavCategories != null)
                         {
-                            "security" => "/security",
-                            "electronics" => "/electronics",
-                            "webapps" => "/webapps",
-                            "homelab" => "/homelab",
-                            "blog" => "/blog",
-                            "team" => "/team",
-                            _ => $"/{cat.Slug}"
-                        };
-                        var label = cat.Slug switch
+                            @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
+                            {
+                                var url = cat.Slug switch
+                                {
+                                    "security" => "/security",
+                                    "electronics" => "/electronics",
+                                    "webapps" => "/webapps",
+                                    "homelab" => "/homelab",
+                                    "blog" => "/blog",
+                                    "team" => "/team",
+                                    _ => $"/{cat.Slug}"
+                                };
+                                var label = cat.Slug switch
+                                {
+                                    "security" => "Güvenlik",
+                                    "electronics" => "Elektronik",
+                                    "webapps" => "Web Apps",
+                                    "homelab" => "Homelab",
+                                    "blog" => "Blog",
+                                    "team" => "Ekip",
+                                    _ => cat.Name
+                                };
+                                <a href="@url" class="block px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition">@label</a>
+                            }
+                        }
+                        @if (ViewBag.NavPages != null && ((List<Portfolio.Models.Page>)ViewBag.NavPages).Any())
                         {
-                            "security" => "Güvenlik",
-                            "electronics" => "Elektronik",
-                            "webapps" => "Web Apps",
-                            "homelab" => "Homelab",
-                            "blog" => "Blog",
-                            "team" => "Ekip",
-                            _ => cat.Name
-                        };
-                        <a href="@url" class="nav-link text-sm text-gray-400 hover:text-white transition">@label</a>
-                    }
-                }
-                @if (ViewBag.NavPages != null)
-                {
-                    @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
-                    {
-                        <a href="/pages/@navPage.Slug" class="nav-link text-sm text-gray-400 hover:text-white transition">@navPage.Title</a>
-                    }
-                }
+                            <div class="border-t border-gray-800 my-2"></div>
+                            @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
+                            {
+                                <a href="/pages/@navPage.Slug" class="block px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition">@navPage.Title</a>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <a href="/activity" class="nav-link text-sm text-gray-400 hover:text-white transition">Aktivite</a>
+
+                <!-- Arama ikonu -->
+                <button onclick="toggleSearch()" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
 
                 <a href="/hire" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition font-medium">
                     İşe Al
                 </a>
-            </div>
-
-            <!-- Mobile Nav -->
-            <div id="mobileMenu" class="hidden md:hidden border-t border-gray-800 px-6 py-4 space-y-3">
-                <a href="/" class="block text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
-
-                @if (ViewBag.NavCategories != null)
-                {
-                    @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
-                    {
-                        var url = cat.Slug switch
-                        {
-                            "security" => "/security",
-                            "electronics" => "/electronics",
-                            "webapps" => "/webapps",
-                            "homelab" => "/homelab",
-                            "blog" => "/blog",
-                            "team" => "/team",
-                            _ => $"/{cat.Slug}"
-                        };
-                        <a href="@url" class="block text-sm text-gray-400 hover:text-white transition">@cat.Name</a>
-                    }
-                }
-
-                <a href="/hire" class="block text-sm text-blue-400 hover:text-blue-300 transition">İşe Al</a>
             </div>
 
             <!-- Mobile menu button -->
@@ -164,14 +160,77 @@
         <!-- Mobile Nav -->
         <div id="mobileMenu" class="hidden md:hidden border-t border-gray-800 px-6 py-4 space-y-3">
             <a href="/" class="block text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
-            <a href="/security" class="block text-sm text-gray-400 hover:text-white transition">Güvenlik</a>
-            <a href="/electronics" class="block text-sm text-gray-400 hover:text-white transition">Elektronik</a>
-            <a href="/webapps" class="block text-sm text-gray-400 hover:text-white transition">Web Apps</a>
-            <a href="/homelab" class="block text-sm text-gray-400 hover:text-white transition">Homelab</a>
-            <a href="/blog" class="block text-sm text-gray-400 hover:text-white transition">Blog</a>
+
+            @if (ViewBag.NavCategories != null)
+            {
+                @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
+                {
+                    var url = cat.Slug switch
+                    {
+                        "security" => "/security",
+                        "electronics" => "/electronics",
+                        "webapps" => "/webapps",
+                        "homelab" => "/homelab",
+                        "blog" => "/blog",
+                        "team" => "/team",
+                        _ => $"/{cat.Slug}"
+                    };
+                    <a href="@url" class="block text-sm text-gray-400 hover:text-white transition">@cat.Name</a>
+                }
+            }
+
+            @if (ViewBag.NavPages != null)
+            {
+                @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
+                {
+                    <a href="/pages/@navPage.Slug" class="block text-sm text-gray-400 hover:text-white transition">@navPage.Title</a>
+                }
+            }
+
+            <a href="/activity" class="block text-sm text-gray-400 hover:text-white transition">Aktivite</a>
+            <a href="/search" class="block text-sm text-gray-400 hover:text-white transition">Ara</a>
             <a href="/hire" class="block text-sm text-blue-400 hover:text-blue-300 transition">İşe Al</a>
         </div>
     </nav>
+
+    <!-- Arama overlay -->
+    <div id="searchOverlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-start justify-center pt-32 px-4">
+        <div class="w-full max-w-xl">
+            <form method="get" action="/search" class="flex gap-2">
+                <input type="text" name="q" id="searchInput"
+                       placeholder="Ne arıyorsun? (Enter'a bas)"
+                       class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 text-white text-lg focus:outline-none focus:border-blue-500 transition" />
+                <button type="button" onclick="toggleSearch()"
+                        class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-4 rounded-lg transition">
+                    ✕
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleSearch() {
+            const overlay = document.getElementById('searchOverlay');
+            overlay.classList.toggle('hidden');
+            if (!overlay.classList.contains('hidden')) {
+                document.getElementById('searchInput').focus();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('searchOverlay').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('searchOverlay').addEventListener('click', function(e) {
+            if (e.target === this) toggleSearch();
+        });
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+    </script>
 
     <!-- İçerik -->
     <main class="flex-1 pt-16 fade-in">

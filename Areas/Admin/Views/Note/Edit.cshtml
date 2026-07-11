@@ -42,6 +42,15 @@
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
                     </select>
                 </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">İlgili Link (opsiyonel)</label>
+                    <input asp-for="RelatedUrl"
+                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                           placeholder="/electronics/proje-slug veya harici bir link" />
+                    <p class="text-xs text-gray-600 mt-1">
+                        "Şu an ne yapıyorum" widget'ında bu nota tıklanırsa buraya gider.
+                    </p>
+                </div>
             </div>
 
             <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">

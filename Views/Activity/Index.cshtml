@@ -1,0 +1,54 @@
+﻿@model List<Portfolio.Models.ViewModels.ActivityItem>
+@{
+    ViewData["Title"] = "Tüm Aktiviteler";
+    ViewData["Description"] = "Tüm proje, araştırma ve blog yazılarının kronolojik listesi";
+}
+
+<div class="max-w-3xl mx-auto px-6 py-16">
+    <div class="mb-12">
+        <p class="font-mono text-green-400 text-sm mb-2">// activity</p>
+        <h1 class="text-4xl font-bold text-white mb-4">Tüm Çalışmalar</h1>
+        <p class="text-gray-400">Tüm içeriklerin kronolojik listesi.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 text-gray-600">
+            <p class="font-mono">// henüz içerik yok</p>
+        </div>
+    }
+    else
+    {
+        var grouped = Model
+        .GroupBy(i => new { i.Date!.Value.Year, i.Date.Value.Month })
+        .OrderByDescending(g => g.Key.Year)
+        .ThenByDescending(g => g.Key.Month);
+
+        @foreach (var group in grouped)
+        {
+            var monthName = new DateTime(group.Key.Year, group.Key.Month, 1).ToString("MMMM yyyy");
+            <div class="mb-10">
+                <p class="font-mono text-xs text-gray-600 mb-4 uppercase tracking-wider">@monthName</p>
+                <div class="space-y-2">
+                    @foreach (var item in group.OrderByDescending(i => i.Date))
+                    {
+                        <a href="@item.Url"
+                           class="flex items-center gap-4 bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-lg px-5 py-3 transition group">
+                            <span class="text-xs px-2 py-1 rounded border font-mono @item.ColorClass whitespace-nowrap">
+                                @item.TypeLabel
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-gray-300 group-hover:text-white transition truncate">
+                                    @item.Title
+                                </p>
+                            </div>
+                            <span class="text-xs text-gray-600 whitespace-nowrap">
+                                @item.Date!.Value.ToString("dd MMM")
+                            </span>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

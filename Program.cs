@@ -60,6 +60,7 @@ builder.Services.AddScoped<IReadingTimeService, ReadingTimeService>();
 builder.Services.AddScoped<IViewCountService, ViewCountService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
+builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"));
@@ -241,6 +242,17 @@ app.MapControllerRoute(
     defaults: new { controller = "Page", action = "Detail" }
 );
 
+app.MapControllerRoute(
+    name: "activity",
+    pattern: "activity",
+    defaults: new { controller = "Activity", action = "Index" }
+);
+
+app.MapControllerRoute(
+    name: "search",
+    pattern: "search",
+    defaults: new { controller = "Search", action = "Index" }
+);
 
 app.MapControllerRoute(
     name: "default",
