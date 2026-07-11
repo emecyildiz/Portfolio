@@ -64,6 +64,14 @@
                 </td>
                 <td class="px-6 py-4">
                     <div class="flex items-center justify-end gap-2">
+                            @if (r.Status == Portfolio.Models.Enums.VisibilityStatus.Public &&
+                                                    r.DisclosureStatus == Portfolio.Models.Enums.DisclosureStatus.PubliclyDisclosed)
+                            {
+                                <a href="/security/@r.Slug" target="_blank"
+                                   class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
+                                    👁 Önizle
+                                </a>
+                            }
                         <form method="post" action="@Url.Action("Toggle", "Security", new { area = "Admin", id = r.Id })">
                             @Html.AntiForgeryToken()
                             <button type="submit"

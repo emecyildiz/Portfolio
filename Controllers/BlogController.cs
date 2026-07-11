@@ -53,6 +53,8 @@ public class BlogController : BaseController
         ViewBag.ContentHtml = Markdown.ToHtml(post.Content ?? "",
             new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
 
+        ViewBag.OgImage = post.CoverImageUrl;
+
         ViewBag.Related = await _db.BlogPosts
             .Where(b => b.Id != post.Id)
             .OrderByDescending(b => b.PublishedAt)

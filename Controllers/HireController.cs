@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models;
@@ -25,8 +26,15 @@ public class HireController : BaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Contact(ContactMessage model, int? serviceId)
+    [EnableRateLimiting("ContactFormLimit")]
+    public async Task<IActionResult> Contact(ContactMessage model, int? serviceId, string? website)
     {
+        if (!string.IsNullOrEmpty(website))
+        {
+            TempData["Success"] = "Talebin alındı!";
+            return RedirectToAction("Index", "Hire", new { area = "" });
+        }
+
         if (string.IsNullOrWhiteSpace(model.Name) ||
             string.IsNullOrWhiteSpace(model.Email) ||
             string.IsNullOrWhiteSpace(model.Message))

@@ -65,6 +65,7 @@ public class WebAppsController : BaseController
             .Where(m => m.EntityType == "project" && m.EntityId == project.Id)
             .OrderBy(m => m.SortOrder)
             .ToListAsync();
+        ViewBag.OgImage = project.CoverImageUrl;
 
         ViewBag.Related = await _db.Projects
             .Include(p => p.Category)

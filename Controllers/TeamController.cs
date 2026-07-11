@@ -65,6 +65,8 @@ public class TeamController : BaseController
             .OrderBy(m => m.SortOrder)
             .ToListAsync();
 
+        ViewBag.OgImage = project.CoverImageUrl;
+
         return View(project);
     }
 }

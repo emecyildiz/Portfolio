@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Services;
@@ -54,6 +55,22 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("ContactFormLimit", opt =>
+    {
+        opt.Window = TimeSpan.FromHours(1);
+        opt.PermitLimit = 3;                    // Saatte en fazla 3 mesaj
+        opt.QueueLimit = 0;                      // Sýraya alma, direkt reddet
+    });
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsync(
+            "Çok fazla istek gönderdin. Lütfen bir süre bekle.", cancellationToken);
+    };
+});
 
 builder.Services.AddScoped<ISlugService, SlugService>();
 builder.Services.AddScoped<IReadingTimeService, ReadingTimeService>();
@@ -139,6 +156,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();  
 

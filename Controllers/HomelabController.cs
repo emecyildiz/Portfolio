@@ -72,6 +72,8 @@ public class HomelabController : BaseController
             .OrderBy(m => m.SortOrder)
             .ToListAsync();
 
+        ViewBag.OgImage = post.CoverImageUrl;
+
         ViewBag.Related = await _db.HomelabPosts
             .Where(h => h.Topic == post.Topic && h.Id != post.Id)
             .OrderByDescending(h => h.PublishedAt)

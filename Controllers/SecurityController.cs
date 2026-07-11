@@ -78,6 +78,8 @@ public class SecurityController : BaseController
             .OrderBy(m => m.SortOrder)
             .ToListAsync();
 
+        ViewBag.OgImage = research.CoverImageUrl;
+
         return View(research);
     }
 }

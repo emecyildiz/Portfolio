@@ -4,7 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="@ViewData["Description"]" />
-    <title>@ViewData["Title"] — Portfolyo</title>
+    <!-- Open Graph -->
+    @{
+        var ogImage = ViewBag.OgImage as string;
+        var fullOgImage = !string.IsNullOrEmpty(ogImage)
+        ? (ogImage.StartsWith("http") ? ogImage : $"{Context.Request.Scheme}://{Context.Request.Host}{ogImage}")
+        : $"{Context.Request.Scheme}://{Context.Request.Host}/og-default.png";
+    }
+    <meta property="og:title" content="@ViewData["Title"] — Portfolyo" />
+    <meta property="og:description" content="@ViewData["Description"]" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    <meta property="og:image" content="@fullOgImage" />
+    <meta property="og:locale" content="tr_TR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@ViewData["Title"] — Portfolyo" />
+    <meta name="twitter:description" content="@ViewData["Description"]" />
+    <meta name="twitter:image" content="@fullOgImage" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>

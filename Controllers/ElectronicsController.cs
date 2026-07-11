@@ -66,6 +66,8 @@ public class ElectronicsController : BaseController
             .OrderBy(m => m.SortOrder)
             .ToListAsync();
 
+        ViewBag.OgImage = project.CoverImageUrl;
+
         ViewBag.Related = await _db.Projects
             .Include(p => p.Category)
             .Where(p => p.Category.Slug == "electronics" && p.Id != project.Id)

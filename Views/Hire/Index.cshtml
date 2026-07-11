@@ -79,6 +79,10 @@
 
         <form method="post" asp-controller="Hire" asp-action="Contact" asp-route-area="" class="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-4">
             @Html.AntiForgeryToken()
+            <div style="position: absolute; left: -9999px;" aria-hidden="true">
+                <label for="website">Website</label>
+                <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
