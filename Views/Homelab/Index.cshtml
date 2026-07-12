@@ -39,8 +39,27 @@
     }
     else
     {
+        var mainLab = Model.FirstOrDefault(h => h.IsMainLab);
+        var otherPosts = Model.Where(h => !h.IsMainLab).ToList();
+
+
+        @if (mainLab != null)
+        {
+            <a href="/homelab/@mainLab.Slug"
+               class="block bg-gradient-to-r from-blue-950/50 to-purple-950/50 border border-blue-800/50 hover:border-blue-600 rounded-2xl p-8 mb-10 transition group">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-lg">🗺</span>
+                    <span class="font-mono text-xs text-blue-400 uppercase tracking-wider">Ana Lab — Tüm Sistem Haritası</span>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-blue-300 transition">
+                    @mainLab.Title
+                </h2>
+                <p class="text-gray-400 text-sm">@mainLab.Summary</p>
+                <p class="text-blue-400 text-sm mt-4">İnteraktif haritayı gör →</p>
+            </a>
+        }
         <div class="space-y-4">
-            @foreach (var h in Model)
+            @foreach (var h in otherPosts)
             {
                 <a href="/homelab/@h.Slug"
                    class="block bg-gray-900 border border-gray-800 hover:border-teal-900/50 rounded-xl p-6 transition group">

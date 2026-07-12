@@ -25,8 +25,9 @@ namespace Portfolio.Models
 
         // Ağ topoloji diyagramı gibi büyük görseller için ayrı alan
         public string? NetworkDiagramUrl { get; set; }
+        public string? NetworkTopology { get; set; }    // JSONB — interaktif ağ haritası
         public string? CoverImageUrl { get; set; }
-
+        public bool IsMainLab { get; set; } = false;
         public VisibilityStatus Status { get; set; } = VisibilityStatus.Draft;
         public bool IsFeatured { get; set; } = false;
 

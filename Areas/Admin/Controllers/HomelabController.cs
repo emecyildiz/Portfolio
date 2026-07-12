@@ -13,13 +13,16 @@ public class HomelabController : AdminBaseController
     private readonly ISlugService _slugService;
     private readonly IReadingTimeService _readingTime;
     private readonly IMediaService _media;
+    private readonly IWebHostEnvironment _env;
+
 
     public HomelabController(AppDbContext db, ISlugService slugService,
-        IReadingTimeService readingTime, IMediaService media) : base(db)
+        IReadingTimeService readingTime, IMediaService media, IWebHostEnvironment env) : base(db)
     {
         _slugService = slugService;
         _readingTime = readingTime;
         _media = media;
+        _env = env;
     }
 
     public async Task<IActionResult> Index()
@@ -113,7 +116,7 @@ public class HomelabController : AdminBaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, HomelabPost model,
-        string? HardwareUsed, string? SoftwareUsed, List<IFormFile>? Images)
+    string? HardwareUsed, string? SoftwareUsed, string? NetworkTopologyJson, List<IFormFile>? Images)
     {
         var existing = await _db.HomelabPosts.IgnoreQueryFilters().FirstOrDefaultAsync(h => h.Id == id);
         if (existing == null) return NotFound();
@@ -125,6 +128,7 @@ public class HomelabController : AdminBaseController
         existing.NetworkDiagramUrl = model.NetworkDiagramUrl;
         existing.Status = model.Status;
         existing.IsFeatured = model.IsFeatured;
+        existing.IsMainLab = model.IsMainLab;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
 
@@ -138,6 +142,10 @@ public class HomelabController : AdminBaseController
         if (!string.IsNullOrEmpty(SoftwareUsed))
             existing.SoftwareUsed = JsonSerializer.Serialize(
                 SoftwareUsed.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList());
+
+        // Network topology JSON'ı kaydet
+        if (!string.IsNullOrEmpty(NetworkTopologyJson))
+            existing.NetworkTopology = NetworkTopologyJson;
 
         await _db.SaveChangesAsync();
 
@@ -203,5 +211,46 @@ public class HomelabController : AdminBaseController
         _db.HomelabPosts.Remove(post);
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadIcon(IFormFile icon)
+    {
+        if (icon == null || icon.Length == 0)
+            return Json(new { success = false, message = "Dosya seçilmedi." });
+
+        var allowedTypes = new[] { "image/svg+xml", "image/png", "image/webp" };
+        if (!allowedTypes.Contains(icon.ContentType))
+            return Json(new { success = false, message = "Sadece SVG, PNG veya WebP yükleyebilirsin." });
+
+        if (icon.Length > 500_000) // 500KB limit — ikonlar küçük olmalı
+            return Json(new { success = false, message = "Dosya çok büyük (max 500KB)." });
+
+        var extension = Path.GetExtension(icon.FileName);
+        var uniqueName = $"{Guid.NewGuid()}{extension}";
+        var relativePath = Path.Combine("uploads", "network-icons", uniqueName);
+        var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
+
+        await using var stream = new FileStream(physicalPath, FileMode.Create);
+        await icon.CopyToAsync(stream);
+
+        var url = "/" + relativePath.Replace('\\', '/');
+        return Json(new { success = true, url });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetElectronicsProjects()
+    {
+        var projects = await _db.Projects
+            .IgnoreQueryFilters()
+            .Include(p => p.Category)
+            .Where(p => p.Category.Slug == "electronics")
+            .Select(p => new { slug = p.Slug, title = p.Title })
+            .ToListAsync();
+
+        return Json(projects);
     }
 }

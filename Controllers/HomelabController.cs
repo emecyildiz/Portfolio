@@ -43,13 +43,6 @@ public class HomelabController : BaseController
 
     public async Task<IActionResult> Detail(string slug)
     {
-        var category = await _db.Categories
-        .IgnoreQueryFilters()
-        .FirstOrDefaultAsync(c => c.Slug == "homelab");
-
-        if (category == null || category.Status != VisibilityStatus.Public)
-            return View("CategoryUnavailable");
-
         var post = await _db.HomelabPosts
             .Include(h => h.Category)
             .FirstOrDefaultAsync(h => h.Slug == slug);
@@ -72,13 +65,51 @@ public class HomelabController : BaseController
             .OrderBy(m => m.SortOrder)
             .ToListAsync();
 
-        ViewBag.OgImage = post.CoverImageUrl;
-
         ViewBag.Related = await _db.HomelabPosts
             .Where(h => h.Topic == post.Topic && h.Id != post.Id)
             .OrderByDescending(h => h.PublishedAt)
             .Take(3)
             .ToListAsync();
+
+        // Eğer ağ haritası varsa, bağlı Electronics projelerinin detaylarını da çek
+        if (!string.IsNullOrEmpty(post.NetworkTopology))
+        {
+            var topology = JsonSerializer.Deserialize<JsonElement>(post.NetworkTopology);
+            var linkedSlugs = new List<string>();
+
+            if (topology.TryGetProperty("nodes", out var nodesElement))
+            {
+                foreach (var node in nodesElement.EnumerateArray())
+                {
+                    if (node.TryGetProperty("linkedProjectSlug", out var slugProp) &&
+                        !string.IsNullOrEmpty(slugProp.GetString()))
+                    {
+                        linkedSlugs.Add(slugProp.GetString()!);
+                    }
+                }
+            }
+
+            if (linkedSlugs.Any())
+            {
+                var linkedProjects = await _db.Projects
+                    .Where(p => linkedSlugs.Contains(p.Slug))
+                    .Select(p => new
+                    {
+                        slug = p.Slug,
+                        title = p.Title,
+                        coverImageUrl = p.CoverImageUrl,
+                        summary = p.Summary,
+                        extraData = p.ExtraData
+                    })
+                    .ToListAsync();
+
+                ViewBag.LinkedProjectsJson = JsonSerializer.Serialize(linkedProjects);
+            }
+            else
+            {
+                ViewBag.LinkedProjectsJson = "[]";
+            }
+        }
 
         return View(post);
     }

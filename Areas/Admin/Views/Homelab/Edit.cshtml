@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 
-<form method="post" enctype="multipart/form-data">
+<form method="post" id="mainForm" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
     <input asp-for="Id" type="hidden" />
 
@@ -69,6 +69,36 @@
                     <label class="block text-sm text-gray-400 mb-1">Ağ Topoloji Diyagramı URL</label>
                     <input asp-for="NetworkDiagramUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+                <!-- İnteraktif Ağ Haritası Builder -->
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-400">İnteraktif Ağ Haritası</h3>
+                            <p class="text-xs text-gray-600 mt-1">Cihazları ve bağlantıları ekleyerek Packet Tracer tarzı harita oluştur</p>
+                        </div>
+                        <button type="button" onclick="addDevice()"
+                                class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition">
+                            + Cihaz Ekle
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="NetworkTopologyJson" id="networkTopologyJson" />
+
+                    <!-- Cihazlar listesi -->
+                    <div id="devices-container" class="space-y-3 mb-6"></div>
+
+                    <!-- Bağlantılar -->
+                    <div class="border-t border-gray-800 pt-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Bağlantılar</h4>
+                            <button type="button" onclick="addConnection()"
+                                    class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
+                                + Bağlantı Ekle
+                            </button>
+                        </div>
+                        <div id="connections-container" class="space-y-2"></div>
+                    </div>
                 </div>
             </div>
 
@@ -129,6 +159,10 @@
                     <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
                     Ana sayfada öne çıkar
                 </label>
+                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                    <input asp-for="IsMainLab" type="checkbox" class="w-4 h-4 rounded" />
+                    🗺 Bu yazı "Ana Lab" — tüm sistemi gösteren ana harita
+                </label>
 
                 <div class="pt-2 border-t border-gray-800 text-xs text-gray-600 space-y-1">
                     <p>Oluşturuldu: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
@@ -156,5 +190,270 @@
         element: document.getElementById('content-editor'),
         spellChecker: false,
         toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
+    });
+</script>
+<script>
+    // ============ VERİ MODELİ ============
+    let devices = [];
+    let connections = [];
+    let electronicsProjects = [];
+
+    // Sayfa yüklenirken mevcut topolojiyi ve Electronics projelerini çek
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Electronics projelerini getir (dropdown için)
+        try {
+            const res = await fetch('/money/homelab/getelectronicsprojects');
+            electronicsProjects = await res.json();
+        } catch (e) {
+            console.error('Electronics projeleri alınamadı', e);
+        }
+
+        // Mevcut topoloji varsa yükle
+        const existingJson = @Html.Raw(string.IsNullOrEmpty(Model.NetworkTopology) ? "null" : Model.NetworkTopology);
+        if (existingJson) {
+            devices = existingJson.nodes || [];
+            connections = existingJson.edges || [];
+        }
+
+        renderDevices();
+        renderConnections();
+    });
+
+    // ============ CİHAZ YÖNETİMİ ============
+    function addDevice() {
+        const newId = devices.length > 0 ? Math.max(...devices.map(d => d.id)) + 1 : 1;
+        devices.push({
+            id: newId,
+            label: '',
+            iconUrl: '',
+            deviceType: 'custom',
+            linkedProjectSlug: '',
+            standaloneImageUrl: '',
+            standaloneHardware: '',
+            shortInfo: '',
+            ipAddress: '',
+            homelabRole: '',
+            homelabNotes: '',
+            _expanded: true
+        });
+        renderDevices();
+    }
+
+    function removeDevice(id) {
+        devices = devices.filter(d => d.id !== id);
+        // Bu cihaza bağlı bağlantıları da temizle
+        connections = connections.filter(c => c.from !== id && c.to !== id);
+        renderDevices();
+        renderConnections();
+    }
+
+    function updateDevice(id, field, value) {
+        const device = devices.find(d => d.id === id);
+        if (device) device[field] = value;
+    }
+
+    async function uploadDeviceIcon(id, inputEl) {
+        const file = inputEl.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('icon', file);
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        try {
+            const res = await fetch('/money/homelab/uploadicon', {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': token },
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                updateDevice(id, 'iconUrl', data.url);
+                renderDevices();
+            } else {
+                alert('Hata: ' + data.message);
+            }
+        } catch (e) {
+            alert('İkon yüklenirken hata oluştu.');
+            console.error(e);
+        }
+    }
+
+        function renderDevices() {
+        const container = document.getElementById('devices-container');
+        container.innerHTML = devices.map(d => {
+            const isExpanded = d._expanded === true; // varsayılan açık
+            return `
+            <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+                <div class="flex items-center justify-between cursor-pointer" onclick="toggleDeviceExpand(${d.id})">
+                    <div class="flex items-center gap-3">
+                        ${d.iconUrl
+                            ? `<img src="${d.iconUrl}" class="w-8 h-8 object-contain bg-gray-700 rounded p-1" />`
+                            : `<div class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs">?</div>`
+                        }
+                        <span class="text-sm text-gray-300 font-medium">${d.label || 'İsimsiz Cihaz'}</span>
+                        <span class="text-xs text-gray-600">${d.deviceType}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="event.stopPropagation(); removeDevice(${d.id})"
+                                class="text-xs text-red-400 hover:text-red-300">Kaldır</button>
+                        <svg class="w-4 h-4 text-gray-500 transition ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+
+                ${isExpanded ? `
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Cihaz Adı</label>
+                        <input value="${d.label}" oninput="updateDevice(${d.id}, 'label', this.value)"
+                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Cihaz Tipi</label>
+                        <select onchange="updateDevice(${d.id}, 'deviceType', this.value)"
+                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                            ${['router','switch','firewall','server','pc','laptop','microcontroller','mobile','custom','sensor','audio','antenna'].map(t =>
+                                `<option value="${t}" ${d.deviceType === t ? 'selected' : ''}>${t}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">İkon Yükle (SVG/PNG, max 500KB)</label>
+                    <input type="file" accept="image/svg+xml,image/png,image/webp"
+                           onchange="uploadDeviceIcon(${d.id}, this)"
+                           class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-gray-700 file:text-gray-300 hover:file:bg-gray-600" />
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Elektronik Projesine Bağla (opsiyonel)</label>
+                    <select onchange="updateDevice(${d.id}, 'linkedProjectSlug', this.value)"
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                        <option value="">Bağlantısız — manuel bilgi gir</option>
+                        ${electronicsProjects.map(p =>
+                            `<option value="${p.slug}" ${d.linkedProjectSlug === p.slug ? 'selected' : ''}>${p.title}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+
+                ${!d.linkedProjectSlug ? `
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Fotoğraf URL (manuel)</label>
+                        <input value="${d.standaloneImageUrl || ''}" oninput="updateDevice(${d.id}, 'standaloneImageUrl', this.value)"
+                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Donanım Bilgisi (manuel)</label>
+                        <input value="${d.standaloneHardware || ''}" oninput="updateDevice(${d.id}, 'standaloneHardware', this.value)"
+                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Kısa Bilgi (hover'da görünür)</label>
+                        <input value="${d.shortInfo || ''}" oninput="updateDevice(${d.id}, 'shortInfo', this.value)"
+                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">IP Adresi (opsiyonel)</label>
+                        <input value="${d.ipAddress || ''}" oninput="updateDevice(${d.id}, 'ipAddress', this.value)"
+                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Homelab'taki Rolü</label>
+                    <input value="${d.homelabRole || ''}" oninput="updateDevice(${d.id}, 'homelabRole', this.value)"
+                           placeholder="Bu ağda ne işe yarıyor?"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Ekstra Notlar</label>
+                    <textarea oninput="updateDevice(${d.id}, 'homelabNotes', this.value)" rows="2"
+                              class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">${d.homelabNotes || ''}</textarea>
+                </div>
+                ` : ''}
+            </div>
+        `}).join('');
+    }
+
+    function toggleDeviceExpand(id) {
+        const device = devices.find(d => d.id === id);
+        if (device) device._expanded = device._expanded === false ? true : false;
+        renderDevices();
+    }
+
+    // ============ BAĞLANTI YÖNETİMİ ============
+    function addConnection() {
+        if (devices.length < 2) {
+            alert('Bağlantı eklemek için en az 2 cihaz olmalı.');
+            return;
+        }
+        connections.push({
+            from: devices[0].id,
+            to: devices[1].id,
+            connectionType: 'ethernet',
+            label: ''
+        });
+        renderConnections();
+    }
+
+    function removeConnection(index) {
+        connections.splice(index, 1);
+        renderConnections();
+    }
+
+    function updateConnection(index, field, value) {
+        connections[index][field] = field === 'from' || field === 'to' ? parseInt(value) : value;
+    }
+
+    function renderConnections() {
+        const container = document.getElementById('connections-container');
+
+        if (devices.length < 2) {
+            container.innerHTML = '<p class="text-xs text-gray-600">En az 2 cihaz ekleyince bağlantı ekleyebilirsin.</p>';
+            return;
+        }
+
+        container.innerHTML = connections.map((c, i) => `
+            <div class="bg-gray-800 rounded-lg p-3 flex items-center gap-2">
+                <select onchange="updateConnection(${i}, 'from', this.value)"
+                        class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
+                    ${devices.map(d => `<option value="${d.id}" ${c.from === d.id ? 'selected' : ''}>${d.label || 'İsimsiz'}</option>`).join('')}
+                </select>
+                <span class="text-gray-600 text-xs">→</span>
+                <select onchange="updateConnection(${i}, 'to', this.value)"
+                        class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
+                    ${devices.map(d => `<option value="${d.id}" ${c.to === d.id ? 'selected' : ''}>${d.label || 'İsimsiz'}</option>`).join('')}
+                </select>
+                <select onchange="updateConnection(${i}, 'connectionType', this.value)"
+                        class="bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
+                    ${['ethernet','wifi','usb','power','other'].map(t =>
+                        `<option value="${t}" ${c.connectionType === t ? 'selected' : ''}>${t}</option>`
+                    ).join('')}
+                </select>
+                <input value="${c.label || ''}" oninput="updateConnection(${i}, 'label', this.value)"
+                       placeholder="Etiket (opsiyonel)"
+                       class="w-24 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500" />
+                <button type="button" onclick="removeConnection(${i})"
+                        class="text-xs text-red-400 hover:text-red-300 px-2">✕</button>
+            </div>
+        `).join('');
+    }
+
+        // ============ KAYDETME ============
+    document.getElementById('mainForm')?.addEventListener('submit', function() {
+        const cleanDevices = devices.map(({ _expanded, ...rest }) => rest);
+        const topology = { nodes: cleanDevices, edges: connections };
+        document.getElementById('networkTopologyJson').value = JSON.stringify(topology);
     });
 </script>
