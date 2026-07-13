@@ -78,6 +78,7 @@ builder.Services.AddScoped<IViewCountService, ViewCountService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddHttpClient<IGeoLocationService, GeoLocationService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"));
@@ -149,10 +150,46 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? "";
+
+    var skipPrefixes = new[] { "/money", "/css", "/js", "/lib", "/uploads", "/icons", "/favicon" };
+    if (!skipPrefixes.Any(p => path.StartsWith(p)) && context.Request.Method == "GET")
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var today = DateTime.UtcNow.Date;
+
+        using var scope = context.RequestServices.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var alreadyVisitedToday = await db.PageViews
+            .AnyAsync(p => p.IpAddress == ip && p.ViewedAt.Date == today);
+
+        if (!alreadyVisitedToday)
+        {
+            var geoService = scope.ServiceProvider.GetRequiredService<IGeoLocationService>();
+            var (country, city) = await geoService.LookupAsync(ip);
+
+            db.PageViews.Add(new Portfolio.Models.PageView
+            {
+                Path = path,
+                IpAddress = ip,
+                Country = country,
+                City = city,
+                ViewedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+        }
+    }
+
+    await next();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

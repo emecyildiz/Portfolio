@@ -253,4 +253,25 @@ public class HomelabController : AdminBaseController
 
         return Json(projects);
     }
+
+    [HttpGet]
+    public IActionResult GetIconLibrary()
+    {
+        var iconFolder = Path.Combine(_env.WebRootPath, "icons", "network");
+
+        if (!Directory.Exists(iconFolder))
+            return Json(new List<object>());
+
+        var icons = Directory.GetFiles(iconFolder)
+            .Where(f => new[] { ".svg", ".png", ".webp" }.Contains(Path.GetExtension(f).ToLower()))
+            .Select(f => new
+            {
+                name = Path.GetFileNameWithoutExtension(f),
+                url = "/icons/network/" + Path.GetFileName(f)
+            })
+            .OrderBy(i => i.name)
+            .ToList();
+
+        return Json(icons);
+    }
 }

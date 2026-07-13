@@ -95,7 +95,8 @@
 </head>
 
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
-
+    <!-- Sayfa geçiş yükleme çubuğu -->
+    <div id="pageLoadBar" class="fixed top-0 left-0 h-0.5 bg-blue-500 z-[100] transition-all duration-300" style="width: 0%;"></div>
     <!-- Navbar -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800/50">
         <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -281,6 +282,31 @@
         document.getElementById('mobileMenuBtn').addEventListener('click', function() {
             document.getElementById('mobileMenu').classList.toggle('hidden');
         });
+    </script>
+    <script>
+        // Basit sayfa geçiş yükleme çubuğu
+        (function() {
+            const bar = document.getElementById('pageLoadBar');
+
+            // Link tıklanınca çubuğu başlat
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link && link.href && link.target !== '_blank' &&
+                    link.href.startsWith(window.location.origin) &&
+                    !link.href.includes('#')) {
+                    bar.style.width = '30%';
+                    setTimeout(() => bar.style.width = '70%', 150);
+                }
+            });
+
+            // Sayfa yüklenince çubuğu tamamla ve gizle
+            window.addEventListener('load', function() {
+                bar.style.width = '100%';
+                setTimeout(() => {
+                    bar.style.width = '0%';
+                }, 300);
+            });
+        })();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

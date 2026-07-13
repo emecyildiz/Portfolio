@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Portfolio.Data;
@@ -11,9 +12,11 @@ using Portfolio.Data;
 namespace Portfolio.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260713001309_AddPageViews")]
+    partial class AddPageViews
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -763,15 +766,6 @@ namespace Portfolio.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("City")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .HasColumnType("text");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("text");
 
                     b.Property<string>("Path")
                         .IsRequired()

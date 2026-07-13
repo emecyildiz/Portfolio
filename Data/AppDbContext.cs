@@ -26,6 +26,7 @@ namespace Portfolio.Data
         public DbSet<Page> Pages => Set<Page>();
         public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
         public DbSet<Certificate> Certificates => Set<Certificate>();
+        public DbSet<PageView> PageViews => Set<PageView>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -223,7 +224,10 @@ namespace Portfolio.Data
             modelBuilder.Entity<ContactMessage>()
                 .Property(c => c.IpAddress).HasMaxLength(45); // IPv6 max
 
-            
+            modelBuilder.Entity<PageView>()
+                .HasIndex(p => p.ViewedAt)
+                .HasDatabaseName("idx_pageviews_date");
+
         }
 
         // ── SaveChanges Override — AuditLog otomasyonu ────────────────────────
