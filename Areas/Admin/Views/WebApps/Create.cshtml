@@ -1,138 +1,100 @@
-﻿@model Portfolio.Models.Project
+@model Portfolio.Models.Project
 @{
     ViewData["Title"] = "New Web Application";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">New Web Application</h2>
-</div>
+@section Head {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css" />
+}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Software archive</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">New web application</h2>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Document a software project, its architecture, team context and public endpoints.</p>
+    </div>
+    <a href="@Url.Action("Index", "WebApps", new { area = "Admin" })" class="focus-ring w-fit border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to web apps</a>
+</div>
 
 <form method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
 
-    <div class="grid grid-cols-3 gap-6">
-        <div class="col-span-2 space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Content</h3>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Title</label>
-                    <input asp-for="Title"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_21rem]">
+        <div class="space-y-6">
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="webapp-content-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Project narrative</p>
+                <h3 id="webapp-content-heading" class="mt-2 text-lg font-semibold text-white">Title, summary and body</h3>
+                <div class="mt-6 space-y-5">
+                    <div><label asp-for="Title" class="admin-label">Title</label><input asp-for="Title" class="admin-input" autocomplete="off" /><p class="admin-hint">The public slug is generated from this title.</p><span asp-validation-for="Title"></span></div>
+                    <div><label asp-for="Summary" class="admin-label">Summary</label><textarea asp-for="Summary" rows="3" class="admin-textarea" placeholder="A concise overview for project cards and search results."></textarea><span asp-validation-for="Summary"></span></div>
+                    <div><label asp-for="Content" class="admin-label">Content <span class="font-normal text-slate-600">(Markdown)</span></label><textarea asp-for="Content" id="content-editor"></textarea><p class="admin-hint">Local draft recovery is enabled in this browser while creating the application.</p><span asp-validation-for="Content"></span></div>
                 </div>
+            </section>
 
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
-                    <textarea asp-for="Summary" rows="2"
-                              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
-                    <textarea asp-for="Content" id="content-editor"></textarea>
-                </div>
-            </div>
-
-            <!-- Web application-specific fields -->
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Technical Details</h3>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Tech Stack</label>
-                    <input name="TechStack"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="React, FastAPI, PostgreSQL (comma-separated)" />
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Team Size</label>
-                        <input name="TeamSize" type="number" min="1"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                               placeholder="3" />
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="webapp-technical-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Implementation profile</p>
+                <h3 id="webapp-technical-heading" class="mt-2 text-lg font-semibold text-white">Technical details</h3>
+                <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label for="TechStack" class="admin-label">Technology stack</label>
+                        <input name="TechStack" id="TechStack" class="admin-input" autocomplete="off" aria-describedby="tech-stack-help" placeholder="React, ASP.NET Core, PostgreSQL" />
+                        <p id="tech-stack-help" class="admin-hint">Separate technologies with commas.</p>
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">My Role</label>
-                        <input name="MyRole"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                               placeholder="Backend Developer" />
+                        <label for="TeamSize" class="admin-label">Team size <span class="font-normal text-slate-600">(optional)</span></label>
+                        <input name="TeamSize" id="TeamSize" type="number" min="1" class="admin-input" inputmode="numeric" placeholder="3" />
                     </div>
+                    <div>
+                        <label for="MyRole" class="admin-label">My role</label>
+                        <input name="MyRole" id="MyRole" class="admin-input" autocomplete="off" placeholder="Backend developer" />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="Subdomain" class="admin-label">Subdomain <span class="font-normal text-slate-600">(optional)</span></label>
+                        <input name="Subdomain" id="Subdomain" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}" title="Enter a hostname without a scheme or path." aria-describedby="subdomain-help" placeholder="app.example.com" />
+                        <p id="subdomain-help" class="admin-hint">Hostname only; do not include https:// or a path.</p>
+                    </div>
+                    <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4 sm:col-span-2">
+                        <input name="IsSchoolProject" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" />
+                        <span><span class="block text-sm font-medium text-slate-300">Academic project</span><span class="mt-1 block text-xs leading-5 text-slate-600">Identifies work completed in an academic context.</span></span>
+                    </label>
                 </div>
+            </section>
 
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Subdomain</label>
-                    <input name="Subdomain"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="muhasebe.siteadi.com" />
-                </div>
-
-                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input name="IsSchoolProject" type="checkbox" class="w-4 h-4 rounded" />
-                    Academic project
-                </label>
-            </div>
-
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Images</h3>
-                <input name="Images" type="file" multiple accept="image/*"
-                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
-            </div>
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="webapp-media-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Media upload</p>
+                <h3 id="webapp-media-heading" class="mt-2 text-lg font-semibold text-white">Application images</h3>
+                <label for="webappImages" class="admin-label mt-5">Image files <span class="font-normal text-slate-600">(optional)</span></label>
+                <input name="Images" id="webappImages" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="webapp-images-help" class="focus-ring w-full border border-line bg-ink p-3 text-sm text-slate-400 file:mr-3 file:border-0 file:bg-raised file:px-3 file:py-2 file:text-xs file:font-medium file:text-slate-300 hover:file:bg-line" />
+                <p id="webapp-images-help" class="admin-hint">JPEG, PNG, WebP or GIF; maximum 10 MB per file. The first valid image becomes the cover.</p>
+            </section>
         </div>
 
-        <div class="space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Status</label>
-                    <select asp-for="Status" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </select>
+        <aside class="h-fit space-y-4 xl:sticky xl:top-6" aria-labelledby="webapp-settings-heading">
+            <section class="admin-surface p-5 sm:p-6">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Publishing</p>
+                <h3 id="webapp-settings-heading" class="mt-2 text-lg font-semibold text-white">Application settings</h3>
+                <div class="mt-6 space-y-5">
+                    <div><label asp-for="Status" class="admin-label">Status</label><select asp-for="Status" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()" class="admin-select"></select><span asp-validation-for="Status"></span></div>
+                    <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4"><input asp-for="IsFeatured" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" /><span><span class="block text-sm font-medium text-slate-300">Feature on homepage</span><span class="mt-1 block text-xs leading-5 text-slate-600">Give this application additional visibility.</span></span></label>
+                    <div><label asp-for="GithubUrl" class="admin-label">GitHub URL <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="GithubUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." placeholder="https://github.com/..." /><span asp-validation-for="GithubUrl"></span></div>
+                    <div><label asp-for="LiveDemoUrl" class="admin-label">Live demo URL <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="LiveDemoUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." placeholder="https://..." /><span asp-validation-for="LiveDemoUrl"></span></div>
                 </div>
-
-                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Feature on the homepage
-                </label>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">GitHub</label>
-                    <input asp-for="GithubUrl"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="https://github.com/..." />
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Live Demo</label>
-                    <input asp-for="LiveDemoUrl"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="https://..." />
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Save
-                </button>
-                <a href="@Url.Action("Index", "WebApps", new { area = "Admin" })"
-                   class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    Cancel
-                </a>
-            </div>
-        </div>
+            </section>
+            <div class="flex flex-col gap-2"><button type="submit" class="focus-ring w-full bg-signal px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white">Create application</button><a href="@Url.Action("Index", "WebApps", new { area = "Admin" })" class="focus-ring w-full border border-line px-5 py-3 text-center text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Cancel</a></div>
+        </aside>
     </div>
 </form>
 
-<script>
-    new EasyMDE({
-        element: document.getElementById('content-editor'),
-        spellChecker: false,
-        autosave: { enabled: true, uniqueId: 'webapps-create' },
-        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
-    });
-</script>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <script>
+        new EasyMDE({
+            element: document.getElementById('content-editor'),
+            spellChecker: false,
+            autosave: { enabled: true, uniqueId: 'webapps-create' },
+            toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
+        });
+    </script>
+}

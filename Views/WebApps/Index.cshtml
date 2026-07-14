@@ -26,6 +26,8 @@
                 var extra = new Portfolio.Models.ExtraData.WebAppExtraData();
                 if (!string.IsNullOrEmpty(project.ExtraData))
                     extra = System.Text.Json.JsonSerializer.Deserialize<Portfolio.Models.ExtraData.WebAppExtraData>(project.ExtraData) ?? extra;
+                var liveDemoUrl = project.LiveDemoUrl?.Trim();
+                var hasSafeLiveDemoUrl = Uri.TryCreate(liveDemoUrl, UriKind.Absolute, out var liveDemoUri) && liveDemoUri.Scheme == Uri.UriSchemeHttps;
 
                 <a href="/webapps/@project.Slug" class="focus-ring card-lift surface group grid overflow-hidden rounded-2xl hover:border-cyan/30 sm:grid-cols-[11rem_1fr]">
                     <div class="relative min-h-48 overflow-hidden border-b border-white/[0.07] bg-raised sm:border-b-0 sm:border-r">
@@ -40,7 +42,7 @@
                     </div>
                     <div class="flex min-w-0 flex-col p-5 sm:p-6">
                         <div class="flex flex-wrap items-center gap-2">
-                            @if (!string.IsNullOrEmpty(project.LiveDemoUrl))
+                            @if (hasSafeLiveDemoUrl)
                             {
                                 <span class="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-signal"><span class="h-1.5 w-1.5 rounded-full bg-signal"></span>Live</span>
                             }

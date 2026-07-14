@@ -5,6 +5,12 @@
     var extra = ViewBag.Extra as Portfolio.Models.ExtraData.WebAppExtraData ?? new Portfolio.Models.ExtraData.WebAppExtraData();
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
     var related = ViewBag.Related as List<Portfolio.Models.Project> ?? new();
+    var githubUrl = Model.GithubUrl?.Trim();
+    var liveDemoUrl = Model.LiveDemoUrl?.Trim();
+    var subdomain = extra.Subdomain?.Trim();
+    var hasSafeGithubUrl = Uri.TryCreate(githubUrl, UriKind.Absolute, out var githubUri) && githubUri.Scheme == Uri.UriSchemeHttps;
+    var hasSafeLiveDemoUrl = Uri.TryCreate(liveDemoUrl, UriKind.Absolute, out var liveDemoUri) && liveDemoUri.Scheme == Uri.UriSchemeHttps;
+    var hasSafeSubdomain = !string.IsNullOrEmpty(subdomain) && Uri.CheckHostName(subdomain) == UriHostNameType.Dns;
 }
 
 <article class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
@@ -12,7 +18,7 @@
 
     <header class="mt-10 grid gap-8 border-b border-white/[0.07] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
         <div><p class="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan">Software system record</p><h1 class="mt-5 max-w-5xl text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl">@Model.Title</h1><p class="mt-6 max-w-3xl text-lg leading-8 text-slate-400">@Model.Summary</p><div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600"><span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "Undated")</span><span>@Model.ReadingTimeMinutes min read</span><span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span></div></div>
-        <div class="flex flex-wrap gap-2 lg:max-w-64 lg:justify-end">@if (!string.IsNullOrEmpty(Model.GithubUrl)){<a href="@Model.GithubUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-white/10 px-4 py-2.5 text-xs text-slate-300 transition hover:border-cyan/30 hover:text-white">GitHub ↗</a>}@if (!string.IsNullOrEmpty(Model.LiveDemoUrl)){<a href="@Model.LiveDemoUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md bg-signal px-4 py-2.5 text-xs font-semibold text-ink transition hover:bg-white">Live demo ↗</a>}@if (!string.IsNullOrEmpty(extra.Subdomain)){<a href="https://@extra.Subdomain" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-cyan/20 bg-cyan/[0.05] px-4 py-2.5 text-xs text-cyan transition hover:border-cyan/40">@extra.Subdomain ↗</a>}</div>
+        <div class="flex flex-wrap gap-2 lg:max-w-64 lg:justify-end">@if (hasSafeGithubUrl){<a href="@githubUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-white/10 px-4 py-2.5 text-xs text-slate-300 transition hover:border-cyan/30 hover:text-white">GitHub ↗</a>}@if (hasSafeLiveDemoUrl){<a href="@liveDemoUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md bg-signal px-4 py-2.5 text-xs font-semibold text-ink transition hover:bg-white">Live demo ↗</a>}@if (hasSafeSubdomain){<a href="https://@subdomain" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-cyan/20 bg-cyan/[0.05] px-4 py-2.5 text-xs text-cyan transition hover:border-cyan/40">@subdomain ↗</a>}</div>
     </header>
 
     @if (!string.IsNullOrEmpty(Model.CoverImageUrl)){<figure class="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-panel"><img src="@Model.CoverImageUrl" alt="@Model.Title" class="max-h-[38rem] w-full object-cover" /></figure>}
