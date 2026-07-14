@@ -1,5 +1,6 @@
-﻿using System.Text.Json;
-
+using MaxMind.Db;
+using MaxMind.GeoIP2;
+using MaxMind.GeoIP2.Exceptions;
 using System.Net;
 using System.Net.Sockets;
 
@@ -12,55 +13,106 @@ public interface IGeoLocationService
         CancellationToken cancellationToken = default);
 }
 
-public class GeoLocationService : IGeoLocationService
+public sealed class GeoLocationService : IGeoLocationService, IDisposable
 {
-    private readonly HttpClient _http;
+    private readonly ILogger<GeoLocationService> _logger;
+    private readonly DatabaseReader? _reader;
 
-    public GeoLocationService(HttpClient http)
+    public GeoLocationService(
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment,
+        ILogger<GeoLocationService> logger)
     {
-        _http = http;
-    }
+        _logger = logger;
 
-    public async Task<(string? Country, string? City)> LookupAsync(
-        string ip,
-        CancellationToken cancellationToken = default)
-    {
-        // Never send local or private addresses to an external provider.
-        if (!IPAddress.TryParse(ip, out var address) || IsPrivateOrLocal(address))
+        var configuredPath = configuration["GeoLocation:DatabasePath"];
+        if (string.IsNullOrWhiteSpace(configuredPath))
         {
-            return (null, null);
+            _logger.LogWarning(
+                "Local GeoIP lookup is disabled because GeoLocation:DatabasePath is not configured.");
+            return;
+        }
+
+        var databasePath = Path.IsPathRooted(configuredPath)
+            ? configuredPath
+            : Path.Combine(hostEnvironment.ContentRootPath, configuredPath);
+        databasePath = Path.GetFullPath(databasePath);
+
+        if (!File.Exists(databasePath))
+        {
+            _logger.LogWarning(
+                "Local GeoIP database was not found at {DatabasePath}. Location fields will remain empty.",
+                databasePath);
+            return;
         }
 
         try
         {
-            // Replace this HTTP-only free provider before production deployment.
-            using var response = await _http.GetAsync(
-                $"http://ip-api.com/json/{Uri.EscapeDataString(ip)}?fields=status,country,city",
-                cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var json = await JsonDocument.ParseAsync(
-                responseStream,
-                cancellationToken: cancellationToken);
-
-            if (json.RootElement.GetProperty("status").GetString() == "success")
-            {
-                var country = json.RootElement.TryGetProperty("country", out var c) ? c.GetString() : null;
-                var city = json.RootElement.TryGetProperty("city", out var ci) ? ci.GetString() : null;
-                return (country, city);
-            }
+            _reader = new DatabaseReader(databasePath);
+            _logger.LogInformation("Local GeoIP database loaded successfully.");
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (InvalidDatabaseException exception)
         {
-            throw;
+            _logger.LogError(
+                exception,
+                "The local GeoIP database is invalid. Location fields will remain empty.");
         }
-        catch
+        catch (IOException exception)
         {
-            // A geolocation failure must never break the public page.
+            _logger.LogError(
+                exception,
+                "The local GeoIP database could not be opened. Location fields will remain empty.");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "Local GeoIP initialization failed. Location fields will remain empty.");
+        }
+    }
+
+    public Task<(string? Country, string? City)> LookupAsync(
+        string ip,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (_reader is null ||
+            !IPAddress.TryParse(ip, out var address) ||
+            IsPrivateOrLocal(address))
+        {
+            return Task.FromResult<(string? Country, string? City)>((null, null));
         }
 
-        return (null, null);
+        try
+        {
+            var response = _reader.City(address);
+            return Task.FromResult<(string? Country, string? City)>(
+                (response.Country.Name, response.City.Name));
+        }
+        catch (AddressNotFoundException)
+        {
+            return Task.FromResult<(string? Country, string? City)>((null, null));
+        }
+        catch (InvalidDatabaseException exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "The local GeoIP database could not complete a lookup.");
+            return Task.FromResult<(string? Country, string? City)>((null, null));
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "Local GeoIP lookup failed. Location fields will remain empty.");
+            return Task.FromResult<(string? Country, string? City)>((null, null));
+        }
+    }
+
+    public void Dispose()
+    {
+        _reader?.Dispose();
     }
 
     private static bool IsPrivateOrLocal(IPAddress address)

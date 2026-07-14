@@ -36,6 +36,7 @@ services:
     volumes:
       - uploads:/app/wwwroot/uploads
       - dataprotection:/app/dataprotection-keys
+      - ./geoip:/app/geoip:ro
     restart: unless-stopped
 
 volumes:

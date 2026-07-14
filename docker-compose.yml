@@ -36,6 +36,7 @@ services:
       # wwwroot/uploads klasörü container dışına çıkar — container silinse bile görseller kalır
       - uploads:/app/wwwroot/uploads
       - dataprotection:/app/dataprotection-keys
+      - ./geoip:/app/geoip:ro
 
 volumes:
   pgdata:

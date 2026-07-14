@@ -117,10 +117,7 @@ builder.Services.AddScoped<IViewCountService, ViewCountService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
-builder.Services.AddHttpClient<IGeoLocationService, GeoLocationService>(client =>
-{
-    client.Timeout = TimeSpan.FromSeconds(3);
-});
+builder.Services.AddSingleton<IGeoLocationService, GeoLocationService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"));
@@ -136,6 +133,7 @@ if (app.Environment.IsProduction())
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    _ = scope.ServiceProvider.GetRequiredService<IGeoLocationService>();
     db.Database.Migrate();
 
     // Seed the initial admin only when explicit credentials are configured.
