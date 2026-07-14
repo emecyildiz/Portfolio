@@ -5,203 +5,215 @@
     var hardwareString = ViewBag.HardwareString as string ?? "";
     var softwareString = ViewBag.SoftwareString as string ?? "";
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new List<Portfolio.Models.Media>();
+    var isPublic = Model.Status == Portfolio.Models.Enums.VisibilityStatus.Public;
 }
 
-<div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Edit Homelab Post</h2>
-    <p class="text-gray-500 mt-1">/@Model.Slug</p>
-</div>
+@section Head {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css" />
+}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-teal-300">Infrastructure archive</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Edit homelab post</h2>
+        <p class="mt-2 font-mono text-[11px] text-slate-600">/homelab/@Model.Slug</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+        @if (isPublic)
+        {
+            <a href="/homelab/@Model.Slug" target="_blank" rel="noopener noreferrer" class="focus-ring border border-teal-300/20 px-4 py-2.5 text-sm text-teal-200 transition hover:bg-teal-300/10">Preview</a>
+        }
+        <a href="@Url.Action("Index", "Homelab", new { area = "Admin" })" class="focus-ring border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to homelab</a>
+    </div>
+</div>
 
 <form method="post" id="mainForm" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
     <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly"></div>
 
-    <div class="grid grid-cols-3 gap-6">
-        <div class="col-span-2 space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Content</h3>
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_21rem]">
+        <div class="space-y-6">
+            <section class="admin-surface p-5 sm:p-6">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Lab narrative</p>
+                <h3 class="mt-2 text-lg font-semibold text-white">Title, summary and documentation</h3>
 
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Title</label>
-                    <input asp-for="Title"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                <div class="mt-6 space-y-5">
+                    <div>
+                        <label asp-for="Title" class="admin-label">Title</label>
+                        <input asp-for="Title" class="admin-input" autocomplete="off" />
+                        <p class="admin-hint">Changing the title also updates the public slug.</p>
+                        <span asp-validation-for="Title"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Summary" class="admin-label">Summary</label>
+                        <textarea asp-for="Summary" rows="3" class="admin-textarea"></textarea>
+                        <span asp-validation-for="Summary"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Content" class="admin-label">Content <span class="font-normal text-slate-600">(Markdown)</span></label>
+                        <textarea asp-for="Content" id="content-editor"></textarea>
+                        <span asp-validation-for="Content"></span>
+                    </div>
                 </div>
+            </section>
 
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
-                    <textarea asp-for="Summary" rows="2"
-                              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
-                </div>
+            <section class="admin-surface p-5 sm:p-6">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">System specification</p>
+                <h3 class="mt-2 text-lg font-semibold text-white">Technical details</h3>
 
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
-                    <textarea asp-for="Content" id="content-editor"></textarea>
-                </div>
-            </div>
-
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Technical Details</h3>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Topic</label>
+                <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                    <label asp-for="Topic" class="admin-label">Topic</label>
                     <select asp-for="Topic"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.HomelabTopic>()"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                            class="admin-select">
                     </select>
+                    <span asp-validation-for="Topic"></span>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Hardware</label>
-                    <input name="HardwareUsed" value="@hardwareString"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    <label for="HardwareUsed" class="admin-label">Hardware <span class="font-normal text-slate-600">(optional)</span></label>
+                    <input name="HardwareUsed" id="HardwareUsed" value="@hardwareString" class="admin-input" autocomplete="off" />
+                    <p class="admin-hint">Separate items with commas.</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Software</label>
-                    <input name="SoftwareUsed" value="@softwareString"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    <label for="SoftwareUsed" class="admin-label">Software <span class="font-normal text-slate-600">(optional)</span></label>
+                    <input name="SoftwareUsed" id="SoftwareUsed" value="@softwareString" class="admin-input" autocomplete="off" />
+                    <p class="admin-hint">Separate items with commas.</p>
                 </div>
 
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Network Topology Diagram URL</label>
-                    <input asp-for="NetworkDiagramUrl"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                <div class="sm:col-span-2">
+                    <label asp-for="NetworkDiagramUrl" class="admin-label">Network diagram path <span class="font-normal text-slate-600">(optional)</span></label>
+                    <input asp-for="NetworkDiagramUrl" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:/(?!/).+|https://.+)" title="Use a root-relative path or an HTTPS URL." />
+                    <span asp-validation-for="NetworkDiagramUrl"></span>
                 </div>
-                <!-- Interactive network map builder -->
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="border border-line bg-ink/40 p-4 sm:col-span-2 sm:p-5">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h3 class="text-sm font-medium text-gray-400">Interactive Network Map</h3>
-                            <p class="text-xs text-gray-600 mt-1">Build a Packet Tracer-style map by adding devices and connections</p>
+                            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-teal-300">Topology builder</p>
+                            <h4 class="mt-2 text-base font-semibold text-white">Interactive network map</h4>
+                            <p class="admin-hint">Add devices and connections, then drag nodes to save their public positions.</p>
                         </div>
                         <button type="button" onclick="addDevice()"
-                                class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition">
-                            + Add Device
+                                class="focus-ring w-fit border border-teal-300/20 px-3 py-2 text-xs text-teal-200 transition hover:bg-teal-300/10">
+                            Add device
                         </button>
                     </div>
 
                     <input type="hidden" name="NetworkTopologyJson" id="networkTopologyJson" />
 
-                    <!-- Device list -->
-                    <div id="devices-container" class="space-y-3 mb-6"></div>
+                    <div id="devices-container" class="mb-6 mt-5 space-y-3"></div>
 
-                    <!-- Connections -->
-                    <div class="border-t border-gray-800 pt-4">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Connections</h4>
+                    <div class="border-t border-line pt-5">
+                        <div class="mb-4 flex items-center justify-between gap-4">
+                            <h4 class="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">Connections</h4>
                             <button type="button" onclick="addConnection()"
-                                    class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
-                                + Add Connection
+                                    class="focus-ring border border-line px-3 py-2 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white">
+                                Add connection
                             </button>
                         </div>
                         <div id="connections-container" class="space-y-2"></div>
                     </div>
 
-                    <div class="border-t border-gray-800 pt-4 mt-6">
-                        <div class="flex items-center justify-between gap-4 mb-3">
+                    <div class="mt-6 border-t border-line pt-5">
+                        <div class="mb-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                             <div>
-                                <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Map Layout</h4>
-                                <p class="text-xs text-gray-600 mt-1">Drag devices to set their positions on the public map.</p>
+                                <h4 class="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">Map layout</h4>
+                                <p class="admin-hint">Drag devices to set their positions on the public map.</p>
                             </div>
                             <button type="button" onclick="resetTopologyLayout()"
-                                    class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
-                                Reset to Grid
+                                    class="focus-ring w-fit border border-line px-3 py-2 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white">
+                                Reset to grid
                             </button>
                         </div>
                         <div id="network-layout-editor"
-                             class="h-96 bg-gray-950 border border-gray-800 rounded-lg overflow-hidden"></div>
-                        <p id="network-layout-status" class="text-xs text-gray-600 mt-2"></p>
+                             class="h-96 overflow-hidden border border-line bg-ink"></div>
+                        <p id="network-layout-status" class="admin-hint"></p>
                     </div>
                 </div>
-            </div>
+                </div>
+            </section>
 
             @if (images.Any())
             {
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                    <h3 class="text-sm font-medium text-gray-400 mb-4">Existing Images</h3>
-                    <div class="grid grid-cols-3 gap-3">
-                        @foreach (var img in images)
+                <section class="admin-surface p-5 sm:p-6" aria-labelledby="homelab-existing-media-heading">
+                    <div class="flex items-end justify-between gap-4">
+                        <div><p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Lab gallery</p><h3 id="homelab-existing-media-heading" class="mt-2 text-lg font-semibold text-white">Existing images</h3></div>
+                        <span class="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">@images.Count files</span>
+                    </div>
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach (var image in images)
                         {
-                            <div class="relative group">
-                                <img src="@img.Url" alt="@img.AltText"
-                                     class="w-full h-32 object-cover rounded-lg @(img.IsCover ? "ring-2 ring-blue-500" : "")" />
-                                @if (img.IsCover)
-                                {
-                                    <span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">Cover</span>
-                                }
-                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center gap-2">
-                                    <form method="post" action="@Url.Action("SetCover", "Homelab", new { area = "Admin" })">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="mediaId" value="@img.Id" />
-                                        <input type="hidden" name="postId" value="@Model.Id" />
-                                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Set Cover</button>
-                                    </form>
-                                    <form method="post" action="@Url.Action("DeleteImage", "Homelab", new { area = "Admin" })">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="mediaId" value="@img.Id" />
-                                        <input type="hidden" name="postId" value="@Model.Id" />
-                                        <button type="submit" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Delete</button>
-                                    </form>
-                                </div>
-                            </div>
+                            <article class="overflow-hidden border @(image.IsCover ? "border-signal/35" : "border-line") bg-ink/50">
+                                <div class="relative"><img src="@image.Url" alt="@image.AltText" class="h-40 w-full object-cover" />@if (image.IsCover){<span class="absolute left-2 top-2 bg-signal px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-ink">Cover</span>}</div>
+                                <div class="flex items-center justify-end gap-2 p-3">@if (!image.IsCover){<button type="submit" form="homelab-cover-@image.Id" class="focus-ring border border-cyan/20 px-2.5 py-1.5 text-[10px] text-cyan transition hover:bg-cyan/10">Set cover</button>}<button type="submit" form="homelab-delete-@image.Id" class="focus-ring border border-rose-300/20 px-2.5 py-1.5 text-[10px] text-rose-300 transition hover:bg-rose-300/10">Delete</button></div>
+                            </article>
                         }
                     </div>
-                </div>
+                </section>
             }
 
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Add New Images</h3>
-                <input name="Images" type="file" multiple accept="image/*"
-                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
-            </div>
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="homelab-media-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Lab media</p><h3 id="homelab-media-heading" class="mt-2 text-lg font-semibold text-white">Add images</h3>
+                <label for="homelabImages" class="admin-label mt-5">Image files <span class="font-normal text-slate-600">(optional)</span></label>
+                <input name="Images" id="homelabImages" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="homelab-images-help" class="focus-ring w-full border border-line bg-ink p-3 text-sm text-slate-400 file:mr-3 file:border-0 file:bg-raised file:px-3 file:py-2 file:text-xs file:font-medium file:text-slate-300 hover:file:bg-line" />
+                <p id="homelab-images-help" class="admin-hint">JPEG, PNG, WebP or GIF; maximum 10 MB per file.</p>
+            </section>
         </div>
 
-        <div class="space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
+        <aside class="h-fit space-y-4 xl:sticky xl:top-6" aria-labelledby="homelab-settings-heading">
+            <section class="admin-surface p-5 sm:p-6">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Publishing</p>
+                <h3 id="homelab-settings-heading" class="mt-2 text-lg font-semibold text-white">Post settings</h3>
 
+                <div class="mt-6 space-y-5">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Status</label>
+                    <label asp-for="Status" class="admin-label">Status</label>
                     <select asp-for="Status"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                            class="admin-select">
                     </select>
+                    <span asp-validation-for="Status"></span>
                 </div>
 
-                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Feature on the homepage
+                <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4">
+                    <input asp-for="IsFeatured" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" />
+                    <span><span class="block text-sm font-medium text-slate-300">Feature on homepage</span><span class="mt-1 block text-xs leading-5 text-slate-600">Give this post additional visibility.</span></span>
                 </label>
-                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input asp-for="IsMainLab" type="checkbox" class="w-4 h-4 rounded" />
-                    🗺 Mark this as the "Main Lab" system map
+                <label class="flex cursor-pointer items-start gap-3 border border-teal-300/20 bg-teal-300/[0.04] p-4">
+                    <input asp-for="IsMainLab" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" />
+                    <span><span class="block text-sm font-medium text-teal-200">Main lab map</span><span class="mt-1 block text-xs leading-5 text-slate-600">Use this entry as the primary public homelab topology.</span></span>
                 </label>
 
-                <div class="pt-2 border-t border-gray-800 text-xs text-gray-600 space-y-1">
-                    <p>Created: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
-                    <p>Views: @Model.ViewCount</p>
-                    <p>Reading time: @Model.ReadingTimeMinutes min</p>
+                <div class="border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-slate-700">
+                    <p>Created @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
+                    <p class="mt-1">@Model.ViewCount views</p>
+                    <p class="mt-1">@Model.ReadingTimeMinutes min read</p>
                 </div>
-            </div>
+                </div>
+            </section>
 
             <div class="flex flex-col gap-2">
-                <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Update
-                </button>
-                <a href="@Url.Action("Index", "Homelab", new { area = "Admin" })"
-                   class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    Cancel
-                </a>
+                <button type="submit" class="focus-ring w-full bg-signal px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white">Save changes</button>
+                <a href="@Url.Action("Index", "Homelab", new { area = "Admin" })" class="focus-ring w-full border border-line px-5 py-3 text-center text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Cancel</a>
             </div>
-        </div>
+        </aside>
     </div>
 </form>
 
+@foreach (var image in images)
+{
+    <form id="homelab-cover-@image.Id" method="post" action="@Url.Action("SetCover", "Homelab", new { area = "Admin" })" class="hidden">@Html.AntiForgeryToken()<input type="hidden" name="mediaId" value="@image.Id" /><input type="hidden" name="postId" value="@Model.Id" /></form>
+    <form id="homelab-delete-@image.Id" method="post" action="@Url.Action("DeleteImage", "Homelab", new { area = "Admin" })" onsubmit="return confirm('Delete this image permanently?');" class="hidden">@Html.AntiForgeryToken()<input type="hidden" name="mediaId" value="@image.Id" /><input type="hidden" name="postId" value="@Model.Id" /></form>
+}
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <script>
     new EasyMDE({
         element: document.getElementById('content-editor'),
@@ -239,8 +251,10 @@
         if (!value) return '';
 
         try {
-            const url = new URL(String(value), window.location.origin);
-            return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+            const rawValue = String(value).trim();
+            const url = new URL(rawValue, window.location.origin);
+            const isRootRelative = rawValue.startsWith('/') && !rawValue.startsWith('//') && url.origin === window.location.origin;
+            return isRootRelative || url.protocol === 'https:' ? url.href : '';
         } catch {
             return '';
         }
@@ -458,36 +472,32 @@
             const isExpanded = d._expanded === true; // Expanded by default.
             const iconUrl = safeWebUrl(d.iconUrl);
             return `
-            <div class="bg-gray-800 rounded-lg p-4 space-y-3">
-                <div class="flex items-center justify-between cursor-pointer" onclick="toggleDeviceExpand(${d.id})">
-                    <div class="flex items-center gap-3">
+            <article class="space-y-4 border border-line bg-raised/50 p-4">
+                <div class="flex items-center justify-between gap-4">
+                    <button type="button" class="focus-ring flex min-w-0 flex-1 items-center gap-3 text-left" onclick="toggleDeviceExpand(${d.id})" aria-expanded="${isExpanded}">
                         ${iconUrl
-                            ? `<img src="${escapeHtml(iconUrl)}" class="w-8 h-8 object-contain bg-gray-700 rounded p-1" />`
-                            : `<div class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs">?</div>`
+                            ? `<img src="${escapeHtml(iconUrl)}" alt="" class="h-9 w-9 border border-line bg-ink object-contain p-1" />`
+                            : `<div class="grid h-9 w-9 place-items-center border border-line bg-ink font-mono text-xs text-slate-600">?</div>`
                         }
-                        <span class="text-sm text-gray-300 font-medium">${escapeHtml(d.label || 'Unnamed Device')}</span>
-                        <span class="text-xs text-gray-600">${escapeHtml(d.deviceType)}</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button type="button" onclick="event.stopPropagation(); removeDevice(${d.id})"
-                                class="text-xs text-red-400 hover:text-red-300">Remove</button>
-                        <svg class="w-4 h-4 text-gray-500 transition ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span class="min-w-0"><span class="block truncate text-sm font-medium text-slate-200">${escapeHtml(d.label || 'Unnamed Device')}</span><span class="block font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600">${escapeHtml(d.deviceType)}</span></span>
+                        <svg class="h-4 w-4 text-slate-500 transition ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
-                    </div>
+                    </button>
+                    <button type="button" onclick="removeDevice(${d.id})" class="focus-ring shrink-0 text-xs text-rose-300 transition hover:text-white">Remove</button>
                 </div>
 
                 ${isExpanded ? `
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid gap-3 sm:grid-cols-2">
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Device Name</label>
+                        <label class="admin-label">Device name</label>
                         <input value="${escapeHtml(d.label)}" oninput="updateDevice(${d.id}, 'label', this.value)"
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                               class="admin-input" />
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Device Type</label>
+                        <label class="admin-label">Device type</label>
                         <select onchange="updateDevice(${d.id}, 'deviceType', this.value)"
-                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                                class="admin-select">
                             ${['router','switch','firewall','server','pc','laptop','microcontroller','mobile','custom','sensor','audio','antenna'].map(t =>
                                 `<option value="${t}" ${d.deviceType === t ? 'selected' : ''}>${t}</option>`
                             ).join('')}
@@ -495,11 +505,11 @@
                     </div>
                 </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid gap-3 sm:grid-cols-2">
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Choose from Icon Library</label>
+                            <label class="admin-label">Choose from icon library</label>
                             <select onchange="selectLibraryIcon(${d.id}, this.value)"
-                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                                class="admin-select">
                                 <option value="">-- Select --</option>
                                 ${iconLibrary.map(icon =>
                     `               <option value="${escapeHtml(safeWebUrl(icon.url))}" ${d.iconUrl === icon.url ? 'selected' : ''}>${escapeHtml(icon.name)}</option>`
@@ -507,17 +517,17 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Or Upload a File</label>
+                            <label class="admin-label">Or upload a file</label>
                             <input type="file" accept="image/png,image/webp"
                                 onchange="uploadDeviceIcon(${d.id}, this)"
-                                class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-gray-700 file:text-gray-300 hover:file:bg-gray-600" />
+                                class="focus-ring w-full border border-line bg-ink p-2 text-xs text-slate-400 file:mr-3 file:border-0 file:bg-raised file:px-3 file:py-1.5 file:text-slate-300 hover:file:bg-line" />
                         </div>
                     </div>
 
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1">Link to an Electronics Project (optional)</label>
+                    <label class="admin-label">Link to an electronics project <span class="font-normal text-slate-600">(optional)</span></label>
                     <select onchange="updateDevice(${d.id}, 'linkedProjectSlug', this.value)"
-                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                            class="admin-select">
                         <option value="">Not linked — enter details manually</option>
                         ${electronicsProjects.map(p =>
                             `<option value="${escapeHtml(p.slug)}" ${d.linkedProjectSlug === p.slug ? 'selected' : ''}>${escapeHtml(p.title)}</option>`
@@ -526,47 +536,47 @@
                 </div>
 
                 ${!d.linkedProjectSlug ? `
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid gap-3 sm:grid-cols-2">
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Image URL (manual)</label>
+                        <label class="admin-label">Image URL <span class="font-normal text-slate-600">(manual)</span></label>
                         <input value="${escapeHtml(d.standaloneImageUrl || '')}" oninput="updateDevice(${d.id}, 'standaloneImageUrl', this.value)"
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                               class="admin-input" />
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Hardware Details (manual)</label>
+                        <label class="admin-label">Hardware details <span class="font-normal text-slate-600">(manual)</span></label>
                         <input value="${escapeHtml(d.standaloneHardware || '')}" oninput="updateDevice(${d.id}, 'standaloneHardware', this.value)"
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                               class="admin-input" />
                     </div>
                 </div>
                 ` : ''}
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid gap-3 sm:grid-cols-2">
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Short Description (shown on hover)</label>
+                        <label class="admin-label">Short description <span class="font-normal text-slate-600">(shown on hover)</span></label>
                         <input value="${escapeHtml(d.shortInfo || '')}" oninput="updateDevice(${d.id}, 'shortInfo', this.value)"
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                               class="admin-input" />
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">IP Address (optional)</label>
+                        <label class="admin-label">IP address <span class="font-normal text-slate-600">(optional)</span></label>
                         <input value="${escapeHtml(d.ipAddress || '')}" oninput="updateDevice(${d.id}, 'ipAddress', this.value)"
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                               class="admin-input font-mono" />
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1">Role in the Homelab</label>
+                    <label class="admin-label">Role in the homelab</label>
                     <input value="${escapeHtml(d.homelabRole || '')}" oninput="updateDevice(${d.id}, 'homelabRole', this.value)"
                            placeholder="What does it do on this network?"
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                           class="admin-input" />
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1">Additional Notes</label>
+                    <label class="admin-label">Additional notes</label>
                     <textarea oninput="updateDevice(${d.id}, 'homelabNotes', this.value)" rows="2"
-                              class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">${escapeHtml(d.homelabNotes || '')}</textarea>
+                              class="admin-textarea">${escapeHtml(d.homelabNotes || '')}</textarea>
                 </div>
                 ` : ''}
-            </div>
+            </article>
         `}).join('');
     }
 
@@ -607,32 +617,32 @@
         const container = document.getElementById('connections-container');
 
         if (devices.length < 2) {
-            container.innerHTML = '<p class="text-xs text-gray-600">Add at least two devices before creating a connection.</p>';
+            container.innerHTML = '<p class="text-xs text-slate-600">Add at least two devices before creating a connection.</p>';
             return;
         }
 
         container.innerHTML = connections.map((c, i) => `
-            <div class="bg-gray-800 rounded-lg p-3 flex items-center gap-2">
+            <div class="grid gap-2 border border-line bg-raised/50 p-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,8rem)_minmax(0,8rem)_auto] sm:items-center">
                 <select onchange="updateConnection(${i}, 'from', this.value)"
-                        class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
+                        class="admin-select text-xs">
                     ${devices.map(d => `<option value="${d.id}" ${c.from === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'Unnamed')}</option>`).join('')}
                 </select>
-                <span class="text-gray-600 text-xs">→</span>
+                <span class="hidden text-xs text-slate-600 sm:inline">→</span>
                 <select onchange="updateConnection(${i}, 'to', this.value)"
-                        class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
+                        class="admin-select text-xs">
                     ${devices.map(d => `<option value="${d.id}" ${c.to === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'Unnamed')}</option>`).join('')}
                 </select>
                 <select onchange="updateConnection(${i}, 'connectionType', this.value)"
-                        class="bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
+                        class="admin-select text-xs">
                     ${['ethernet','wifi','usb','power','other'].map(t =>
                         `<option value="${t}" ${c.connectionType === t ? 'selected' : ''}>${t}</option>`
                     ).join('')}
                 </select>
                 <input value="${escapeHtml(c.label || '')}" oninput="updateConnection(${i}, 'label', this.value)"
                        placeholder="Label (optional)"
-                       class="w-24 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500" />
+                       class="admin-input text-xs" />
                 <button type="button" onclick="removeConnection(${i})"
-                        class="text-xs text-red-400 hover:text-red-300 px-2">✕</button>
+                        class="focus-ring px-2 text-xs text-rose-300 transition hover:text-white" aria-label="Remove connection">Remove</button>
             </div>
         `).join('');
     }
@@ -645,3 +655,4 @@
         document.getElementById('networkTopologyJson').value = JSON.stringify(topology);
     });
 </script>
+}

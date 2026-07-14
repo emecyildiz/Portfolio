@@ -1,241 +1,161 @@
-﻿@model Portfolio.Models.TeamProject
+@model Portfolio.Models.TeamProject
 @{
     ViewData["Title"] = "Edit Team Project";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     var members = ViewBag.Members as List<Portfolio.Models.ExtraData.TeamMember> ?? new();
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
     var membersJson = System.Text.Json.JsonSerializer.Serialize(members);
+    var isPublic = Model.Status == Portfolio.Models.Enums.VisibilityStatus.Public;
 }
 
-<div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Edit Team Project</h2>
-    <p class="text-gray-500 mt-1">/@Model.Slug</p>
-</div>
+@section Head {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css" />
+}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-orange-300">Collaboration archive</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Edit team project</h2>
+        <p class="mt-2 font-mono text-[11px] text-slate-600">/team/@Model.Slug</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+        @if (isPublic)
+        {
+            <a href="/team/@Model.Slug" target="_blank" rel="noopener noreferrer" class="focus-ring border border-orange-300/20 px-4 py-2.5 text-sm text-orange-200 transition hover:bg-orange-300/10">Preview</a>
+        }
+        <a href="@Url.Action("Index", "Team", new { area = "Admin" })" class="focus-ring border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to team projects</a>
+    </div>
+</div>
 
 <form method="post" enctype="multipart/form-data" id="mainForm">
     @Html.AntiForgeryToken()
     <input asp-for="Id" type="hidden" />
     <input type="hidden" name="TeamMembersJson" id="teamMembersJson" />
+    <div asp-validation-summary="ModelOnly"></div>
 
-    <div class="grid grid-cols-3 gap-6">
-        <div class="col-span-2 space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Content</h3>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Title</label>
-                    <input asp-for="Title"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_21rem]">
+        <div class="space-y-6">
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="team-content-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Project narrative</p>
+                <h3 id="team-content-heading" class="mt-2 text-lg font-semibold text-white">Title, summary and story</h3>
+                <div class="mt-6 space-y-5">
+                    <div><label asp-for="Title" class="admin-label">Title</label><input asp-for="Title" class="admin-input" autocomplete="off" /><p class="admin-hint">Changing the title also updates the public slug.</p><span asp-validation-for="Title"></span></div>
+                    <div><label asp-for="Summary" class="admin-label">Summary</label><textarea asp-for="Summary" rows="3" class="admin-textarea"></textarea><span asp-validation-for="Summary"></span></div>
+                    <div><label asp-for="Content" class="admin-label">Content <span class="font-normal text-slate-600">(Markdown)</span></label><textarea asp-for="Content" id="content-editor"></textarea><span asp-validation-for="Content"></span></div>
                 </div>
+            </section>
 
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
-                    <textarea asp-for="Summary" rows="2"
-                              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="team-event-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Project context</p>
+                <h3 id="team-event-heading" class="mt-2 text-lg font-semibold text-white">Event and outcome</h3>
+                <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                    <div><label asp-for="EventName" class="admin-label">Event name <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="EventName" class="admin-input" autocomplete="off" /><span asp-validation-for="EventName"></span></div>
+                    <div><label asp-for="EventDate" class="admin-label">Event date <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="EventDate" type="date" class="admin-input" /><span asp-validation-for="EventDate"></span></div>
+                    <div><label asp-for="MyRole" class="admin-label">My role</label><input asp-for="MyRole" class="admin-input" autocomplete="off" /><span asp-validation-for="MyRole"></span></div>
+                    <div><label asp-for="Outcome" class="admin-label">Outcome or award <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="Outcome" class="admin-input" autocomplete="off" /><span asp-validation-for="Outcome"></span></div>
+                    <div class="sm:col-span-2"><label asp-for="EventUrl" class="admin-label">Event URL <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="EventUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." /><span asp-validation-for="EventUrl"></span></div>
                 </div>
+            </section>
 
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
-                    <textarea asp-for="Content" id="content-editor"></textarea>
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="team-members-heading">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div><p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Contributors</p><h3 id="team-members-heading" class="mt-2 text-lg font-semibold text-white">Team members</h3><p class="admin-hint">Only add profile links that the member has made public.</p></div>
+                    <button type="button" onclick="addMember()" class="focus-ring w-fit border border-orange-300/20 px-3 py-2 text-xs text-orange-200 transition hover:bg-orange-300/10">Add member</button>
                 </div>
-            </div>
-
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Event Information</h3>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Event Name</label>
-                        <input asp-for="EventName"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Event Date</label>
-                        <input asp-for="EventDate" type="date"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">My Role</label>
-                        <input asp-for="MyRole"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Outcome / Award</label>
-                        <input asp-for="Outcome"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Event URL</label>
-                    <input asp-for="EventUrl"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                </div>
-            </div>
-
-            <!-- Team members -->
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-medium text-gray-400">Team Members</h3>
-                    <button type="button" onclick="addMember()"
-                            class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
-                        + Add Member
-                    </button>
-                </div>
-                <div id="members-container" class="space-y-3"></div>
-            </div>
+                <div id="members-container" class="mt-5 space-y-3" aria-live="polite"></div>
+            </section>
 
             @if (images.Any())
             {
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                    <h3 class="text-sm font-medium text-gray-400 mb-4">Existing Images</h3>
-                    <div class="grid grid-cols-3 gap-3">
-                        @foreach (var img in images)
+                <section class="admin-surface p-5 sm:p-6" aria-labelledby="team-existing-media-heading">
+                    <div class="flex items-end justify-between gap-4"><div><p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Project gallery</p><h3 id="team-existing-media-heading" class="mt-2 text-lg font-semibold text-white">Existing images</h3></div><span class="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">@images.Count files</span></div>
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach (var image in images)
                         {
-                            <div class="relative group">
-                                <img src="@img.Url" alt="@img.AltText"
-                                     class="w-full h-32 object-cover rounded-lg @(img.IsCover ? "ring-2 ring-blue-500" : "")" />
-                                @if (img.IsCover)
-                                {
-                                    <span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">Cover</span>
-                                }
-                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center gap-2">
-                                    <form method="post" action="@Url.Action("SetCover", "Team", new { area = "Admin" })">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="mediaId" value="@img.Id" />
-                                        <input type="hidden" name="projectId" value="@Model.Id" />
-                                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Set Cover</button>
-                                    </form>
-                                    <form method="post" action="@Url.Action("DeleteImage", "Team", new { area = "Admin" })">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="mediaId" value="@img.Id" />
-                                        <input type="hidden" name="projectId" value="@Model.Id" />
-                                        <button type="submit" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Delete</button>
-                                    </form>
-                                </div>
-                            </div>
+                            <article class="overflow-hidden border @(image.IsCover ? "border-signal/35" : "border-line") bg-ink/50">
+                                <div class="relative"><img src="@image.Url" alt="@image.AltText" class="h-40 w-full object-cover" />@if (image.IsCover){<span class="absolute left-2 top-2 bg-signal px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-ink">Cover</span>}</div>
+                                <div class="flex items-center justify-end gap-2 p-3">@if (!image.IsCover){<button type="submit" form="team-cover-@image.Id" class="focus-ring border border-cyan/20 px-2.5 py-1.5 text-[10px] text-cyan transition hover:bg-cyan/10">Set cover</button>}<button type="submit" form="team-delete-@image.Id" class="focus-ring border border-rose-300/20 px-2.5 py-1.5 text-[10px] text-rose-300 transition hover:bg-rose-300/10">Delete</button></div>
+                            </article>
                         }
                     </div>
-                </div>
+                </section>
             }
 
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Add New Images</h3>
-                <input name="Images" type="file" multiple accept="image/*"
-                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
-            </div>
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="team-media-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Project media</p><h3 id="team-media-heading" class="mt-2 text-lg font-semibold text-white">Add images</h3>
+                <label for="teamImages" class="admin-label mt-5">Image files <span class="font-normal text-slate-600">(optional)</span></label>
+                <input name="Images" id="teamImages" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="team-images-help" class="focus-ring w-full border border-line bg-ink p-3 text-sm text-slate-400 file:mr-3 file:border-0 file:bg-raised file:px-3 file:py-2 file:text-xs file:font-medium file:text-slate-300 hover:file:bg-line" />
+                <p id="team-images-help" class="admin-hint">JPEG, PNG, WebP or GIF; maximum 10 MB per file.</p>
+            </section>
         </div>
 
-        <div class="space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Status</label>
-                    <select asp-for="Status"
-                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </select>
+        <aside class="h-fit space-y-4 xl:sticky xl:top-6" aria-labelledby="team-settings-heading">
+            <section class="admin-surface p-5 sm:p-6">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Publishing</p><h3 id="team-settings-heading" class="mt-2 text-lg font-semibold text-white">Project settings</h3>
+                <div class="mt-6 space-y-5">
+                    <div><label asp-for="Status" class="admin-label">Status</label><select asp-for="Status" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()" class="admin-select"></select><span asp-validation-for="Status"></span></div>
+                    <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4"><input asp-for="IsFeatured" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" /><span><span class="block text-sm font-medium text-slate-300">Feature on homepage</span><span class="mt-1 block text-xs leading-5 text-slate-600">Give this collaboration additional visibility.</span></span></label>
+                    <div><label asp-for="GithubUrl" class="admin-label">GitHub URL <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="GithubUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." /><span asp-validation-for="GithubUrl"></span></div>
+                    <div><label asp-for="LiveDemoUrl" class="admin-label">Live demo URL <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="LiveDemoUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." /><span asp-validation-for="LiveDemoUrl"></span></div>
+                    <div class="border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-slate-700"><p>Created @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p><p class="mt-1">@Model.ViewCount views</p></div>
                 </div>
-
-                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Feature on the homepage
-                </label>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">GitHub</label>
-                    <input asp-for="GithubUrl"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Live Demo</label>
-                    <input asp-for="LiveDemoUrl"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                </div>
-
-                <div class="pt-2 border-t border-gray-800 text-xs text-gray-600 space-y-1">
-                    <p>Created: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
-                    <p>Views: @Model.ViewCount</p>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Update
-                </button>
-                <a href="@Url.Action("Index", "Team", new { area = "Admin" })"
-                   class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    Cancel
-                </a>
-            </div>
-        </div>
+            </section>
+            <div class="flex flex-col gap-2"><button type="submit" class="focus-ring w-full bg-signal px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white">Save changes</button><a href="@Url.Action("Index", "Team", new { area = "Admin" })" class="focus-ring w-full border border-line px-5 py-3 text-center text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Cancel</a></div>
+        </aside>
     </div>
 </form>
 
-<script>
-    let members = @Html.Raw(membersJson);
-    const htmlEscapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+@foreach (var image in images)
+{
+    <form id="team-cover-@image.Id" method="post" action="@Url.Action("SetCover", "Team", new { area = "Admin" })" class="hidden">@Html.AntiForgeryToken()<input type="hidden" name="mediaId" value="@image.Id" /><input type="hidden" name="projectId" value="@Model.Id" /></form>
+    <form id="team-delete-@image.Id" method="post" action="@Url.Action("DeleteImage", "Team", new { area = "Admin" })" onsubmit="return confirm('Delete this image permanently?');" class="hidden">@Html.AntiForgeryToken()<input type="hidden" name="mediaId" value="@image.Id" /><input type="hidden" name="projectId" value="@Model.Id" /></form>
+}
 
-    function escapeHtml(value) {
-        return String(value ?? '').replace(/[&<>"']/g, character => htmlEscapeMap[character]);
-    }
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <script>
+        let members = @Html.Raw(membersJson);
+        const htmlEscapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
-    function addMember() {
-        members.push({ Name: '', Role: '', GithubUrl: '', LinkedinUrl: '' });
-        renderMembers();
-    }
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, character => htmlEscapeMap[character]);
+        }
 
-    function removeMember(index) {
-        members.splice(index, 1);
-        renderMembers();
-    }
+        function addMember() {
+            members.push({ Name: '', Role: '', GithubUrl: '', LinkedinUrl: '' });
+            renderMembers();
+        }
+
+        function removeMember(index) {
+            members.splice(index, 1);
+            renderMembers();
+        }
 
         function renderMembers() {
-        const container = document.getElementById('members-container');
-        container.innerHTML = members.map((m, i) => `
-            <div class="bg-gray-800 rounded-lg p-4 space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">Member ${i + 1}</span>
-                    <button type="button" onclick="removeMember(${i})"
-                            class="text-xs text-red-400 hover:text-red-300">Remove</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <input placeholder="Full Name" value="${escapeHtml(m.Name || '')}"
-                           oninput="members[${i}].Name = this.value"
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="Role" value="${escapeHtml(m.Role || '')}"
-                           oninput="members[${i}].Role = this.value"
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="GitHub URL" value="${escapeHtml(m.GithubUrl || '')}"
-                           oninput="members[${i}].GithubUrl = this.value"
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="LinkedIn URL" value="${escapeHtml(m.LinkedinUrl || '')}"
-                           oninput="members[${i}].LinkedinUrl = this.value"
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                </div>
-            </div>
-        `).join('');
-    }
+            const container = document.getElementById('members-container');
+            container.innerHTML = members.map((member, index) => `
+                <article class="border border-line bg-ink/50 p-4 sm:p-5">
+                    <div class="flex items-center justify-between gap-4"><span class="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600">Member ${index + 1}</span><button type="button" onclick="removeMember(${index})" class="focus-ring text-xs text-rose-300 transition hover:text-white">Remove</button></div>
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                        <div><label class="admin-label" for="member-name-${index}">Full name</label><input id="member-name-${index}" maxlength="200" value="${escapeHtml(member.Name || '')}" oninput="members[${index}].Name = this.value" class="admin-input" autocomplete="name" /></div>
+                        <div><label class="admin-label" for="member-role-${index}">Role</label><input id="member-role-${index}" maxlength="200" value="${escapeHtml(member.Role || '')}" oninput="members[${index}].Role = this.value" class="admin-input" autocomplete="off" /></div>
+                        <div><label class="admin-label" for="member-github-${index}">GitHub URL <span class="font-normal text-slate-600">(optional)</span></label><input id="member-github-${index}" type="url" maxlength="2048" pattern="https://.+" title="Use an HTTPS URL." value="${escapeHtml(member.GithubUrl || '')}" oninput="members[${index}].GithubUrl = this.value" class="admin-input" inputmode="url" autocomplete="url" /></div>
+                        <div><label class="admin-label" for="member-linkedin-${index}">LinkedIn URL <span class="font-normal text-slate-600">(optional)</span></label><input id="member-linkedin-${index}" type="url" maxlength="2048" pattern="https://.+" title="Use an HTTPS URL." value="${escapeHtml(member.LinkedinUrl || '')}" oninput="members[${index}].LinkedinUrl = this.value" class="admin-input" inputmode="url" autocomplete="url" /></div>
+                    </div>
+                </article>
+            `).join('');
+        }
 
-    // Render existing members when the page loads.
-    renderMembers();
+        renderMembers();
 
-    document.getElementById('mainForm').addEventListener('submit', function() {
-        document.getElementById('teamMembersJson').value = JSON.stringify(members);
-    });
+        document.getElementById('mainForm').addEventListener('submit', function() {
+            document.getElementById('teamMembersJson').value = JSON.stringify(members);
+        });
 
-    new EasyMDE({
-        element: document.getElementById('content-editor'),
-        spellChecker: false,
-        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
-    });
-</script>
+        new EasyMDE({
+            element: document.getElementById('content-editor'),
+            spellChecker: false,
+            toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
+        });
+    </script>
+}

@@ -1,194 +1,167 @@
-﻿@model Portfolio.Models.SecurityResearch
+@model Portfolio.Models.SecurityResearch
 @{
     ViewData["Title"] = "Edit Security Research";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     var toolsString = ViewBag.ToolsString as string ?? "";
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new List<Portfolio.Models.Media>();
+    var isPublic = Model.Status == Portfolio.Models.Enums.VisibilityStatus.Public
+        && Model.DisclosureStatus == Portfolio.Models.Enums.DisclosureStatus.PubliclyDisclosed;
 }
 
-<div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Edit Security Research</h2>
-    <p class="text-gray-500 mt-1">/@Model.Slug</p>
-</div>
+@section Head {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css" />
+}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-rose-300">Research archive</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Edit security research</h2>
+        <p class="mt-2 font-mono text-[11px] text-slate-600">/security/@Model.Slug</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+        @if (isPublic)
+        {
+            <a href="/security/@Model.Slug" target="_blank" rel="noopener noreferrer" class="focus-ring border border-rose-300/20 px-4 py-2.5 text-sm text-rose-200 transition hover:bg-rose-300/10">Preview</a>
+        }
+        <a href="@Url.Action("Index", "Security", new { area = "Admin" })" class="focus-ring border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to security</a>
+    </div>
+</div>
 
 <form method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
     <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly"></div>
 
-    <div class="grid grid-cols-3 gap-6">
-        <div class="col-span-2 space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Content</h3>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Title</label>
-                    <input asp-for="Title"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
-                    <textarea asp-for="Summary" rows="2"
-                              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
-                    <textarea asp-for="Content" id="content-editor"></textarea>
-                </div>
-            </div>
-
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Research Details</h3>
-
-                <div class="grid grid-cols-2 gap-4">
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_21rem]">
+        <div class="space-y-6">
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="security-content-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Research narrative</p>
+                <h3 id="security-content-heading" class="mt-2 text-lg font-semibold text-white">Title, summary and write-up</h3>
+                <div class="mt-6 space-y-5">
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Research Type</label>
-                        <select asp-for="ResearchType"
-                                asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.ResearchType>()"
-                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                        </select>
+                        <label asp-for="Title" class="admin-label">Title</label>
+                        <input asp-for="Title" class="admin-input" autocomplete="off" />
+                        <p class="admin-hint">Changing the title also updates the public slug.</p>
+                        <span asp-validation-for="Title"></span>
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Target Category</label>
-                        <input asp-for="TargetCategory"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                        <label asp-for="Summary" class="admin-label">Summary</label>
+                        <textarea asp-for="Summary" rows="3" class="admin-textarea"></textarea>
+                        <span asp-validation-for="Summary"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Content" class="admin-label">Content <span class="font-normal text-slate-600">(Markdown)</span></label>
+                        <textarea asp-for="Content" id="content-editor"></textarea>
+                        <span asp-validation-for="Content"></span>
                     </div>
                 </div>
+            </section>
 
-                <div class="grid grid-cols-2 gap-4">
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="security-details-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Classification</p>
+                <h3 id="security-details-heading" class="mt-2 text-lg font-semibold text-white">Research details</h3>
+                <div class="mt-6 grid gap-5 sm:grid-cols-2">
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">CVE ID</label>
-                        <input asp-for="CveId"
-                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-blue-500" />
+                        <label asp-for="ResearchType" class="admin-label">Research type</label>
+                        <select asp-for="ResearchType" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.ResearchType>()" class="admin-select"></select>
+                        <span asp-validation-for="ResearchType"></span>
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Severity</label>
-                        <select asp-for="SeverityLevel"
-                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                            <option value="">Select</option>
+                        <label asp-for="TargetCategory" class="admin-label">Target category <span class="font-normal text-slate-600">(optional)</span></label>
+                        <input asp-for="TargetCategory" class="admin-input" autocomplete="off" />
+                        <span asp-validation-for="TargetCategory"></span>
+                    </div>
+                    <div>
+                        <label asp-for="CveId" class="admin-label">CVE ID <span class="font-normal text-slate-600">(optional)</span></label>
+                        <input asp-for="CveId" class="admin-input font-mono" autocomplete="off" />
+                        <span asp-validation-for="CveId"></span>
+                    </div>
+                    <div>
+                        <label asp-for="SeverityLevel" class="admin-label">Severity</label>
+                        <select asp-for="SeverityLevel" class="admin-select">
+                            <option value="">Not assigned</option>
                             <option value="critical">Critical</option>
                             <option value="high">High</option>
                             <option value="medium">Medium</option>
                             <option value="low">Low</option>
-                            <option value="info">Info</option>
+                            <option value="info">Informational</option>
                         </select>
+                        <span asp-validation-for="SeverityLevel"></span>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="ToolsUsed" class="admin-label">Tools used <span class="font-normal text-slate-600">(optional)</span></label>
+                        <input name="ToolsUsed" id="ToolsUsed" value="@toolsString" class="admin-input" autocomplete="off" aria-describedby="security-tools-help" />
+                        <p id="security-tools-help" class="admin-hint">Separate tool names with commas.</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label asp-for="DisclosureStatus" class="admin-label">Disclosure status</label>
+                        <select asp-for="DisclosureStatus" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.DisclosureStatus>()" class="admin-select"></select>
+                        <span asp-validation-for="DisclosureStatus"></span>
                     </div>
                 </div>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Tools Used</label>
-                    <input name="ToolsUsed" value="@toolsString"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Disclosure Status</label>
-                    <select asp-for="DisclosureStatus"
-                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.DisclosureStatus>()"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </select>
-                </div>
-            </div>
+            </section>
 
             @if (images.Any())
             {
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                    <h3 class="text-sm font-medium text-gray-400 mb-4">Existing Images</h3>
-                    <div class="grid grid-cols-3 gap-3">
-                        @foreach (var img in images)
+                <section class="admin-surface p-5 sm:p-6" aria-labelledby="security-existing-media-heading">
+                    <div class="flex items-end justify-between gap-4">
+                        <div><p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Evidence library</p><h3 id="security-existing-media-heading" class="mt-2 text-lg font-semibold text-white">Existing images</h3></div>
+                        <span class="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">@images.Count files</span>
+                    </div>
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach (var image in images)
                         {
-                            <div class="relative group">
-                                <img src="@img.Url" alt="@img.AltText"
-                                     class="w-full h-32 object-cover rounded-lg @(img.IsCover ? "ring-2 ring-blue-500" : "")" />
-                                @if (img.IsCover)
-                                {
-                                    <span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">Cover</span>
-                                }
-                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center gap-2">
-                                    <form method="post" action="@Url.Action("SetCover", "Security", new { area = "Admin" })">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="mediaId" value="@img.Id" />
-                                        <input type="hidden" name="researchId" value="@Model.Id" />
-                                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Set Cover</button>
-                                    </form>
-                                    <form method="post" action="@Url.Action("DeleteImage", "Security", new { area = "Admin" })">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="mediaId" value="@img.Id" />
-                                        <input type="hidden" name="researchId" value="@Model.Id" />
-                                        <button type="submit" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Delete</button>
-                                    </form>
+                            <article class="overflow-hidden border @(image.IsCover ? "border-signal/35" : "border-line") bg-ink/50">
+                                <div class="relative"><img src="@image.Url" alt="@image.AltText" class="h-40 w-full object-cover" />@if (image.IsCover){<span class="absolute left-2 top-2 bg-signal px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-ink">Cover</span>}</div>
+                                <div class="flex items-center justify-end gap-2 p-3">
+                                    @if (!image.IsCover){<button type="submit" form="security-cover-@image.Id" class="focus-ring border border-cyan/20 px-2.5 py-1.5 text-[10px] text-cyan transition hover:bg-cyan/10">Set cover</button>}
+                                    <button type="submit" form="security-delete-@image.Id" class="focus-ring border border-rose-300/20 px-2.5 py-1.5 text-[10px] text-rose-300 transition hover:bg-rose-300/10">Delete</button>
                                 </div>
-                            </div>
+                            </article>
                         }
                     </div>
-                </div>
+                </section>
             }
 
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Add New Images</h3>
-                <input name="Images" type="file" multiple accept="image/*"
-                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
-            </div>
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="security-media-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Evidence upload</p>
+                <h3 id="security-media-heading" class="mt-2 text-lg font-semibold text-white">Add images</h3>
+                <label for="securityImages" class="admin-label mt-5">Image files <span class="font-normal text-slate-600">(optional)</span></label>
+                <input name="Images" id="securityImages" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" aria-describedby="security-images-help" class="focus-ring w-full border border-line bg-ink p-3 text-sm text-slate-400 file:mr-3 file:border-0 file:bg-raised file:px-3 file:py-2 file:text-xs file:font-medium file:text-slate-300 hover:file:bg-line" />
+                <p id="security-images-help" class="admin-hint">JPEG, PNG, WebP or GIF; maximum 10 MB per file.</p>
+            </section>
         </div>
 
-        <div class="space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Status</label>
-                    <select asp-for="Status"
-                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </select>
+        <aside class="h-fit space-y-4 xl:sticky xl:top-6" aria-labelledby="security-settings-heading">
+            <section class="admin-surface p-5 sm:p-6">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Publishing</p>
+                <h3 id="security-settings-heading" class="mt-2 text-lg font-semibold text-white">Research settings</h3>
+                <div class="mt-6 space-y-5">
+                    <div><label asp-for="Status" class="admin-label">Visibility</label><select asp-for="Status" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()" class="admin-select"></select><span asp-validation-for="Status"></span></div>
+                    <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4"><input asp-for="IsFeatured" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" /><span><span class="block text-sm font-medium text-slate-300">Feature on homepage</span><span class="mt-1 block text-xs leading-5 text-slate-600">Give this research additional visibility after disclosure.</span></span></label>
+                    <div><label asp-for="GithubUrl" class="admin-label">GitHub / PoC URL <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="GithubUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." /><span asp-validation-for="GithubUrl"></span></div>
+                    <div class="border border-rose-300/20 bg-rose-300/[0.05] p-4 text-xs leading-5 text-rose-200">Public visibility requires both a Public status and a Publicly Disclosed disclosure status.</div>
+                    <div class="border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-slate-700"><p>Created @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p><p class="mt-1">@Model.ViewCount views</p><p class="mt-1">@Model.ReadingTimeMinutes min read</p></div>
                 </div>
-
-                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Feature on the homepage
-                </label>
-
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">GitHub / PoC</label>
-                    <input asp-for="GithubUrl"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-                </div>
-
-                <div class="bg-red-900/20 border border-red-900/50 rounded-lg p-3">
-                    <p class="text-xs text-red-400">
-                        ⚠ Public visibility requires both Status=Public and DisclosureStatus=PubliclyDisclosed.
-                    </p>
-                </div>
-
-                <div class="pt-2 border-t border-gray-800 text-xs text-gray-600 space-y-1">
-                    <p>Created: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
-                    <p>Views: @Model.ViewCount</p>
-                    <p>Reading time: @Model.ReadingTimeMinutes min</p>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Update
-                </button>
-                <a href="@Url.Action("Index", "Security", new { area = "Admin" })"
-                   class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    Cancel
-                </a>
-            </div>
-        </div>
+            </section>
+            <div class="flex flex-col gap-2"><button type="submit" class="focus-ring w-full bg-signal px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white">Save changes</button><a href="@Url.Action("Index", "Security", new { area = "Admin" })" class="focus-ring w-full border border-line px-5 py-3 text-center text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Cancel</a></div>
+        </aside>
     </div>
 </form>
 
-<script>
-    new EasyMDE({
-        element: document.getElementById('content-editor'),
-        spellChecker: false,
-        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
-    });
-</script>
+@foreach (var image in images)
+{
+    <form id="security-cover-@image.Id" method="post" action="@Url.Action("SetCover", "Security", new { area = "Admin" })" class="hidden">@Html.AntiForgeryToken()<input type="hidden" name="mediaId" value="@image.Id" /><input type="hidden" name="researchId" value="@Model.Id" /></form>
+    <form id="security-delete-@image.Id" method="post" action="@Url.Action("DeleteImage", "Security", new { area = "Admin" })" onsubmit="return confirm('Delete this image permanently?');" class="hidden">@Html.AntiForgeryToken()<input type="hidden" name="mediaId" value="@image.Id" /><input type="hidden" name="researchId" value="@Model.Id" /></form>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <script>
+        new EasyMDE({
+            element: document.getElementById('content-editor'),
+            spellChecker: false,
+            toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
+        });
+    </script>
+}
