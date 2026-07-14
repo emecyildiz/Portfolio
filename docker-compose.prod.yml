@@ -23,7 +23,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5000:8080"          # Nginx bu porta bağlanır — sadece localhost'tan erişilir
+      - "127.0.0.1:5000:8080" # Nginx bu porta yalnızca localhost üzerinden bağlanır
     depends_on:
       db:
         condition: service_healthy
