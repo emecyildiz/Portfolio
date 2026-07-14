@@ -1,62 +1,80 @@
-﻿@model Portfolio.Models.Category
+@model Portfolio.Models.Category
 @{
     ViewData["Title"] = "New Category";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">New Category</h2>
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Content structure</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">New category</h2>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Create a section and define how it participates in navigation.</p>
+    </div>
+    <a href="@Url.Action("Index", "Category", new { area = "Admin" })" class="focus-ring w-fit border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to categories</a>
 </div>
 
-<div class="max-w-2xl bg-gray-900 border border-gray-800 rounded-xl p-6">
-    <form method="post">
-        @Html.AntiForgeryToken()
+<form method="post" class="max-w-5xl">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
 
-        <div class="mb-4">
-            <label class="block text-sm text-gray-400 mb-1">Name</label>
-            <input asp-for="Name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-            <span asp-validation-for="Name" class="text-red-400 text-xs mt-1"></span>
-        </div>
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,.7fr)]">
+        <section class="admin-surface p-5 sm:p-6" aria-labelledby="category-content-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Section identity</p>
+            <h3 id="category-content-heading" class="mt-2 text-lg font-semibold text-white">Core information</h3>
 
-        <div class="mb-4">
-            <label class="block text-sm text-gray-400 mb-1">Slug</label>
-            <input asp-for="Slug" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" placeholder="electronics" />
-            <span asp-validation-for="Slug" class="text-red-400 text-xs mt-1"></span>
-        </div>
+            <div class="mt-6 space-y-5">
+                <div>
+                    <label asp-for="Name" class="admin-label">Name</label>
+                    <input asp-for="Name" class="admin-input" autocomplete="off" placeholder="Electronics and microcontrollers" />
+                    <span asp-validation-for="Name"></span>
+                </div>
 
-        <div class="mb-4">
-            <label class="block text-sm text-gray-400 mb-1">Description</label>
-            <textarea asp-for="Description" rows="3"
-                      class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
-        </div>
+                <div>
+                    <label asp-for="Slug" class="admin-label">Slug</label>
+                    <input asp-for="Slug" class="admin-input font-mono" autocomplete="off" aria-describedby="category-slug-help" placeholder="electronics" />
+                    <p id="category-slug-help" class="admin-hint">Core section slugs also map to controllers. Change them only when the corresponding routes are updated.</p>
+                    <span asp-validation-for="Slug"></span>
+                </div>
 
-        <div class="mb-4">
-            <label class="block text-sm text-gray-400 mb-1">Icon Class</label>
-            <input asp-for="IconClass" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" placeholder="ti ti-cpu" />
-        </div>
+                <div>
+                    <label asp-for="Description" class="admin-label">Description</label>
+                    <textarea asp-for="Description" rows="5" class="admin-textarea" aria-describedby="category-description-help" placeholder="A concise description of the work collected in this section."></textarea>
+                    <p id="category-description-help" class="admin-hint">Used as supporting copy where the section is introduced.</p>
+                    <span asp-validation-for="Description"></span>
+                </div>
+            </div>
+        </section>
 
-        <div class="mb-4">
-            <label class="block text-sm text-gray-400 mb-1">Sort Order</label>
-            <input asp-for="SortOrder" type="number"
-                   class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-        </div>
+        <aside class="admin-surface h-fit p-5 sm:p-6" aria-labelledby="category-settings-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Configuration</p>
+            <h3 id="category-settings-heading" class="mt-2 text-lg font-semibold text-white">Display settings</h3>
 
-        <div class="mb-6 flex items-center gap-6">
-            <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                <input asp-for="IsPrivate" type="checkbox" class="w-4 h-4 rounded" />
-                Private (admin only)
-            </label>
-        </div>
+            <div class="mt-6 space-y-5">
+                <div>
+                    <label asp-for="IconClass" class="admin-label">Icon class</label>
+                    <input asp-for="IconClass" class="admin-input font-mono" autocomplete="off" placeholder="ti ti-cpu" />
+                    <span asp-validation-for="IconClass"></span>
+                </div>
 
-        <div class="flex gap-3">
-            <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-                Save
-            </button>
-            <a href="@Url.Action("Index", "Category", new { area = "Admin" })"
-               class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-6 py-2.5 rounded-lg transition">
-                Cancel
-            </a>
-        </div>
-    </form>
-</div>
+                <div>
+                    <label asp-for="SortOrder" class="admin-label">Sort order</label>
+                    <input asp-for="SortOrder" type="number" class="admin-input" inputmode="numeric" />
+                    <span asp-validation-for="SortOrder"></span>
+                </div>
+
+                <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4">
+                    <input asp-for="IsPrivate" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" />
+                    <span>
+                        <span class="block text-sm font-medium text-slate-300">Private section</span>
+                        <span class="mt-1 block text-xs leading-5 text-slate-600">Visible only in the admin console. Direct public requests return 404.</span>
+                    </span>
+                </label>
+            </div>
+        </aside>
+    </div>
+
+    <div class="mt-6 flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:justify-end">
+        <a href="@Url.Action("Index", "Category", new { area = "Admin" })" class="focus-ring border border-line px-5 py-2.5 text-center text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Cancel</a>
+        <button type="submit" class="focus-ring bg-signal px-6 py-2.5 text-sm font-semibold text-ink transition hover:bg-white">Create category</button>
+    </div>
+</form>

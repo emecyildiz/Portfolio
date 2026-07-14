@@ -35,11 +35,37 @@
         }
         .admin-surface { background: linear-gradient(145deg, rgba(18,25,35,.94), rgba(10,14,20,.94)); border: 1px solid rgba(148,163,184,.14); }
         .focus-ring:focus-visible { outline: 2px solid #B8F36B; outline-offset: 3px; }
+        .admin-label { display: block; margin-bottom: .5rem; color: #cbd5e1; font-size: .875rem; font-weight: 500; }
+        .admin-hint { margin-top: .5rem; color: #64748b; font-size: .75rem; line-height: 1.25rem; }
+        .admin-input, .admin-select, .admin-textarea {
+            width: 100%; border: 1px solid #202C38; border-radius: 0; background: #07090D;
+            padding: .75rem 1rem; color: #f8fafc; font-size: .875rem; transition: border-color .15s, box-shadow .15s;
+        }
+        .admin-textarea { resize: vertical; line-height: 1.6; }
+        .admin-input::placeholder, .admin-textarea::placeholder { color: #475569; }
+        .admin-input:hover, .admin-select:hover, .admin-textarea:hover { border-color: #475569; }
+        .admin-input:focus, .admin-select:focus, .admin-textarea:focus {
+            border-color: #B8F36B; outline: none; box-shadow: 0 0 0 3px rgba(184,243,107,.08);
+        }
+        .admin-checkbox { width: 1rem; height: 1rem; accent-color: #B8F36B; }
+        .field-validation-error { display: block; margin-top: .4rem; color: #fda4af; font-size: .75rem; }
+        .validation-summary-errors { margin-bottom: 1.5rem; border: 1px solid rgba(253,164,175,.22); background: rgba(253,164,175,.06); padding: 1rem; color: #fecdd3; font-size: .875rem; }
+        .validation-summary-errors ul { list-style: none; margin: 0; padding: 0; }
+        .validation-summary-valid { display: none; }
+        .editor-toolbar { border-color: #202C38 !important; border-radius: 0 !important; background: #0D1219; }
+        .editor-toolbar button { color: #94a3b8 !important; }
+        .editor-toolbar button.active, .editor-toolbar button:hover { border-color: #334155 !important; background: #121923 !important; color: #B8F36B !important; }
+        .editor-toolbar i.separator { border-color: #202C38 !important; }
+        .CodeMirror { min-height: 28rem; border-color: #202C38 !important; border-radius: 0 !important; background: #07090D; color: #e2e8f0; }
+        .CodeMirror-cursor { border-left-color: #B8F36B !important; }
+        .editor-statusbar { color: #64748b; }
+        .editor-preview, .editor-preview-side { background: #0D1219; color: #e2e8f0; }
         ::selection { color: #07090D; background: #B8F36B; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #07090D; }
         ::-webkit-scrollbar-thumb { background: #273543; border: 2px solid #07090D; border-radius: 999px; }
     </style>
+    @await RenderSectionAsync("Head", required: false)
 </head>
 <body class="min-h-screen overflow-x-hidden bg-ink text-slate-100 antialiased">
     @{
