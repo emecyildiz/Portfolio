@@ -19,7 +19,7 @@ public class AdminBaseController : Controller
 
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        // Her action çalışmadan önce kategorileri sidebar için yükle
+        // Load categories for the sidebar before each action runs.
         ViewBag.Categories = await _db.Categories
             .OrderBy(c => c.SortOrder)
             .ToListAsync();

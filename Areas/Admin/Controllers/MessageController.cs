@@ -27,7 +27,7 @@ public class MessageController : AdminBaseController
 
         if (message == null) return NotFound();
 
-        // Okundu olarak işaretle
+        // Mark the message as read.
         if (!message.IsRead)
         {
             message.IsRead = true;

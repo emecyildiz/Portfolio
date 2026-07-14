@@ -1,11 +1,11 @@
 ﻿@model Portfolio.Models.Page
 @{
-    ViewData["Title"] = "Yeni Sayfa";
+    ViewData["Title"] = "New Page";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Yeni Sayfa</h2>
+    <h2 class="text-2xl font-bold text-white">New Page</h2>
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
@@ -18,19 +18,19 @@
         <div class="col-span-2 space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <label class="block text-sm text-gray-400 mb-1">Title</label>
                     <input asp-for="Title"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="Hakkımda" />
+                           placeholder="About" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
                     <textarea asp-for="Content" id="content-editor"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Kapak Görseli URL (opsiyonel)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Cover Image URL (optional)</label>
                     <input asp-for="CoverImageUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
@@ -39,10 +39,10 @@
 
         <div class="space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <label class="block text-sm text-gray-400 mb-1">Status</label>
                     <select asp-for="Status"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -51,11 +51,11 @@
 
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="ShowInNav" type="checkbox" class="w-4 h-4 rounded" />
-                    Navbar'da göster
+                    Show in navigation
                 </label>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Sıra</label>
+                    <label class="block text-sm text-gray-400 mb-1">Sort Order</label>
                     <input asp-for="SortOrder" type="number"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
@@ -64,11 +64,11 @@
             <div class="flex flex-col gap-2">
                 <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Kaydet
+                    Save
                 </button>
                 <a href="@Url.Action("Index", "Page", new { area = "Admin" })"
                    class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    İptal
+                    Cancel
                 </a>
             </div>
         </div>

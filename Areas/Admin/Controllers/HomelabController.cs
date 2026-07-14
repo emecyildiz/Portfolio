@@ -43,13 +43,13 @@ public class HomelabController : AdminBaseController
     public async Task<IActionResult> Create(HomelabPost model,
         string? HardwareUsed, string? SoftwareUsed, List<IFormFile>? Images)
     {
-        if (!ModelState.IsValid)      // ← bunu ekle
+        if (!ModelState.IsValid)
             return View(model);
 
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "homelab");
         if (category == null)
         {
-            ModelState.AddModelError("", "Homelab kategorisi bulunamadı.");
+            ModelState.AddModelError("", "The homelab category could not be found.");
             return View(model);
         }
 
@@ -128,7 +128,7 @@ public class HomelabController : AdminBaseController
         if (!NetworkTopologyJsonService.TryNormalize(
                 NetworkTopologyJson, out _, out var normalizedTopology))
         {
-            TempData["Error"] = "Ağ topolojisi geçersiz veya izin verilen sınırları aşıyor.";
+            TempData["Error"] = "The network topology is invalid or exceeds the allowed limits.";
             return RedirectToAction(nameof(Edit), new { id });
         }
 
@@ -157,7 +157,7 @@ public class HomelabController : AdminBaseController
             existing.SoftwareUsed = JsonSerializer.Serialize(
                 SoftwareUsed.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList());
 
-        // Network topology JSON'ı kaydet
+        // Save the network topology JSON.
         if (normalizedTopology != null)
             existing.NetworkTopology = normalizedTopology;
 
@@ -229,15 +229,15 @@ public class HomelabController : AdminBaseController
     public async Task<IActionResult> UploadIcon(IFormFile icon)
     {
         if (icon == null || icon.Length == 0)
-            return Json(new { success = false, message = "Dosya seçilmedi." });
+            return Json(new { success = false, message = "No file was selected." });
 
-        if (icon.Length > 500_000) // 500KB limit — ikonlar küçük olmalı
-            return Json(new { success = false, message = "Dosya çok büyük (max 500KB)." });
+        if (icon.Length > 500_000) // Keep icons small with a 500 KB limit.
+            return Json(new { success = false, message = "The file is too large (maximum 500 KB)." });
 
-        // Kullanıcı SVG'si aynı origin üzerinde script çalıştırabildiği için yalnızca raster ikon kabul edilir.
+        // Accept raster icons only because user-supplied SVG can execute scripts on the same origin.
         var validatedUpload = await UploadFileValidator.ValidateImageAsync(icon, ".png", ".webp");
         if (validatedUpload == null)
-            return Json(new { success = false, message = "Dosya geçerli bir PNG veya WebP ikonu olmalı." });
+            return Json(new { success = false, message = "The file must be a valid PNG or WebP icon." });
 
         var uniqueName = $"{Guid.NewGuid()}{validatedUpload.Extension}";
         var relativePath = Path.Combine("uploads", "network-icons", uniqueName);

@@ -1,6 +1,6 @@
 ﻿@model Portfolio.Models.HomelabPost
 @{
-    ViewData["Title"] = "Homelab Yazısı Düzenle";
+    ViewData["Title"] = "Edit Homelab Post";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     var hardwareString = ViewBag.HardwareString as string ?? "";
     var softwareString = ViewBag.SoftwareString as string ?? "";
@@ -8,7 +8,7 @@
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Homelab Yazısı Düzenle</h2>
+    <h2 class="text-2xl font-bold text-white">Edit Homelab Post</h2>
     <p class="text-gray-500 mt-1">/@Model.Slug</p>
 </div>
 
@@ -23,31 +23,31 @@
     <div class="grid grid-cols-3 gap-6">
         <div class="col-span-2 space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">İçerik</h3>
+                <h3 class="text-sm font-medium text-gray-400">Content</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <label class="block text-sm text-gray-400 mb-1">Title</label>
                     <input asp-for="Title"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Özet</label>
+                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
                     <textarea asp-for="Summary" rows="2"
                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
                     <textarea asp-for="Content" id="content-editor"></textarea>
                 </div>
             </div>
 
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Teknik Detaylar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Technical Details</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Konu</label>
+                    <label class="block text-sm text-gray-400 mb-1">Topic</label>
                     <select asp-for="Topic"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.HomelabTopic>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -55,47 +55,47 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Donanımlar</label>
+                    <label class="block text-sm text-gray-400 mb-1">Hardware</label>
                     <input name="HardwareUsed" value="@hardwareString"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Yazılımlar</label>
+                    <label class="block text-sm text-gray-400 mb-1">Software</label>
                     <input name="SoftwareUsed" value="@softwareString"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Ağ Topoloji Diyagramı URL</label>
+                    <label class="block text-sm text-gray-400 mb-1">Network Topology Diagram URL</label>
                     <input asp-for="NetworkDiagramUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
-                <!-- İnteraktif Ağ Haritası Builder -->
+                <!-- Interactive network map builder -->
                 <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-sm font-medium text-gray-400">İnteraktif Ağ Haritası</h3>
-                            <p class="text-xs text-gray-600 mt-1">Cihazları ve bağlantıları ekleyerek Packet Tracer tarzı harita oluştur</p>
+                            <h3 class="text-sm font-medium text-gray-400">Interactive Network Map</h3>
+                            <p class="text-xs text-gray-600 mt-1">Build a Packet Tracer-style map by adding devices and connections</p>
                         </div>
                         <button type="button" onclick="addDevice()"
                                 class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition">
-                            + Cihaz Ekle
+                            + Add Device
                         </button>
                     </div>
 
                     <input type="hidden" name="NetworkTopologyJson" id="networkTopologyJson" />
 
-                    <!-- Cihazlar listesi -->
+                    <!-- Device list -->
                     <div id="devices-container" class="space-y-3 mb-6"></div>
 
-                    <!-- Bağlantılar -->
+                    <!-- Connections -->
                     <div class="border-t border-gray-800 pt-4">
                         <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Bağlantılar</h4>
+                            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Connections</h4>
                             <button type="button" onclick="addConnection()"
                                     class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
-                                + Bağlantı Ekle
+                                + Add Connection
                             </button>
                         </div>
                         <div id="connections-container" class="space-y-2"></div>
@@ -104,12 +104,12 @@
                     <div class="border-t border-gray-800 pt-4 mt-6">
                         <div class="flex items-center justify-between gap-4 mb-3">
                             <div>
-                                <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Harita Yerleşimi</h4>
-                                <p class="text-xs text-gray-600 mt-1">Cihazları sürükleyerek public haritada kullanılacak konumları ayarla.</p>
+                                <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Map Layout</h4>
+                                <p class="text-xs text-gray-600 mt-1">Drag devices to set their positions on the public map.</p>
                             </div>
                             <button type="button" onclick="resetTopologyLayout()"
                                     class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
-                                Izgaraya Sıfırla
+                                Reset to Grid
                             </button>
                         </div>
                         <div id="network-layout-editor"
@@ -122,7 +122,7 @@
             @if (images.Any())
             {
                 <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                    <h3 class="text-sm font-medium text-gray-400 mb-4">Mevcut Görseller</h3>
+                    <h3 class="text-sm font-medium text-gray-400 mb-4">Existing Images</h3>
                     <div class="grid grid-cols-3 gap-3">
                         @foreach (var img in images)
                         {
@@ -131,20 +131,20 @@
                                      class="w-full h-32 object-cover rounded-lg @(img.IsCover ? "ring-2 ring-blue-500" : "")" />
                                 @if (img.IsCover)
                                 {
-                                    <span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">Kapak</span>
+                                    <span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">Cover</span>
                                 }
                                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center gap-2">
                                     <form method="post" action="@Url.Action("SetCover", "Homelab", new { area = "Admin" })">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="mediaId" value="@img.Id" />
                                         <input type="hidden" name="postId" value="@Model.Id" />
-                                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Kapak</button>
+                                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Set Cover</button>
                                     </form>
                                     <form method="post" action="@Url.Action("DeleteImage", "Homelab", new { area = "Admin" })">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="mediaId" value="@img.Id" />
                                         <input type="hidden" name="postId" value="@Model.Id" />
-                                        <button type="submit" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Sil</button>
+                                        <button type="submit" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Delete</button>
                                     </form>
                                 </div>
                             </div>
@@ -154,7 +154,7 @@
             }
 
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Yeni Görsel Ekle</h3>
+                <h3 class="text-sm font-medium text-gray-400 mb-4">Add New Images</h3>
                 <input name="Images" type="file" multiple accept="image/*"
                        class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
             </div>
@@ -162,10 +162,10 @@
 
         <div class="space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <label class="block text-sm text-gray-400 mb-1">Status</label>
                     <select asp-for="Status"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -174,28 +174,28 @@
 
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Ana sayfada öne çıkar
+                    Feature on the homepage
                 </label>
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="IsMainLab" type="checkbox" class="w-4 h-4 rounded" />
-                    🗺 Bu yazı "Ana Lab" — tüm sistemi gösteren ana harita
+                    🗺 Mark this as the "Main Lab" system map
                 </label>
 
                 <div class="pt-2 border-t border-gray-800 text-xs text-gray-600 space-y-1">
-                    <p>Oluşturuldu: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
-                    <p>Görüntülenme: @Model.ViewCount</p>
-                    <p>Okuma süresi: @Model.ReadingTimeMinutes dk</p>
+                    <p>Created: @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
+                    <p>Views: @Model.ViewCount</p>
+                    <p>Reading time: @Model.ReadingTimeMinutes min</p>
                 </div>
             </div>
 
             <div class="flex flex-col gap-2">
                 <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Güncelle
+                    Update
                 </button>
                 <a href="@Url.Action("Index", "Homelab", new { area = "Admin" })"
                    class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    İptal
+                    Cancel
                 </a>
             </div>
         </div>
@@ -210,7 +210,7 @@
     });
 </script>
 <script>
-    // ============ VERİ MODELİ ============
+    // ============ DATA MODEL ============
     let devices = [];
     let connections = [];
     let electronicsProjects = [];
@@ -258,15 +258,15 @@
             const res = await fetch(endpoints.electronicsProjects);
             electronicsProjects = await res.json();
         } catch (e) {
-            console.error('Electronics projeleri alınamadı', e);
+            console.error('Electronics projects could not be loaded', e);
         }
 
-        // İkon kütüphanesini çek
+        // Load the icon library.
         try {
             const iconRes = await fetch(endpoints.iconLibrary);
             iconLibrary = await iconRes.json();
         } catch (e) {
-            console.error('İkon kütüphanesi alınamadı', e);
+            console.error('The icon library could not be loaded', e);
         }
 
         const existingJson = @Html.Raw(ViewBag.NetworkTopologyJson ?? "null");
@@ -308,7 +308,7 @@
         const imageUrl = safeWebUrl(device.iconUrl);
         return {
             id: device.id,
-            label: device.label || `Cihaz ${device.id}`,
+            label: device.label || `Device ${device.id}`,
             shape: imageUrl ? 'image' : 'dot',
             image: imageUrl || undefined,
             color: imageUrl ? undefined : (layoutTypeColors[device.deviceType] || '#6B7280'),
@@ -335,7 +335,7 @@
         }
 
         if (typeof vis === 'undefined') {
-            status.textContent = 'Harita kütüphanesi yüklenemedi. Diğer alanları yine kaydedebilirsin.';
+            status.textContent = 'The map library could not be loaded. You can still save the other fields.';
             return;
         }
 
@@ -363,12 +363,12 @@
 
         layoutNetwork.on('dragEnd', params => {
             captureLayoutPositions(params.nodes || []);
-            status.textContent = 'Yerleşim değişti. Kalıcı olması için Güncelle düğmesine bas.';
+            status.textContent = 'The layout changed. Select Update to save the new positions.';
         });
 
         status.textContent = devices.length === 0
-            ? 'Önce en az bir cihaz ekle.'
-            : 'Cihaz konumları form gönderildiğinde topolojiyle birlikte kaydedilir.';
+            ? 'Add at least one device first.'
+            : 'Device positions are saved with the topology when the form is submitted.';
     }
 
     function resetTopologyLayout() {
@@ -378,10 +378,10 @@
         });
         renderTopologyLayout();
         document.getElementById('network-layout-status').textContent =
-            'Yerleşim ızgaraya sıfırlandı. Kalıcı olması için Güncelle düğmesine bas.';
+            'The layout was reset to the grid. Select Update to save the new positions.';
     }
 
-    // ============ CİHAZ YÖNETİMİ ============
+    // ============ DEVICE MANAGEMENT ============
     function addDevice() {
         const newId = devices.length > 0 ? Math.max(...devices.map(d => d.id)) + 1 : 1;
         devices.push({
@@ -406,7 +406,7 @@
 
     function removeDevice(id) {
         devices = devices.filter(d => d.id !== id);
-        // Bu cihaza bağlı bağlantıları da temizle
+        // Remove connections attached to this device as well.
         connections = connections.filter(c => c.from !== id && c.to !== id);
         renderDevices();
         renderConnections();
@@ -444,10 +444,10 @@
                 updateDevice(id, 'iconUrl', data.url);
                 renderDevices();
             } else {
-                alert('Hata: ' + data.message);
+                alert('Error: ' + data.message);
             }
         } catch (e) {
-            alert('İkon yüklenirken hata oluştu.');
+            alert('An error occurred while uploading the icon.');
             console.error(e);
         }
     }
@@ -455,7 +455,7 @@
         function renderDevices() {
         const container = document.getElementById('devices-container');
         container.innerHTML = devices.map(d => {
-            const isExpanded = d._expanded === true; // varsayılan açık
+            const isExpanded = d._expanded === true; // Expanded by default.
             const iconUrl = safeWebUrl(d.iconUrl);
             return `
             <div class="bg-gray-800 rounded-lg p-4 space-y-3">
@@ -465,12 +465,12 @@
                             ? `<img src="${escapeHtml(iconUrl)}" class="w-8 h-8 object-contain bg-gray-700 rounded p-1" />`
                             : `<div class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs">?</div>`
                         }
-                        <span class="text-sm text-gray-300 font-medium">${escapeHtml(d.label || 'İsimsiz Cihaz')}</span>
+                        <span class="text-sm text-gray-300 font-medium">${escapeHtml(d.label || 'Unnamed Device')}</span>
                         <span class="text-xs text-gray-600">${escapeHtml(d.deviceType)}</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <button type="button" onclick="event.stopPropagation(); removeDevice(${d.id})"
-                                class="text-xs text-red-400 hover:text-red-300">Kaldır</button>
+                                class="text-xs text-red-400 hover:text-red-300">Remove</button>
                         <svg class="w-4 h-4 text-gray-500 transition ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
@@ -480,12 +480,12 @@
                 ${isExpanded ? `
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Cihaz Adı</label>
+                        <label class="block text-xs text-gray-500 mb-1">Device Name</label>
                         <input value="${escapeHtml(d.label)}" oninput="updateDevice(${d.id}, 'label', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Cihaz Tipi</label>
+                        <label class="block text-xs text-gray-500 mb-1">Device Type</label>
                         <select onchange="updateDevice(${d.id}, 'deviceType', this.value)"
                                 class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
                             ${['router','switch','firewall','server','pc','laptop','microcontroller','mobile','custom','sensor','audio','antenna'].map(t =>
@@ -497,17 +497,17 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Hazır İkonlardan Seç</label>
+                            <label class="block text-xs text-gray-500 mb-1">Choose from Icon Library</label>
                             <select onchange="selectLibraryIcon(${d.id}, this.value)"
                                 class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                                <option value="">-- Seç --</option>
+                                <option value="">-- Select --</option>
                                 ${iconLibrary.map(icon =>
                     `               <option value="${escapeHtml(safeWebUrl(icon.url))}" ${d.iconUrl === icon.url ? 'selected' : ''}>${escapeHtml(icon.name)}</option>`
                                 ).join('')}
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Ya da Dosya Yükle</label>
+                            <label class="block text-xs text-gray-500 mb-1">Or Upload a File</label>
                             <input type="file" accept="image/png,image/webp"
                                 onchange="uploadDeviceIcon(${d.id}, this)"
                                 class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-gray-700 file:text-gray-300 hover:file:bg-gray-600" />
@@ -515,10 +515,10 @@
                     </div>
 
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1">Elektronik Projesine Bağla (opsiyonel)</label>
+                    <label class="block text-xs text-gray-500 mb-1">Link to an Electronics Project (optional)</label>
                     <select onchange="updateDevice(${d.id}, 'linkedProjectSlug', this.value)"
                             class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                        <option value="">Bağlantısız — manuel bilgi gir</option>
+                        <option value="">Not linked — enter details manually</option>
                         ${electronicsProjects.map(p =>
                             `<option value="${escapeHtml(p.slug)}" ${d.linkedProjectSlug === p.slug ? 'selected' : ''}>${escapeHtml(p.title)}</option>`
                         ).join('')}
@@ -528,12 +528,12 @@
                 ${!d.linkedProjectSlug ? `
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Fotoğraf URL (manuel)</label>
+                        <label class="block text-xs text-gray-500 mb-1">Image URL (manual)</label>
                         <input value="${escapeHtml(d.standaloneImageUrl || '')}" oninput="updateDevice(${d.id}, 'standaloneImageUrl', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Donanım Bilgisi (manuel)</label>
+                        <label class="block text-xs text-gray-500 mb-1">Hardware Details (manual)</label>
                         <input value="${escapeHtml(d.standaloneHardware || '')}" oninput="updateDevice(${d.id}, 'standaloneHardware', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
@@ -542,26 +542,26 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Kısa Bilgi (hover'da görünür)</label>
+                        <label class="block text-xs text-gray-500 mb-1">Short Description (shown on hover)</label>
                         <input value="${escapeHtml(d.shortInfo || '')}" oninput="updateDevice(${d.id}, 'shortInfo', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">IP Adresi (opsiyonel)</label>
+                        <label class="block text-xs text-gray-500 mb-1">IP Address (optional)</label>
                         <input value="${escapeHtml(d.ipAddress || '')}" oninput="updateDevice(${d.id}, 'ipAddress', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1">Homelab'taki Rolü</label>
+                    <label class="block text-xs text-gray-500 mb-1">Role in the Homelab</label>
                     <input value="${escapeHtml(d.homelabRole || '')}" oninput="updateDevice(${d.id}, 'homelabRole', this.value)"
-                           placeholder="Bu ağda ne işe yarıyor?"
+                           placeholder="What does it do on this network?"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1">Ekstra Notlar</label>
+                    <label class="block text-xs text-gray-500 mb-1">Additional Notes</label>
                     <textarea oninput="updateDevice(${d.id}, 'homelabNotes', this.value)" rows="2"
                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">${escapeHtml(d.homelabNotes || '')}</textarea>
                 </div>
@@ -576,10 +576,10 @@
         renderDevices();
     }
 
-    // ============ BAĞLANTI YÖNETİMİ ============
+    // ============ CONNECTION MANAGEMENT ============
     function addConnection() {
         if (devices.length < 2) {
-            alert('Bağlantı eklemek için en az 2 cihaz olmalı.');
+            alert('At least two devices are required to add a connection.');
             return;
         }
         connections.push({
@@ -607,7 +607,7 @@
         const container = document.getElementById('connections-container');
 
         if (devices.length < 2) {
-            container.innerHTML = '<p class="text-xs text-gray-600">En az 2 cihaz ekleyince bağlantı ekleyebilirsin.</p>';
+            container.innerHTML = '<p class="text-xs text-gray-600">Add at least two devices before creating a connection.</p>';
             return;
         }
 
@@ -615,12 +615,12 @@
             <div class="bg-gray-800 rounded-lg p-3 flex items-center gap-2">
                 <select onchange="updateConnection(${i}, 'from', this.value)"
                         class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
-                    ${devices.map(d => `<option value="${d.id}" ${c.from === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'İsimsiz')}</option>`).join('')}
+                    ${devices.map(d => `<option value="${d.id}" ${c.from === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'Unnamed')}</option>`).join('')}
                 </select>
                 <span class="text-gray-600 text-xs">→</span>
                 <select onchange="updateConnection(${i}, 'to', this.value)"
                         class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
-                    ${devices.map(d => `<option value="${d.id}" ${c.to === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'İsimsiz')}</option>`).join('')}
+                    ${devices.map(d => `<option value="${d.id}" ${c.to === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'Unnamed')}</option>`).join('')}
                 </select>
                 <select onchange="updateConnection(${i}, 'connectionType', this.value)"
                         class="bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
@@ -629,7 +629,7 @@
                     ).join('')}
                 </select>
                 <input value="${escapeHtml(c.label || '')}" oninput="updateConnection(${i}, 'label', this.value)"
-                       placeholder="Etiket (opsiyonel)"
+                       placeholder="Label (optional)"
                        class="w-24 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500" />
                 <button type="button" onclick="removeConnection(${i})"
                         class="text-xs text-red-400 hover:text-red-300 px-2">✕</button>
@@ -637,7 +637,7 @@
         `).join('');
     }
 
-        // ============ KAYDETME ============
+        // ============ SAVE ============
     document.getElementById('mainForm')?.addEventListener('submit', function() {
         captureLayoutPositions();
         const cleanDevices = devices.map(({ _expanded, ...rest }) => rest);

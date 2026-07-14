@@ -29,11 +29,11 @@ public class AccountController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        // Email ile kullanıcıyı bul, sonra username ile giriş yap
+        // Find the user by email, then sign in with the username.
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            ModelState.AddModelError("", "E-posta veya şifre yanlış.");
+            ModelState.AddModelError("", "The email or password is incorrect.");
             return View(model);
         }
 
@@ -48,9 +48,9 @@ public class AccountController : Controller
             return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
 
         if (result.IsLockedOut)
-            ModelState.AddModelError("", "Çok fazla yanlış deneme. 15 dakika bekle.");
+            ModelState.AddModelError("", "Too many failed attempts. Try again in 15 minutes.");
         else
-            ModelState.AddModelError("", "E-posta veya şifre yanlış.");
+            ModelState.AddModelError("", "The email or password is incorrect.");
 
         return View(model);
     }

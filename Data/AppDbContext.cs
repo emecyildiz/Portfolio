@@ -9,7 +9,7 @@ namespace Portfolio.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        // ── DbSet'ler ──────────────────────────────────────────────────────────
+        // ── DbSets ─────────────────────────────────────────────────────────────
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Project> Projects => Set<Project>();
         public DbSet<SecurityResearch> SecurityResearches => Set<SecurityResearch>();
@@ -33,9 +33,9 @@ namespace Portfolio.Data
             base.OnModelCreating(modelBuilder);
 
             // ── Global Query Filters ───────────────────────────────────────────
-            // Public kullanıcılar sadece Public içerikleri görür.
-            // Admin controller'larında .IgnoreQueryFilters() ile bypass et.
-            // NOT: Notes ve audit tabloları dahil edilmedi — public endpoint yok.
+            // Public users can access only public content.
+            // Admin controllers bypass these filters with .IgnoreQueryFilters().
+            // Notes and audit tables are excluded because they have no public endpoints.
 
             modelBuilder.Entity<Project>().HasQueryFilter(p =>
                 p.Status == VisibilityStatus.Public &&
@@ -63,15 +63,15 @@ namespace Portfolio.Data
             modelBuilder.Entity<Certificate>().HasQueryFilter(c =>
                 c.Status == VisibilityStatus.Public);
 
-            // SecurityResearch için çift kontrol — DisclosureStatus da zorunlu
+            // Security research requires both public visibility and public disclosure.
             modelBuilder.Entity<SecurityResearch>().HasQueryFilter(s =>
                 s.Status == VisibilityStatus.Public &&
                 s.Category.Status == VisibilityStatus.Public &&
                 !s.Category.IsPrivate &&
                 s.DisclosureStatus == DisclosureStatus.PubliclyDisclosed);
 
-            // ── Enum → String dönüşümleri ─────────────────────────────────────
-            // Veritabanında okunabilir string saklanır, int değil.
+            // ── Enum-to-string conversions ────────────────────────────────────
+            // Store readable strings in the database instead of integers.
 
             modelBuilder.Entity<Category>()
                 .Property(c => c.Status)
@@ -119,9 +119,9 @@ namespace Portfolio.Data
             modelBuilder.Entity<Certificate>()
                 .Property(c => c.Status).HasConversion<string>();
 
-            // ── JSONB sütunları (PostgreSQL) ──────────────────────────────────
-            // EF Core bu sütunları string olarak görür, PostgreSQL jsonb tipi
-            // migration'da elle belirtilmeli: .HasColumnType("jsonb")
+            // ── JSONB columns (PostgreSQL) ────────────────────────────────────
+            // EF Core treats these columns as strings while PostgreSQL stores them as jsonb.
+            // Must be declared explicitly in migrations with .HasColumnType("jsonb").
 
             modelBuilder.Entity<Project>()
                 .Property(p => p.ExtraData).HasColumnType("jsonb");
@@ -146,8 +146,8 @@ namespace Portfolio.Data
             modelBuilder.Entity<SiteSettings>()
                 .Property(s => s.FooterLinksJson).HasColumnType("jsonb");
 
-            // ── Many-to-Many ilişkiler ─────────────────────────────────────────
-            // EF Core ara tabloyu otomatik oluşturur.
+            // ── Many-to-many relationships ─────────────────────────────────────
+            // EF Core creates the join table automatically.
 
             modelBuilder.Entity<Project>()
                 .HasMany(p => p.Tags)
@@ -174,7 +174,7 @@ namespace Portfolio.Data
                 .WithMany(tag => tag.TeamProjects)
                 .UsingEntity("TeamProjectTags");
 
-            // ── ServiceReference bileşik PK ───────────────────────────────────
+            // ── ServiceReference composite primary key ────────────────────────
             modelBuilder.Entity<ServiceReference>()
                 .HasKey(sr => new { sr.ServiceId, sr.RefType, sr.RefId });
 
@@ -183,7 +183,7 @@ namespace Portfolio.Data
                 .WithMany(s => s.References)
                 .HasForeignKey(sr => sr.ServiceId);
 
-            // ── Unique index'ler ──────────────────────────────────────────────
+            // ── Unique indexes ────────────────────────────────────────────────
             modelBuilder.Entity<Category>()
                 .HasIndex(c => c.Slug).IsUnique();
 
@@ -209,23 +209,23 @@ namespace Portfolio.Data
             modelBuilder.Entity<Page>()
                 .HasIndex(p => p.Slug).IsUnique();
 
-            // ── Composite index'ler ───────────────────────────────────────────
-            // Ana sayfa sorgusu — featured + public + category
+            // ── Composite indexes ─────────────────────────────────────────────
+            // Homepage query: featured + public + category
             modelBuilder.Entity<Project>()
                 .HasIndex(p => new { p.IsFeatured, p.Status, p.CategoryId })
                 .HasDatabaseName("idx_projects_featured");
 
-            // Kategori listesi sorgusu
+            // Category listing query
             modelBuilder.Entity<Project>()
                 .HasIndex(p => new { p.CategoryId, p.Status })
                 .HasDatabaseName("idx_projects_category");
 
-            // Media getirme — entity_type + entity_id çok sık sorgulanır
+            // Media lookup index for frequently queried entity_type + entity_id pairs.
             modelBuilder.Entity<Media>()
                 .HasIndex(m => new { m.EntityType, m.EntityId })
                 .HasDatabaseName("idx_media_entity");
 
-            // ── Ek kısıtlamalar ───────────────────────────────────────────────
+            // ── Additional constraints ────────────────────────────────────────
             modelBuilder.Entity<ContactMessage>()
                 .Property(c => c.Email).HasMaxLength(300);
 
@@ -238,11 +238,11 @@ namespace Portfolio.Data
 
         }
 
-        // ── SaveChanges Override — AuditLog otomasyonu ────────────────────────
+        // ── SaveChanges override — AuditLog automation ────────────────────────
         public override int SaveChanges()
         {
             UpdateTimestamps();
-            // AuditService burada çağrılır — bkz. Services/AuditService.cs
+            // AuditService runs here; see Services/AuditService.cs.
             return base.SaveChanges();
         }
 
@@ -253,8 +253,8 @@ namespace Portfolio.Data
         }
 
         /// <summary>
-        /// UpdatedAt sütununu otomatik günceller.
-        /// Her entity için ayrı property set etmeye gerek kalmaz.
+        /// Updates the UpdatedAt column automatically.
+        /// Avoids setting the property separately for every entity.
         /// </summary>
         private void UpdateTimestamps()
         {

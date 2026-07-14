@@ -8,7 +8,7 @@ namespace Portfolio.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Başlık zorunlu")]
+        [Required(ErrorMessage = "Title is required.")]
         public string Title { get; set; } = string.Empty;
 
         public string Slug { get; set; } = string.Empty;          // unique index
@@ -18,20 +18,20 @@ namespace Portfolio.Models
         public string? CveId { get; set; }                        // "CVE-2024-XXXXX"
 
         // critical / high / medium / low / info
-        // String tutuldu — enum yerine esnek kalması için
+        // Stored as a string to keep the field flexible instead of restricting it to an enum.
         public string? SeverityLevel { get; set; }
 
         public string Summary { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;       // Markdown write-up
 
         // ["Ghidra", "Wireshark", "HackRF", "SDR++"] — JSONB
-        // Okuma: JsonSerializer.Deserialize<List<string>>(ToolsUsed)
+        // Read with JsonSerializer.Deserialize<List<string>>(ToolsUsed).
         public string? ToolsUsed { get; set; }
 
         public string? CoverImageUrl { get; set; }
         public string? GithubUrl { get; set; }                    // PoC kodu
 
-        // KRİTİK: PubliclyDisclosed olmadan public endpoint'e giremez
+        // Critical: research cannot reach the public endpoint unless it is PubliclyDisclosed.
         public DisclosureStatus DisclosureStatus { get; set; } = DisclosureStatus.Private;
 
         public VisibilityStatus Status { get; set; } = VisibilityStatus.Draft;

@@ -44,13 +44,13 @@ public class WebAppsController : AdminBaseController
         string? Subdomain, bool IsSchoolProject,
         List<IFormFile>? Images)
     {
-        if (!ModelState.IsValid)      // ← bunu ekle
+        if (!ModelState.IsValid)
             return View(model);
 
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "webapps");
         if (category == null)
         {
-            ModelState.AddModelError("", "Web Uygulamaları kategorisi bulunamadı.");
+            ModelState.AddModelError("", "The web applications category could not be found.");
             return View(model);
         }
 

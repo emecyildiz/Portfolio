@@ -7,21 +7,21 @@ namespace Portfolio.Models
         public int Id { get; set; }
 
         public string Title { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;       // Markdown veya düz metin
+        public string Content { get; set; } = string.Empty;       // Markdown or plain text
 
         public NoteType NoteType { get; set; } = NoteType.Idea;
 
-        public string? RelatedUrl { get; set; }    // "şu an çalışıyorum" widget'ı için opsiyonel link
+        public string? RelatedUrl { get; set; }    // Optional destination for the Current Focus widget
 
-        // Todo modunda bu alanlar aktif
+        // These fields are active in task mode.
         public bool IsTodo { get; set; } = false;
         public bool IsCompleted { get; set; } = false;
         public DateOnly? DueDate { get; set; }
 
         public NotePriority Priority { get; set; } = NotePriority.Normal;
 
-        // Basit string etiketler — ayrı tag sistemine gerek yok
-        // Örnek: ["siber güvenlik", "ESP32", "ileride bak"]
+        // Simple string labels; no separate tag system is needed.
+        // Example: ["cybersecurity", "ESP32", "review later"]
         public string? TagsJson { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

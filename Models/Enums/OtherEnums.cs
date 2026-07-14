@@ -2,28 +2,28 @@
 {
     public enum ResearchType
     {
-        MalwareAnalysis,   // Zararlı yazılım analizi / tersine mühendislik
-        HardwareVuln,      // Donanım güvenlik açıkları (araç, IoT vs.)
-        RFSecurity,        // Radyo frekansı — SDR, replay attack, jamming
-        WebSecurity,       // Web uygulama güvenliği
-        NetworkSecurity,   // Ağ katmanı — MITM, ARP spoofing
-        MobileSecurity,    // Android APK analizi, SMS spoofing
+        MalwareAnalysis,   // Malware analysis and reverse engineering
+        HardwareVuln,      // Hardware vulnerabilities in vehicles, IoT devices, and similar systems
+        RFSecurity,        // Radio frequency security: SDR, replay attacks, and jamming
+        WebSecurity,       // Web application security
+        NetworkSecurity,   // Network-layer security: MITM and ARP spoofing
+        MobileSecurity,    // Android APK analysis and SMS spoofing
         Other
     }
 
     public enum DisclosureStatus
     {
-        Private,             // Yayınlanmadı — admin panelinde bile dikkatli davran
-        Coordinated,         // Üreticiye bildirildi, henüz kamuya açık değil
-        PubliclyDisclosed    // Full write-up yayında
+        Private,             // Not published; handle carefully even in the admin panel
+        Coordinated,         // Reported to the vendor but not yet public
+        PubliclyDisclosed    // Full write-up is public
     }
 
     public enum HomelabTopic
     {
         NetworkSetup,        // VLAN, routing, switch
         Firewall,            // pfSense, iptables
-        Monitoring,          // Grafana, Prometheus, log yönetimi
-        ServerManagement,    // SSH hardening, cron, servis yönetimi
+        Monitoring,          // Grafana, Prometheus, and log management
+        ServerManagement,    // SSH hardening, cron, and service management
         VPN,                 // WireGuard, OpenVPN
         Virtualization,      // Proxmox, Docker, VM
         Other
@@ -31,11 +31,11 @@
 
     public enum NoteType
     {
-        Idea,      // Proje veya araştırma fikri
-        Todo,      // Yapılacaklar
-        Research,  // Araştırma notları, linkler
-        Roadmap,   // Gelecek planları
-        Snippet    // Kod veya komut parçacığı
+        Idea,      // Project or research idea
+        Todo,      // Tasks to complete
+        Research,  // Research notes and links
+        Roadmap,   // Future plans
+        Snippet    // Code or command snippet
     }
 
     public enum NotePriority

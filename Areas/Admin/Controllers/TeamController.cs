@@ -45,14 +45,14 @@ public class TeamController : AdminBaseController
                 .Select(x => $"{x.Key}: {string.Join(", ", x.Value!.Errors.Select(e => e.ErrorMessage))}")
                 .ToList();
 
-            TempData["Error"] = "Form hataları: " + string.Join(" | ", errors);
+            TempData["Error"] = "Form errors: " + string.Join(" | ", errors);
             return View(model);
         }
 
         if (!TeamMemberJsonService.TryNormalize(
                 TeamMembersJson, out _, out var normalizedTeamMembers))
         {
-            TempData["Error"] = "Ekip üyesi bilgileri veya bağlantıları geçersiz.";
+            TempData["Error"] = "Team member details or links are invalid.";
             return View(model);
         }
 
@@ -61,7 +61,7 @@ public class TeamController : AdminBaseController
             var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "team");
             if (category == null)
             {
-                TempData["Error"] = "Ekip kategorisi bulunamadı. Önce 'team' slug'ına sahip kategori oluştur.";
+                TempData["Error"] = "The team category could not be found. Create a category with the 'team' slug first.";
                 return View(model);
             }
 
@@ -92,12 +92,12 @@ public class TeamController : AdminBaseController
                 }
             }
 
-            TempData["Success"] = "Ekip projesi oluşturuldu.";
+            TempData["Success"] = "The team project was created.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            TempData["Error"] = $"Hata: {ex.Message}";
+            TempData["Error"] = $"Error: {ex.Message}";
             return View(model);
         }
     }
@@ -110,7 +110,7 @@ public class TeamController : AdminBaseController
 
         if (project == null) return NotFound();
 
-        // Ekip üyelerini parse et
+        // Parse team members.
         TeamMemberJsonService.TryNormalize(project.TeamMembers, out var members, out _);
 
         ViewBag.Members = members;
@@ -130,7 +130,7 @@ public class TeamController : AdminBaseController
         if (!TeamMemberJsonService.TryNormalize(
                 TeamMembersJson, out _, out var normalizedTeamMembers))
         {
-            TempData["Error"] = "Ekip üyesi bilgileri veya bağlantıları geçersiz.";
+            TempData["Error"] = "Team member details or links are invalid.";
             return RedirectToAction(nameof(Edit), new { id });
         }
 

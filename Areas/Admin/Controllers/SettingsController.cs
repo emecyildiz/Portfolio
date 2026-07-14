@@ -33,7 +33,7 @@ public class SettingsController : AdminBaseController
         if (!SiteLinksJsonService.TryNormalize(
                 footerLinksJson, out _, out var normalizedLinks))
         {
-            TempData["Error"] = "Bağlantılar geçersiz. Yalnızca https://, http:// ve mailto: adresleri kullanılabilir.";
+            TempData["Error"] = "The links are invalid. Only https://, http://, and mailto: addresses are allowed.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -48,7 +48,7 @@ public class SettingsController : AdminBaseController
         settings.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Footer bağlantıları kaydedildi.";
+        TempData["Success"] = "Footer links were saved.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -58,23 +58,23 @@ public class SettingsController : AdminBaseController
     {
         if (cvFile == null || cvFile.Length == 0)
         {
-            TempData["Error"] = "Dosya seçilmedi.";
+            TempData["Error"] = "No file was selected.";
             return RedirectToAction(nameof(Index));
         }
 
         if (cvFile.Length > MaxCvFileSize)
         {
-            TempData["Error"] = "CV dosyası en fazla 10 MB olabilir.";
+            TempData["Error"] = "The CV file cannot exceed 10 MB.";
             return RedirectToAction(nameof(Index));
         }
 
         if (!await UploadFileValidator.ValidatePdfAsync(cvFile))
         {
-            TempData["Error"] = "Dosya uzantısı, içerik türü ve içeriği geçerli bir PDF olmalı.";
+            TempData["Error"] = "The file extension, content type, and contents must represent a valid PDF.";
             return RedirectToAction(nameof(Index));
         }
 
-        // Sabit isimle kaydet — her yüklemede üzerine yazılır
+        // Save with a fixed name so each upload replaces the previous CV.
         var relativePath = Path.Combine("uploads", "cv", "cv.pdf");
         var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
         Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
@@ -104,7 +104,7 @@ public class SettingsController : AdminBaseController
         settings.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "CV yüklendi.";
+        TempData["Success"] = "The CV was uploaded.";
         return RedirectToAction(nameof(Index));
     }
 }

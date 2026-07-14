@@ -1,11 +1,11 @@
 ﻿@model Portfolio.Models.SecurityResearch
 @{
-    ViewData["Title"] = "Yeni Güvenlik Araştırması";
+    ViewData["Title"] = "New Security Research";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Yeni Güvenlik Araştırması</h2>
+    <h2 class="text-2xl font-bold text-white">New Security Research</h2>
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
@@ -17,40 +17,40 @@
     <div class="grid grid-cols-3 gap-6">
         <div class="col-span-2 space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">İçerik</h3>
+                <h3 class="text-sm font-medium text-gray-400">Content</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <label class="block text-sm text-gray-400 mb-1">Title</label>
                     <input asp-for="Title"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Özet</label>
+                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
                     <textarea asp-for="Summary" rows="2"
                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
                     <textarea asp-for="Content" id="content-editor"></textarea>
                 </div>
             </div>
 
-            <!-- Güvenlik özel alanlar -->
+            <!-- Security research-specific fields -->
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Araştırma Detayları</h3>
+                <h3 class="text-sm font-medium text-gray-400">Research Details</h3>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Araştırma Türü</label>
+                        <label class="block text-sm text-gray-400 mb-1">Research Type</label>
                         <select asp-for="ResearchType"
                                 asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.ResearchType>()"
                                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Hedef Kategori</label>
+                        <label class="block text-sm text-gray-400 mb-1">Target Category</label>
                         <input asp-for="TargetCategory"
                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                                placeholder="Automotive, IoT, Mobile..." />
@@ -65,10 +65,10 @@
                                placeholder="CVE-2024-XXXXX" />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Önem Derecesi</label>
+                        <label class="block text-sm text-gray-400 mb-1">Severity</label>
                         <select asp-for="SeverityLevel"
                                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                            <option value="">Seç</option>
+                            <option value="">Select</option>
                             <option value="critical">Critical</option>
                             <option value="high">High</option>
                             <option value="medium">Medium</option>
@@ -79,14 +79,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Kullanılan Araçlar</label>
+                    <label class="block text-sm text-gray-400 mb-1">Tools Used</label>
                     <input name="ToolsUsed"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="Ghidra, Wireshark, HackRF (virgülle ayır)" />
+                           placeholder="Ghidra, Wireshark, HackRF (comma-separated)" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Açıklama Durumu</label>
+                    <label class="block text-sm text-gray-400 mb-1">Disclosure Status</label>
                     <select asp-for="DisclosureStatus"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.DisclosureStatus>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -95,7 +95,7 @@
             </div>
 
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Görseller</h3>
+                <h3 class="text-sm font-medium text-gray-400 mb-4">Images</h3>
                 <input name="Images" type="file" multiple accept="image/*"
                        class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
             </div>
@@ -103,10 +103,10 @@
 
         <div class="space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <label class="block text-sm text-gray-400 mb-1">Status</label>
                     <select asp-for="Status"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -115,7 +115,7 @@
 
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Ana sayfada öne çıkar
+                    Feature on the homepage
                 </label>
 
                 <div>
@@ -127,8 +127,8 @@
 
                 <div class="bg-red-900/20 border border-red-900/50 rounded-lg p-3">
                     <p class="text-xs text-red-400">
-                        ⚠ Açıklama durumu "Private" olan araştırmalar public sitede hiç görünmez.
-                        "PubliclyDisclosed" seçilmeden yayına alma.
+                        ⚠ Research marked as "Private" is never shown on the public site.
+                        Do not publish it until "PubliclyDisclosed" is selected.
                     </p>
                 </div>
             </div>
@@ -136,11 +136,11 @@
             <div class="flex flex-col gap-2">
                 <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Kaydet
+                    Save
                 </button>
                 <a href="@Url.Action("Index", "Security", new { area = "Admin" })"
                    class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    İptal
+                    Cancel
                 </a>
             </div>
         </div>

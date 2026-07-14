@@ -6,7 +6,7 @@ using Portfolio.Models.Enums;
 
 namespace Portfolio.Services;
 
-// ── Slug Servisi ──────────────────────────────────────────────────────────
+// ── Slug Service ──────────────────────────────────────────────────────────
 
 public interface ISlugService
 {
@@ -84,7 +84,7 @@ public class SlugService : ISlugService
     }
 }
 
-// ── Okuma Süresi Servisi ──────────────────────────────────────────────────
+// ── Reading Time Service ──────────────────────────────────────────────────
 
 public interface IReadingTimeService
 {
@@ -111,7 +111,7 @@ public class ReadingTimeService : IReadingTimeService
     }
 }
 
-// ── View Count Servisi ────────────────────────────────────────────────────
+// ── View Count Service ────────────────────────────────────────────────────
 
 public interface IViewCountService
 {
@@ -138,7 +138,7 @@ public class ViewCountService : IViewCountService
                 "UPDATE \"BlogPosts\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
             "TeamProject" or "TeamProjects" =>
                 "UPDATE \"TeamProjects\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
-            _ => throw new ArgumentOutOfRangeException(nameof(table), table, "Desteklenmeyen içerik tablosu.")
+            _ => throw new ArgumentOutOfRangeException(nameof(table), table, "Unsupported content table.")
         };
 
         await _db.Database.ExecuteSqlRawAsync(sql, id);

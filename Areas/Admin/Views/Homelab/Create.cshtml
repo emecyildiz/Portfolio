@@ -1,11 +1,11 @@
 ﻿@model Portfolio.Models.HomelabPost
 @{
-    ViewData["Title"] = "Yeni Homelab Yazısı";
+    ViewData["Title"] = "New Homelab Post";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Yeni Homelab Yazısı</h2>
+    <h2 class="text-2xl font-bold text-white">New Homelab Post</h2>
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
@@ -17,31 +17,31 @@
     <div class="grid grid-cols-3 gap-6">
         <div class="col-span-2 space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">İçerik</h3>
+                <h3 class="text-sm font-medium text-gray-400">Content</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <label class="block text-sm text-gray-400 mb-1">Title</label>
                     <input asp-for="Title"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Özet</label>
+                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
                     <textarea asp-for="Summary" rows="2"
                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
                     <textarea asp-for="Content" id="content-editor"></textarea>
                 </div>
             </div>
 
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Teknik Detaylar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Technical Details</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Konu</label>
+                    <label class="block text-sm text-gray-400 mb-1">Topic</label>
                     <select asp-for="Topic"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.HomelabTopic>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -49,21 +49,21 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Donanımlar</label>
+                    <label class="block text-sm text-gray-400 mb-1">Hardware</label>
                     <input name="HardwareUsed"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="Raspberry Pi 4, pfSense mini PC (virgülle ayır)" />
+                           placeholder="Raspberry Pi 4, pfSense mini PC (comma-separated)" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Yazılımlar</label>
+                    <label class="block text-sm text-gray-400 mb-1">Software</label>
                     <input name="SoftwareUsed"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="pfSense, Snort, Grafana (virgülle ayır)" />
+                           placeholder="pfSense, Snort, Grafana (comma-separated)" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Ağ Topoloji Diyagramı URL</label>
+                    <label class="block text-sm text-gray-400 mb-1">Network Topology Diagram URL</label>
                     <input asp-for="NetworkDiagramUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                            placeholder="/uploads/diagrams/network.png" />
@@ -71,7 +71,7 @@
             </div>
 
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Görseller</h3>
+                <h3 class="text-sm font-medium text-gray-400 mb-4">Images</h3>
                 <input name="Images" type="file" multiple accept="image/*"
                        class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
             </div>
@@ -79,10 +79,10 @@
 
         <div class="space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <label class="block text-sm text-gray-400 mb-1">Status</label>
                     <select asp-for="Status"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -91,22 +91,22 @@
 
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Ana sayfada öne çıkar
+                    Feature on the homepage
                 </label>
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="IsMainLab" type="checkbox" class="w-4 h-4 rounded" />
-                    🗺 Bu yazı "Ana Lab" — tüm sistemi gösteren ana harita
+                    🗺 Mark this as the "Main Lab" system map
                 </label>
             </div>
 
             <div class="flex flex-col gap-2">
                 <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Kaydet
+                    Save
                 </button>
                 <a href="@Url.Action("Index", "Homelab", new { area = "Admin" })"
                    class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    İptal
+                    Cancel
                 </a>
             </div>
         </div>

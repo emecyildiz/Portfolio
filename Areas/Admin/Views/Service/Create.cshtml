@@ -1,12 +1,12 @@
 ﻿@* Create.cshtml *@
 @model Portfolio.Models.Service
 @{
-    ViewData["Title"] = "Yeni Hizmet";
+    ViewData["Title"] = "New Service";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Yeni Hizmet</h2>
+    <h2 class="text-2xl font-bold text-white">New Service</h2>
 </div>
 
 <div class="max-w-2xl bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -15,28 +15,28 @@
 
         <div class="space-y-4">
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                <label class="block text-sm text-gray-400 mb-1">Title</label>
                 <input asp-for="Title"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Açıklama</label>
+                <label class="block text-sm text-gray-400 mb-1">Description</label>
                 <textarea asp-for="Description" rows="4"
                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">İkon Sınıfı</label>
+                <label class="block text-sm text-gray-400 mb-1">Icon Class</label>
                 <input asp-for="IconClass"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                        placeholder="ti ti-shield" />
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Sıra</label>
+                <label class="block text-sm text-gray-400 mb-1">Sort Order</label>
                 <input asp-for="SortOrder" type="number"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                <label class="block text-sm text-gray-400 mb-1">Status</label>
                 <select asp-for="Status"
                         asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
                         class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -47,11 +47,11 @@
         <div class="flex gap-3 mt-6">
             <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-                Kaydet
+                Save
             </button>
             <a href="@Url.Action("Index", "Service", new { area = "Admin" })"
                class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-6 py-2.5 rounded-lg transition">
-                İptal
+                Cancel
             </a>
         </div>
     </form>

@@ -1,17 +1,17 @@
 ﻿@model List<Portfolio.Models.TeamProject>
 @{
-    ViewData["Title"] = "Ekip Projeleri";
+    ViewData["Title"] = "Team Projects";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="flex items-center justify-between mb-8">
     <div>
-        <h2 class="text-2xl font-bold text-white">Ekip Projeleri</h2>
-        <p class="text-gray-500 mt-1">Hackathonlar ve ekip çalışmaları</p>
+        <h2 class="text-2xl font-bold text-white">Team Projects</h2>
+        <p class="text-gray-500 mt-1">Hackathons and collaborative projects</p>
     </div>
     <a href="@Url.Action("Create", "Team", new { area = "Admin" })"
        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-        + Yeni Proje
+        + New Project
     </a>
 </div>
 
@@ -19,11 +19,11 @@
     <table class="w-full text-sm">
         <thead>
             <tr class="border-b border-gray-800">
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Proje</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Etkinlik</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Sonuç</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Durum</th>
-                <th class="text-right px-6 py-3 text-gray-400 font-medium">İşlemler</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Project</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Event</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Outcome</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Status</th>
+                <th class="text-right px-6 py-3 text-gray-400 font-medium">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -50,20 +50,20 @@
                     <td class="px-6 py-4">
                         @if (p.Status == Portfolio.Models.Enums.VisibilityStatus.Public)
                         {
-                            <span class="bg-green-900/40 text-green-400 text-xs px-2 py-1 rounded-full">Yayında</span>
+                            <span class="bg-green-900/40 text-green-400 text-xs px-2 py-1 rounded-full">Public</span>
                         }
                         else
                         {
-                            <span class="bg-gray-800 text-gray-500 text-xs px-2 py-1 rounded-full">Taslak</span>
+                            <span class="bg-gray-800 text-gray-500 text-xs px-2 py-1 rounded-full">Draft</span>
                         }
                 </td>
                 <td class="px-6 py-4">
                     <div class="flex items-center justify-end gap-2">
                             @if (p.Status == Portfolio.Models.Enums.VisibilityStatus.Public)
                             {
-                                <a href="/team/@p.Slug" target="_blank"
+                                <a href="/team/@p.Slug" target="_blank" rel="noopener noreferrer"
                                    class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
-                                    👁 Önizle
+                                    👁 Preview
                                 </a>
                             }
                         <form method="post" action="@Url.Action("Toggle", "Team", new { area = "Admin", id = p.Id })">
@@ -73,20 +73,20 @@
                                         @(p.Status == Portfolio.Models.Enums.VisibilityStatus.Public
                                                                                 ? "border-green-800 text-green-400 hover:bg-green-900/30"
                                                                                 : "border-gray-700 text-gray-400 hover:bg-gray-800")">
-                                @(p.Status == Portfolio.Models.Enums.VisibilityStatus.Public ? "Gizle" : "Yayınla")
+                                @(p.Status == Portfolio.Models.Enums.VisibilityStatus.Public ? "Hide" : "Publish")
                             </button>
                         </form>
                         <a href="@Url.Action("Edit", "Team", new { area = "Admin", id = p.Id })"
                            class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
-                            Düzenle
+                            Edit
                         </a>
                         <form method="post"
                               action="@Url.Action("Delete", "Team", new { area = "Admin", id = p.Id })"
-                              onsubmit="return confirm('Bu projeyi silmek istediğine emin misin?')">
+                              onsubmit="return confirm('Are you sure you want to delete this project?')">
                             @Html.AntiForgeryToken()
                             <button type="submit"
                                     class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
-                                Sil
+                                Delete
                             </button>
                         </form>
                     </div>
@@ -99,7 +99,7 @@
     @if (!Model.Any())
     {
         <div class="text-center py-16 text-gray-600">
-            Henüz ekip projesi yok.
+            No team projects yet.
         </div>
     }
 </div>

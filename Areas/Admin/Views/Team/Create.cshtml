@@ -1,11 +1,11 @@
 ﻿@model Portfolio.Models.TeamProject
 @{
-    ViewData["Title"] = "Yeni Ekip Projesi";
+    ViewData["Title"] = "New Team Project";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Yeni Ekip Projesi</h2>
+    <h2 class="text-2xl font-bold text-white">New Team Project</h2>
 </div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
@@ -18,39 +18,39 @@
     <div class="grid grid-cols-3 gap-6">
         <div class="col-span-2 space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">İçerik</h3>
+                <h3 class="text-sm font-medium text-gray-400">Content</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <label class="block text-sm text-gray-400 mb-1">Title</label>
                     <input asp-for="Title"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Özet</label>
+                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
                     <textarea asp-for="Summary" rows="2"
                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
                     <textarea asp-for="Content" id="content-editor"></textarea>
                 </div>
             </div>
 
-            <!-- Etkinlik bilgileri -->
+            <!-- Event information -->
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Etkinlik Bilgileri</h3>
+                <h3 class="text-sm font-medium text-gray-400">Event Information</h3>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Etkinlik Adı</label>
+                        <label class="block text-sm text-gray-400 mb-1">Event Name</label>
                         <input asp-for="EventName"
                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                                placeholder="Teknofest 2024" />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Etkinlik Tarihi</label>
+                        <label class="block text-sm text-gray-400 mb-1">Event Date</label>
                         <input asp-for="EventDate" type="date"
                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
@@ -58,34 +58,34 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Benim Rolüm</label>
+                        <label class="block text-sm text-gray-400 mb-1">My Role</label>
                         <input asp-for="MyRole"
                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                                placeholder="Backend Dev & Security" />
                     </div>
                     <div>
-                        <label class="block text-sm text-gray-400 mb-1">Sonuç / Ödül</label>
+                        <label class="block text-sm text-gray-400 mb-1">Outcome / Award</label>
                         <input asp-for="Outcome"
                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                               placeholder="2. Ödül, Tamamlandı..." />
+                               placeholder="Second Place, Completed..." />
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Etkinlik URL</label>
+                    <label class="block text-sm text-gray-400 mb-1">Event URL</label>
                     <input asp-for="EventUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                            placeholder="https://teknofest.org" />
                 </div>
             </div>
 
-            <!-- Ekip üyeleri -->
+            <!-- Team members -->
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-medium text-gray-400">Ekip Üyeleri</h3>
+                    <h3 class="text-sm font-medium text-gray-400">Team Members</h3>
                     <button type="button" onclick="addMember()"
                             class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
-                        + Üye Ekle
+                        + Add Member
                     </button>
                 </div>
 
@@ -93,7 +93,7 @@
             </div>
 
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Görseller</h3>
+                <h3 class="text-sm font-medium text-gray-400 mb-4">Images</h3>
                 <input name="Images" type="file" multiple accept="image/*"
                        class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
             </div>
@@ -101,10 +101,10 @@
 
         <div class="space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <label class="block text-sm text-gray-400 mb-1">Status</label>
                     <select asp-for="Status"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -113,7 +113,7 @@
 
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Ana sayfada öne çıkar
+                    Feature on the homepage
                 </label>
 
                 <div>
@@ -123,7 +123,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Canlı Demo</label>
+                    <label class="block text-sm text-gray-400 mb-1">Live Demo</label>
                     <input asp-for="LiveDemoUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
@@ -132,11 +132,11 @@
             <div class="flex flex-col gap-2">
                 <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Kaydet
+                    Save
                 </button>
                 <a href="@Url.Action("Index", "Team", new { area = "Admin" })"
                    class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    İptal
+                    Cancel
                 </a>
             </div>
         </div>
@@ -166,15 +166,15 @@
         container.innerHTML = members.map((m, i) => `
             <div class="bg-gray-800 rounded-lg p-4 space-y-3">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-500">Üye ${i + 1}</span>
+                    <span class="text-xs text-gray-500">Member ${i + 1}</span>
                     <button type="button" onclick="removeMember(${i})"
-                            class="text-xs text-red-400 hover:text-red-300">Kaldır</button>
+                            class="text-xs text-red-400 hover:text-red-300">Remove</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <input placeholder="Ad Soyad" value="${escapeHtml(m.Name || '')}"
+                    <input placeholder="Full Name" value="${escapeHtml(m.Name || '')}"
                            oninput="members[${i}].Name = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="Rol" value="${escapeHtml(m.Role || '')}"
+                    <input placeholder="Role" value="${escapeHtml(m.Role || '')}"
                            oninput="members[${i}].Role = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
                     <input placeholder="GitHub URL" value="${escapeHtml(m.GithubUrl || '')}"

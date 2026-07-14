@@ -8,7 +8,7 @@ namespace Portfolio.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Başlık zorunlu")]
+        [Required(ErrorMessage = "Title is required.")]
         public string Title { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
 
@@ -23,9 +23,9 @@ namespace Portfolio.Models
         // ["pfSense 2.7", "Snort 3", "Grafana"] — JSONB
         public string? SoftwareUsed { get; set; }
 
-        // Ağ topoloji diyagramı gibi büyük görseller için ayrı alan
+        // Separate field for large assets such as network topology diagrams.
         public string? NetworkDiagramUrl { get; set; }
-        public string? NetworkTopology { get; set; }    // JSONB — interaktif ağ haritası
+        public string? NetworkTopology { get; set; }    // JSONB — interactive network map
         public string? CoverImageUrl { get; set; }
         public bool IsMainLab { get; set; } = false;
         public VisibilityStatus Status { get; set; } = VisibilityStatus.Draft;
@@ -51,7 +51,7 @@ namespace Portfolio.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Başlık zorunlu")]
+        [Required(ErrorMessage = "Title is required.")]
         public string Title { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
 
@@ -83,7 +83,7 @@ namespace Portfolio.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Başlık zorunlu")]
+        [Required(ErrorMessage = "Title is required.")]
         public string Title { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
 
@@ -100,7 +100,7 @@ namespace Portfolio.Models
         // Deserialize: JsonSerializer.Deserialize<List<TeamMember>>(TeamMembers)
         public string? TeamMembers { get; set; }
 
-        public string? Outcome { get; set; }                     // "2. Ödül", "Tamamlandı"
+        public string? Outcome { get; set; }                     // "Second Place", "Completed"
         public string? CoverImageUrl { get; set; }
         public string? GithubUrl { get; set; }
         public string? LiveDemoUrl { get; set; }

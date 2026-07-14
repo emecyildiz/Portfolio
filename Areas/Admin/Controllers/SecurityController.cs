@@ -40,13 +40,13 @@ public class SecurityController : AdminBaseController
     public async Task<IActionResult> Create(SecurityResearch model,
         string? ToolsUsed, List<IFormFile>? Images)
     {
-        if (!ModelState.IsValid)      // ← bunu ekle
+        if (!ModelState.IsValid)
             return View(model);
 
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "security");
         if (category == null)
         {
-            ModelState.AddModelError("", "Güvenlik kategorisi bulunamadı.");
+            ModelState.AddModelError("", "The security category could not be found.");
             return View(model);
         }
 
@@ -60,7 +60,7 @@ public class SecurityController : AdminBaseController
             ? DateTime.UtcNow
             : null;
 
-        // Araçları JSON listesine çevir
+        // Convert the tools string into a JSON list.
         if (!string.IsNullOrEmpty(ToolsUsed))
         {
             var tools = ToolsUsed
@@ -99,7 +99,7 @@ public class SecurityController : AdminBaseController
 
         if (research == null) return NotFound();
 
-        // ToolsUsed JSON'dan string'e çevir
+        // Convert the ToolsUsed JSON list back into a comma-separated string.
         var toolsString = "";
         if (!string.IsNullOrEmpty(research.ToolsUsed))
         {

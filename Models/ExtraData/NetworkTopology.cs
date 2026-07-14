@@ -1,8 +1,8 @@
 ﻿namespace Portfolio.Models.ExtraData;
 
 /// <summary>
-/// HomelabPost.NetworkTopology JSONB sütununun şeması.
-/// Packet Tracer tarzı interaktif ağ haritası için.
+/// Schema for the HomelabPost.NetworkTopology JSONB column.
+/// Used by the interactive Packet Tracer-style network map.
 /// </summary>
 public class NetworkTopology
 {
@@ -14,23 +14,23 @@ public class NetworkNode
 {
     public int Id { get; set; }
     public string Label { get; set; } = string.Empty;
-    public string IconUrl { get; set; } = string.Empty;         // Küçük ikon — haritada görünen
+    public string IconUrl { get; set; } = string.Empty;         // Small icon shown on the map
     public string DeviceType { get; set; } = "custom";          // router, switch, firewall, server, client, custom, sensor, audio
     public double? X { get; set; }
     public double? Y { get; set; }
 
-    // Bir Electronics projesine bağlıysa buradan fotoğraf/malzeme otomatik çekilir
+    // When linked to an Electronics project, image and hardware details are loaded automatically.
     public string? LinkedProjectSlug { get; set; }
 
-    // Bağlantısız cihazlar için (linkedProjectSlug boşsa) manuel girilecek alanlar
+    // Manually entered fields for devices without a linked project.
     public string? StandaloneImageUrl { get; set; }
     public string? StandaloneHardware { get; set; }
 
-    // Her cihaz için ortak — Homelab'a özel bilgiler
-    public string ShortInfo { get; set; } = string.Empty;       // Hover'da görünen kısa özet
+    // Homelab-specific information shared by every device.
+    public string ShortInfo { get; set; } = string.Empty;       // Short summary shown on hover
     public string? IpAddress { get; set; }
-    public string HomelabRole { get; set; } = string.Empty;     // Bu ağda ne işe yarıyor
-    public string? HomelabNotes { get; set; }                    // Ekstra notlar
+    public string HomelabRole { get; set; } = string.Empty;     // Purpose on this network
+    public string? HomelabNotes { get; set; }                    // Additional notes
 }
 
 public class NetworkEdge

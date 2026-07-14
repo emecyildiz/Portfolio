@@ -1,14 +1,14 @@
 ﻿@model Portfolio.Models.Project
 @{
-    ViewData["Title"] = "Yeni Elektronik Projesi";
+    ViewData["Title"] = "New Electronics Project";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Yeni Elektronik Projesi</h2>
+    <h2 class="text-2xl font-bold text-white">New Electronics Project</h2>
 </div>
 
-<!-- EasyMDE Markdown editör -->
+<!-- EasyMDE Markdown editor -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 
@@ -17,85 +17,85 @@
 
     <div class="grid grid-cols-3 gap-6">
 
-        <!-- Sol — Ana içerik -->
+        <!-- Left column — main content -->
         <div class="col-span-2 space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">İçerik</h3>
+                <h3 class="text-sm font-medium text-gray-400">Content</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                    <label class="block text-sm text-gray-400 mb-1">Title</label>
                     <input asp-for="Title"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Özet</label>
+                    <label class="block text-sm text-gray-400 mb-1">Summary</label>
                     <textarea asp-for="Summary" rows="2"
                               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                              placeholder="Liste sayfasında görünecek kısa açıklama"></textarea>
+                              placeholder="Short description shown on the listing page"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">İçerik (Markdown)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Content (Markdown)</label>
                     <textarea asp-for="Content" id="content-editor"></textarea>
                 </div>
             </div>
 
-            <!-- Elektronik özel alanlar -->
+            <!-- Electronics-specific fields -->
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Teknik Detaylar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Technical Details</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Mikrodenetleyici</label>
+                    <label class="block text-sm text-gray-400 mb-1">Microcontroller</label>
                     <input name="Microcontroller"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                            placeholder="ESP32-WROOM-32" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Bileşenler</label>
+                    <label class="block text-sm text-gray-400 mb-1">Components</label>
                     <input name="Components"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="SSD1306, Li-Po 3.7V, AMS1117 (virgülle ayır)" />
-                    <p class="text-xs text-gray-600 mt-1">Virgülle ayırarak yaz</p>
+                           placeholder="SSD1306, Li-Po 3.7V, AMS1117 (comma-separated)" />
+                    <p class="text-xs text-gray-600 mt-1">Separate values with commas</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Programlama Dili</label>
+                    <label class="block text-sm text-gray-400 mb-1">Programming Language</label>
                     <input name="ProgrammingLanguage"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                            placeholder="C (Arduino Framework)" />
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Devre Şeması URL</label>
+                    <label class="block text-sm text-gray-400 mb-1">Circuit Schematic URL</label>
                     <input name="SchematicUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="/uploads/schematics/proje.pdf" />
+                           placeholder="/uploads/schematics/project.pdf" />
                 </div>
 
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input name="IsOpenSource" type="checkbox" class="w-4 h-4 rounded" />
-                    Açık kaynak
+                    Open source
                 </label>
             </div>
 
-            <!-- Görseller -->
+            <!-- Images -->
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <h3 class="text-sm font-medium text-gray-400 mb-4">Görseller</h3>
+                <h3 class="text-sm font-medium text-gray-400 mb-4">Images</h3>
                 <input name="Images" type="file" multiple accept="image/*"
                        class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700" />
-                <p class="text-xs text-gray-600 mt-2">Birden fazla görsel seçebilirsin. İlk görsel kapak olur.</p>
+                <p class="text-xs text-gray-600 mt-2">You can select multiple images. The first image becomes the cover.</p>
             </div>
         </div>
 
-        <!-- Sağ — Ayarlar -->
+        <!-- Right column — settings -->
         <div class="space-y-4">
             <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-                <h3 class="text-sm font-medium text-gray-400">Ayarlar</h3>
+                <h3 class="text-sm font-medium text-gray-400">Settings</h3>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                    <label class="block text-sm text-gray-400 mb-1">Status</label>
                     <select asp-for="Status" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
                     </select>
@@ -103,7 +103,7 @@
 
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="IsFeatured" type="checkbox" class="w-4 h-4 rounded" />
-                    Ana sayfada öne çıkar
+                    Feature on the homepage
                 </label>
 
                 <div>
@@ -114,7 +114,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Canlı Demo</label>
+                    <label class="block text-sm text-gray-400 mb-1">Live Demo</label>
                     <input asp-for="LiveDemoUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                            placeholder="https://..." />
@@ -124,11 +124,11 @@
             <div class="flex flex-col gap-2">
                 <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
-                    Kaydet
+                    Save
                 </button>
                 <a href="@Url.Action("Index", "Electronics", new { area = "Admin" })"
                    class="w-full text-center border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm py-2.5 rounded-lg transition">
-                    İptal
+                    Cancel
                 </a>
             </div>
         </div>

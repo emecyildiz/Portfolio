@@ -26,7 +26,7 @@ public class ServiceController : AdminBaseController
     {
         if (string.IsNullOrWhiteSpace(model.Title))
         {
-            ModelState.AddModelError("", "Başlık zorunlu.");
+            ModelState.AddModelError("", "Title is required.");
             return View(model);
         }
 

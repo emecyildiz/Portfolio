@@ -6,19 +6,19 @@ namespace Portfolio.Models
     {
         public int Id { get; set; }
 
-        public string Name { get; set; } = string.Empty;          // "Elektronik & Mikrodenetleyiciler"
-        public string Slug { get; set; } = string.Empty;          // "electronics" — unique index ile
+        public string Name { get; set; } = string.Empty;          // "Electronics & Microcontrollers"
+        public string Slug { get; set; } = string.Empty;          // "electronics" — protected by a unique index
         public string? IconClass { get; set; }                    // "ti ti-cpu" (Tabler Icons)
-        public string? Description { get; set; }                  // Bölüm sayfasındaki hero text
+        public string? Description { get; set; }                  // Hero text on the section page
 
-        // VisibilityStatus.Public → bölüm görünür
-        // VisibilityStatus.Draft  → bölüm gizli (maintenance)
+        // VisibilityStatus.Public → section is visible
+        // VisibilityStatus.Draft  → section is hidden for maintenance
         public VisibilityStatus Status { get; set; } = VisibilityStatus.Public;
 
-        // True ise URL'den bile erişilemez, 404 döner (notlar gibi özel bölümler)
+        // Private sections return 404 even when accessed directly by URL.
         public bool IsPrivate { get; set; } = false;
 
-        public int SortOrder { get; set; } = 0;                   // Menü sıralaması
+        public int SortOrder { get; set; } = 0;                   // Menu order
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

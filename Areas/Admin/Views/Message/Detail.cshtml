@@ -1,17 +1,17 @@
 ﻿@model Portfolio.Models.ContactMessage
 @{
-    ViewData["Title"] = "Mesaj Detayı";
+    ViewData["Title"] = "Message Details";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8 flex items-center justify-between">
     <div>
-        <h2 class="text-2xl font-bold text-white">Mesaj Detayı</h2>
+        <h2 class="text-2xl font-bold text-white">Message Details</h2>
         <p class="text-gray-500 mt-1">@Model.CreatedAt.ToString("dd MMMM yyyy HH:mm")</p>
     </div>
     <a href="@Url.Action("Index", "Message", new { area = "Admin" })"
        class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-4 py-2 rounded-lg transition">
-        ← Geri
+        ← Back
     </a>
 </div>
 
@@ -19,11 +19,11 @@
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <p class="text-xs text-gray-500 mb-1">Gönderen</p>
+                <p class="text-xs text-gray-500 mb-1">Sender</p>
                 <p class="text-white font-medium">@Model.Name</p>
             </div>
             <div>
-                <p class="text-xs text-gray-500 mb-1">E-posta</p>
+                <p class="text-xs text-gray-500 mb-1">Email</p>
                 <a href="mailto:@Model.Email" class="text-blue-400 hover:text-blue-300 text-sm">@Model.Email</a>
             </div>
         </div>
@@ -31,7 +31,7 @@
         @if (!string.IsNullOrEmpty(Model.Subject))
         {
             <div>
-                <p class="text-xs text-gray-500 mb-1">Konu</p>
+                <p class="text-xs text-gray-500 mb-1">Subject</p>
                 <p class="text-white">@Model.Subject</p>
             </div>
         }
@@ -39,22 +39,22 @@
         @if (Model.Service != null)
         {
             <div>
-                <p class="text-xs text-gray-500 mb-1">İlgilendiği Hizmet</p>
+                <p class="text-xs text-gray-500 mb-1">Service of Interest</p>
                 <p class="text-white">@Model.Service.Title</p>
             </div>
         }
 
         <div>
-            <p class="text-xs text-gray-500 mb-2">Mesaj</p>
+            <p class="text-xs text-gray-500 mb-2">Message</p>
             <div class="bg-gray-800 rounded-lg p-4 text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
                 @Model.Message
             </div>
         </div>
     </div>
 
-    <!-- Durum değiştir -->
+    <!-- Change status -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <p class="text-sm font-medium text-gray-400 mb-4">Durum Değiştir</p>
+        <p class="text-sm font-medium text-gray-400 mb-4">Change Status</p>
         <div class="flex flex-wrap gap-2">
             @foreach (var status in Enum.GetValues<Portfolio.Models.Enums.ContactStatus>())
             {
@@ -75,11 +75,11 @@
     </div>
 
     <form method="post" action="@Url.Action("Delete", "Message", new { area = "Admin", id = Model.Id })"
-          onsubmit="return confirm('Bu mesajı silmek istediğine emin misin?')">
+          onsubmit="return confirm('Are you sure you want to delete this message?')">
         @Html.AntiForgeryToken()
         <button type="submit"
                 class="w-full border border-red-900 text-red-400 hover:bg-red-900/30 text-sm py-2.5 rounded-lg transition">
-            Mesajı Sil
+            Delete Message
         </button>
     </form>
 </div>

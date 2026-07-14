@@ -1,11 +1,11 @@
 ﻿@model Portfolio.Models.Note
 @{
-    ViewData["Title"] = "Yeni Not";
+    ViewData["Title"] = "New Note";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Yeni Not</h2>
+    <h2 class="text-2xl font-bold text-white">New Note</h2>
 </div>
 
 <form method="post">
@@ -15,39 +15,39 @@
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
 
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Başlık</label>
+                <label class="block text-sm text-gray-400 mb-1">Title</label>
                 <input asp-for="Title"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
 
             <div>
-                <label class="block text-sm text-gray-400 mb-1">İçerik</label>
+                <label class="block text-sm text-gray-400 mb-1">Content</label>
                 <textarea asp-for="Content" rows="6"
                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 font-mono"></textarea>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Not Türü</label>
+                    <label class="block text-sm text-gray-400 mb-1">Note Type</label>
                     <select asp-for="NoteType"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.NoteType>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Öncelik</label>
+                    <label class="block text-sm text-gray-400 mb-1">Priority</label>
                     <select asp-for="Priority"
                             asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.NotePriority>()"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">İlgili Link (opsiyonel)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Related Link (optional)</label>
                     <input asp-for="RelatedUrl"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                            placeholder="/electronics/proje-slug veya harici bir link" />
                     <p class="text-xs text-gray-600 mt-1">
-                        "Şu an ne yapıyorum" widget'ında bu nota tıklanırsa buraya gider.
+                        Used as the destination when this note appears in the "Current Focus" widget.
                     </p>
                 </div>
             </div>
@@ -55,13 +55,13 @@
             <div class="flex items-center gap-6">
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input asp-for="IsTodo" type="checkbox" class="w-4 h-4 rounded" id="isTodoCheck" />
-                    Yapılacak listesi
+                    Add to task list
                 </label>
             </div>
 
             <div id="todoFields" class="hidden space-y-3">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Son Tarih</label>
+                    <label class="block text-sm text-gray-400 mb-1">Due Date</label>
                     <input asp-for="DueDate" type="date"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
@@ -71,11 +71,11 @@
         <div class="flex gap-3">
             <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-                Kaydet
+                Save
             </button>
             <a href="@Url.Action("Index", "Note", new { area = "Admin" })"
                class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-6 py-2.5 rounded-lg transition">
-                İptal
+                Cancel
             </a>
         </div>
     </div>

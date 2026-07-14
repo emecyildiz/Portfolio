@@ -9,35 +9,35 @@ namespace Portfolio.Models
         public int Id { get; set; }
 
 
-        [Required(ErrorMessage = "Başlık zorunlu")]
+        [Required(ErrorMessage = "Title is required.")]
         public string Title { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;           // unique index
 
-        // Liste sayfasında görünen kısa açıklama (~300 karakter)
+        // Short description shown on listing pages (approximately 300 characters).
         public string Summary { get; set; } = string.Empty;
 
-        // Detay sayfasında render edilen tam Markdown içerik
+        // Full Markdown content rendered on the detail page.
         public string Content { get; set; } = string.Empty;
 
         public string? CoverImageUrl { get; set; }
         public string? LiveDemoUrl { get; set; }                   // subdomain linki
         public string? GithubUrl { get; set; }
 
-        // Kategoriye göre farklı JSON şeması — bkz. ExtraDataSchemas.cs
+        // Category-specific JSON schema; see ExtraDataSchemas.cs.
         public string? ExtraData { get; set; }
 
-        public bool IsFeatured { get; set; } = false;             // Ana sayfada öne çıkar
-        public int SortOrder { get; set; } = 0;                   // Featured sıralaması
+        public bool IsFeatured { get; set; } = false;             // Feature on the homepage
+        public int SortOrder { get; set; } = 0;                   // Featured-content order
 
         public VisibilityStatus Status { get; set; } = VisibilityStatus.Draft;
 
-        // SlugService tarafından otomatik hesaplanır (kelime sayısı / 200)
+        // Calculated automatically by the reading-time service (word count / 200).
         public int ReadingTimeMinutes { get; set; } = 0;
 
-        // ViewCountService ile raw SQL ile artırılır (EF tracking olmadan)
+        // Incremented with raw SQL by ViewCountService without EF tracking.
         public int ViewCount { get; set; } = 0;
 
-        // Draft → Public geçişinde set edilir, liste sayfasında görünür
+        // Set when moving from Draft to Public and shown on listing pages.
         public DateTime? PublishedAt { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -1,11 +1,11 @@
 ﻿@model Portfolio.Models.Certificate
 @{
-    ViewData["Title"] = "Yeni Sertifika";
+    ViewData["Title"] = "New Certificate";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Yeni Sertifika</h2>
+    <h2 class="text-2xl font-bold text-white">New Certificate</h2>
 </div>
 
 <div class="max-w-xl bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -14,51 +14,51 @@
 
         <div class="space-y-4">
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Sertifika Adı</label>
+                <label class="block text-sm text-gray-400 mb-1">Certificate Name</label>
                 <input asp-for="Title"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                        placeholder="CompTIA Security+" />
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Veren Kurum</label>
+                <label class="block text-sm text-gray-400 mb-1">Issuer</label>
                 <input asp-for="Issuer"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
                        placeholder="CompTIA" />
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Alınma Tarihi</label>
+                    <label class="block text-sm text-gray-400 mb-1">Issue Date</label>
                     <input asp-for="IssuedDate" type="date"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Son Kullanma (opsiyonel)</label>
+                    <label class="block text-sm text-gray-400 mb-1">Expiry Date (optional)</label>
                     <input asp-for="ExpiryDate" type="date"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Sertifika Numarası (opsiyonel)</label>
+                <label class="block text-sm text-gray-400 mb-1">Credential ID (optional)</label>
                 <input asp-for="CredentialId"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Doğrulama Linki (opsiyonel)</label>
+                <label class="block text-sm text-gray-400 mb-1">Verification Link (optional)</label>
                 <input asp-for="CredentialUrl"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Rozet Görseli URL (opsiyonel)</label>
+                <label class="block text-sm text-gray-400 mb-1">Badge Image URL (optional)</label>
                 <input asp-for="ImageUrl"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Sıra</label>
+                <label class="block text-sm text-gray-400 mb-1">Sort Order</label>
                 <input asp-for="SortOrder" type="number"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Durum</label>
+                <label class="block text-sm text-gray-400 mb-1">Status</label>
                 <select asp-for="Status"
                         asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.VisibilityStatus>()"
                         class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
@@ -69,11 +69,11 @@
         <div class="flex gap-3 mt-6">
             <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-                Kaydet
+                Save
             </button>
             <a href="@Url.Action("Index", "Certificate", new { area = "Admin" })"
                class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-6 py-2.5 rounded-lg transition">
-                İptal
+                Cancel
             </a>
         </div>
     </form>

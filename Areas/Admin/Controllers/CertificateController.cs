@@ -27,7 +27,7 @@ public class CertificateController : AdminBaseController
     {
         if (string.IsNullOrWhiteSpace(model.Title))
         {
-            TempData["Error"] = "Başlık zorunlu.";
+            TempData["Error"] = "Title is required.";
             return View(model);
         }
 
@@ -36,7 +36,7 @@ public class CertificateController : AdminBaseController
         _db.Certificates.Add(model);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Sertifika eklendi.";
+        TempData["Success"] = "The certificate was added.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -66,7 +66,7 @@ public class CertificateController : AdminBaseController
         existing.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
-        TempData["Success"] = "Sertifika güncellendi.";
+        TempData["Success"] = "The certificate was updated.";
         return RedirectToAction(nameof(Index));
     }
 

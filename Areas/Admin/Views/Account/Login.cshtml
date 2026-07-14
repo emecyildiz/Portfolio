@@ -1,13 +1,13 @@
 ﻿@model Portfolio.Models.ViewModels.LoginViewModel
 @{
-    Layout = null; // Login sayfasında sidebar yok
+    Layout = null; // The login page does not use the admin sidebar.
 }
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Giriş</title>
+    <title>Sign In</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-950 min-h-screen flex items-center justify-center">
@@ -15,8 +15,8 @@
     <div class="w-full max-w-md">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8">
 
-            <h1 class="text-xl font-bold text-white mb-1">Giriş</h1>
-            <p class="text-sm text-gray-500 mb-6">Admin paneline erişim</p>
+            <h1 class="text-xl font-bold text-white mb-1">Sign In</h1>
+            <p class="text-sm text-gray-500 mb-6">Access the admin panel</p>
 
             @if (!ViewData.ModelState.IsValid)
             {
@@ -32,14 +32,14 @@
                 @Html.AntiForgeryToken()
 
                 <div class="mb-4">
-                    <label class="block text-sm text-gray-400 mb-1">E-posta</label>
+                    <label class="block text-sm text-gray-400 mb-1">Email</label>
                     <input asp-for="Email" type="email"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
                            placeholder="admin@portfolio.local" />
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm text-gray-400 mb-1">Şifre</label>
+                    <label class="block text-sm text-gray-400 mb-1">Password</label>
                     <input asp-for="Password" type="password"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition" />
                 </div>
@@ -47,12 +47,12 @@
                 <div class="mb-6 flex items-center gap-2">
                     <input asp-for="RememberMe" type="checkbox"
                            class="w-4 h-4 rounded border-gray-700 bg-gray-800" />
-                    <label class="text-sm text-gray-400">Beni hatırla</label>
+                    <label class="text-sm text-gray-400">Remember me</label>
                 </div>
 
                 <button type="submit"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm">
-                    Giriş Yap
+                    Sign In
                 </button>
             </form>
         </div>

@@ -7,28 +7,28 @@ namespace Portfolio.Services;
 public interface IMediaService
 {
     /// <summary>
-    /// Yüklenen dosyayı kaydeder, media tablosuna ekler ve Media nesnesini döner.
+    /// Saves an uploaded file, adds it to the media table, and returns the Media entity.
     /// </summary>
     Task<Media> SaveAsync(IFormFile file, string entityType, int entityId,
                           string? altText = null, string? caption = null);
 
     /// <summary>
-    /// Belirli bir içeriğe ait tüm görselleri getirir.
+    /// Gets all images attached to a content item.
     /// </summary>
     Task<List<Media>> GetByEntityAsync(string entityType, int entityId);
 
     /// <summary>
-    /// Görseli siler — hem dosyayı hem veritabanı kaydını.
+    /// Deletes both the image file and its database record.
     /// </summary>
     Task DeleteAsync(int mediaId);
 
     /// <summary>
-    /// Görsel yalnızca belirtilen içeriğe aitse siler.
+    /// Deletes an image only when it belongs to the specified content item.
     /// </summary>
     Task<bool> DeleteAsync(int mediaId, string entityType, int entityId);
 
     /// <summary>
-    /// Bir görseli cover olarak işaretle, diğerlerinin IsCover'ını false yap.
+    /// Marks one image as the cover and clears IsCover on the others.
     /// </summary>
     Task<bool> SetCoverAsync(int mediaId, string entityType, int entityId);
 }
@@ -53,35 +53,35 @@ public class MediaService : IMediaService
                                        string? altText = null, string? caption = null)
     {
         if (!AllowedEntityTypes.Contains(entityType) || entityId <= 0)
-            throw new InvalidOperationException("Geçersiz medya hedefi.");
+            throw new InvalidOperationException("Invalid media target.");
 
         if (!await EntityExistsAsync(entityType, entityId))
-            throw new InvalidOperationException("Medyanın bağlanacağı içerik bulunamadı.");
+            throw new InvalidOperationException("The content item for this media could not be found.");
 
-        // Boyut kontrolü (appsettings'ten alır — varsayılan 10MB)
+        // Enforce the size limit from appsettings (10 MB by default).
         var maxSize = _config.GetValue<long>("MediaStorage:MaxFileSizeBytes", 10_485_760);
         if (file.Length <= 0)
-            throw new InvalidOperationException("Boş dosya yüklenemez.");
+            throw new InvalidOperationException("An empty file cannot be uploaded.");
 
         if (file.Length > maxSize)
-            throw new InvalidOperationException($"Dosya çok büyük. Maksimum: {maxSize / 1_048_576}MB");
+            throw new InvalidOperationException($"The file is too large. Maximum: {maxSize / 1_048_576} MB");
 
-        // Uzantı, MIME ve gerçek dosya imzası birbiriyle eşleşmeli.
+        // The extension, MIME type, and actual file signature must match.
         var validatedUpload = await UploadFileValidator.ValidateImageAsync(file);
         if (validatedUpload == null)
-            throw new InvalidOperationException("Dosya geçerli bir JPEG, PNG, WebP veya GIF görseli değil.");
+            throw new InvalidOperationException("The file is not a valid JPEG, PNG, WebP, or GIF image.");
 
-        // Benzersiz dosya adı — kullanıcıdan gelen ad hiçbir zaman fiziksel yola eklenmez.
+        // Generate a unique filename; never include the user-supplied name in the physical path.
         var uniqueName = $"{Guid.NewGuid()}{validatedUpload.Extension}";
 
-        // Kayıt yolu: wwwroot/uploads/project/42/dosya.jpg
+        // Storage path example: wwwroot/uploads/project/42/file.jpg
         var relativePath = Path.Combine("uploads", entityType, entityId.ToString(), uniqueName);
         var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
 
-        // Klasörü oluştur (yoksa)
+        // Create the directory when it does not exist.
         Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
 
-        // Media kaydı oluştur
+        // Create the media record.
         var media = new Media
         {
             EntityType = entityType,
@@ -99,7 +99,7 @@ public class MediaService : IMediaService
 
         try
         {
-            // Dosya veya veritabanı işlemi başarısız olursa yarım dosya bırakma.
+            // Do not leave a partial file behind when file or database operations fail.
             await using (var stream = new FileStream(
                              physicalPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
@@ -132,7 +132,7 @@ public class MediaService : IMediaService
     public async Task DeleteAsync(int mediaId)
     {
         var media = await _db.Media.FindAsync(mediaId)
-            ?? throw new InvalidOperationException("Medya bulunamadı.");
+            ?? throw new InvalidOperationException("Media could not be found.");
 
         await DeleteMediaAsync(media);
     }
@@ -157,7 +157,7 @@ public class MediaService : IMediaService
 
         await ClearCoverReferenceAsync(media);
 
-        // Fiziksel dosyayı sil
+        // Delete the physical file.
         var physicalPath = GetSafeUploadPhysicalPath(media.Url);
         if (File.Exists(physicalPath))
             File.Delete(physicalPath);
@@ -212,7 +212,7 @@ public class MediaService : IMediaService
         if (!AllowedEntityTypes.Contains(entityType) || entityId <= 0)
             return false;
 
-        // Önce hepsini false yap
+        // Clear the cover flag on all images first.
         var all = await _db.Media
             .Where(m => m.EntityType == entityType && m.EntityId == entityId)
             .ToListAsync();
@@ -295,7 +295,7 @@ public class MediaService : IMediaService
             : StringComparison.Ordinal;
 
         if (!physicalPath.StartsWith(rootPrefix, comparison))
-            throw new InvalidOperationException("Geçersiz medya dosya yolu.");
+            throw new InvalidOperationException("Invalid media file path.");
 
         return physicalPath;
     }
@@ -309,11 +309,11 @@ public class MediaService : IMediaService
         }
         catch (IOException)
         {
-            // Asıl yükleme/veritabanı hatasını koru; temizlik sonraki bakımda yapılabilir.
+            // Preserve the original upload or database error; cleanup can happen during maintenance.
         }
         catch (UnauthorizedAccessException)
         {
-            // Asıl yükleme/veritabanı hatasını koru; temizlik sonraki bakımda yapılabilir.
+            // Preserve the original upload or database error; cleanup can happen during maintenance.
         }
     }
 

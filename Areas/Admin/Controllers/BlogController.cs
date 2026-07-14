@@ -38,13 +38,13 @@ public class BlogController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(BlogPost model, List<IFormFile>? Images)
     {
-        if (!ModelState.IsValid)      // ← bunu ekle
+        if (!ModelState.IsValid)
             return View(model);
 
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "blog");
         if (category == null)
         {
-            ModelState.AddModelError("", "Blog kategorisi bulunamadı.");
+            ModelState.AddModelError("", "The blog category could not be found.");
             return View(model);
         }
 

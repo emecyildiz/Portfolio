@@ -6,24 +6,24 @@
 
 <div class="mb-8">
     <h2 class="text-2xl font-bold text-white">Dashboard</h2>
-    <p class="text-gray-500 mt-1">Hoş geldin.</p>
+    <p class="text-gray-500 mt-1">Welcome back.</p>
 </div>
 
 <div class="grid grid-cols-4 gap-4 mb-8">
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <p class="text-sm text-gray-500">Projeler</p>
+        <p class="text-sm text-gray-500">Projects</p>
         <p class="text-3xl font-bold text-white mt-1">@Model.ProjectCount</p>
     </div>
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <p class="text-sm text-gray-500">Güvenlik Araştırmaları</p>
+        <p class="text-sm text-gray-500">Security Research</p>
         <p class="text-3xl font-bold text-white mt-1">@Model.SecurityCount</p>
     </div>
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <p class="text-sm text-gray-500">Blog Yazıları</p>
+        <p class="text-sm text-gray-500">Blog Posts</p>
         <p class="text-3xl font-bold text-white mt-1">@Model.BlogCount</p>
     </div>
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <p class="text-sm text-gray-500">Okunmamış Mesajlar</p>
+        <p class="text-sm text-gray-500">Unread Messages</p>
         <p class="text-3xl font-bold text-white mt-1">@Model.UnreadMessages</p>
     </div>
 </div>
@@ -35,7 +35,7 @@
 @if (pageViews != null && pageViews.Any())
 {
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
-        <h3 class="text-sm font-medium text-gray-400 mb-4">Son 7 Gün Ziyaretçi</h3>
+        <h3 class="text-sm font-medium text-gray-400 mb-4">Visitors — Last 7 Days</h3>
         <div class="flex items-end gap-2 h-32">
             @foreach (var day in pageViews)
             {
@@ -56,22 +56,22 @@
 @if (topCountries != null && topCountries.Any())
 {
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h3 class="text-sm font-medium text-gray-400 mb-4">Son 30 Gün — Ülkeler</h3>
+        <h3 class="text-sm font-medium text-gray-400 mb-4">Countries — Last 30 Days</h3>
         <div class="space-y-2">
             @foreach (var c in topCountries)
             {
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-gray-300">@c.Country</span>
-                    <span class="text-gray-500">@c.Count ziyaret</span>
+                    <span class="text-gray-500">@c.Count @(c.Count == 1 ? "visit" : "visits")</span>
                 </div>
             }
         </div>
     </div>
 }
 
-<!-- Kategori durumları -->
+<!-- Category statuses -->
 <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-    <h3 class="text-sm font-medium text-gray-400 mb-4">Bölüm Durumları</h3>
+    <h3 class="text-sm font-medium text-gray-400 mb-4">Section Statuses</h3>
     <div class="space-y-2">
         @foreach (var cat in Model.RecentCategories)
         {
@@ -79,11 +79,11 @@
                 <span class="text-sm text-gray-300">@cat.Name</span>
                 @if (cat.Status == Portfolio.Models.Enums.VisibilityStatus.Public)
                 {
-                    <span class="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full">Yayında</span>
+                    <span class="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full">Public</span>
                 }
                 else
                 {
-                    <span class="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full">Gizli</span>
+                    <span class="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full">Hidden</span>
                 }
             </div>
         }

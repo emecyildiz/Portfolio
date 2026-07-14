@@ -24,7 +24,7 @@ public class ElectronicsController : AdminBaseController
         _media = media;
     }
 
-    // Liste
+    // List
     public async Task<IActionResult> Index()
     {
         var projects = await _db.Projects
@@ -37,10 +37,10 @@ public class ElectronicsController : AdminBaseController
         return View(projects);
     }
 
-    // Yeni form
+    // New project form
     public IActionResult Create() => View(new Project());
 
-    // Yeni kaydet
+    // Save a new project
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Project model,
@@ -48,13 +48,13 @@ public class ElectronicsController : AdminBaseController
         string? ProgrammingLanguage, bool IsOpenSource,
         List<IFormFile>? Images)
     {
-        if (!ModelState.IsValid)      // ← bunu ekle
+        if (!ModelState.IsValid)
             return View(model);
-        // Elektronik kategorisini bul
+        // Find the electronics category.
         var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "electronics");
         if (category == null)
         {
-            ModelState.AddModelError("", "Elektronik kategorisi bulunamadı.");
+            ModelState.AddModelError("", "The electronics category could not be found.");
             return View(model);
         }
 
@@ -65,7 +65,7 @@ public class ElectronicsController : AdminBaseController
         model.UpdatedAt = DateTime.UtcNow;
         model.PublishedAt = model.Status == VisibilityStatus.Public ? DateTime.UtcNow : null;
 
-        // Bileşenleri virgülle ayrılmış string'den listeye çevir
+        // Convert the comma-separated components string into a list.
         var components = Components?
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(c => c.Trim())
@@ -84,7 +84,7 @@ public class ElectronicsController : AdminBaseController
         _db.Projects.Add(model);
         await _db.SaveChangesAsync();
 
-        // Görselleri kaydet
+        // Save images.
         if (Images != null && Images.Any())
         {
             foreach (var file in Images)
@@ -93,7 +93,7 @@ public class ElectronicsController : AdminBaseController
                     await _media.SaveAsync(file, "project", model.Id);
             }
 
-            // İlk görseli cover yap
+            // Use the first image as the cover.
             var firstMedia = await _db.Media
                 .FirstOrDefaultAsync(m => m.EntityType == "project" && m.EntityId == model.Id);
             if (firstMedia != null)
@@ -107,7 +107,7 @@ public class ElectronicsController : AdminBaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // Düzenle formu
+    // Edit form
     public async Task<IActionResult> Edit(int id)
     {
         var project = await _db.Projects
@@ -116,7 +116,7 @@ public class ElectronicsController : AdminBaseController
 
         if (project == null) return NotFound();
 
-        // ExtraData'yı parse et
+        // Parse the category-specific extra data.
         var extra = new ElectronicsExtraData();
         if (!string.IsNullOrEmpty(project.ExtraData))
             extra = JsonSerializer.Deserialize<ElectronicsExtraData>(project.ExtraData) ?? extra;
@@ -127,7 +127,7 @@ public class ElectronicsController : AdminBaseController
         return View(project);
     }
 
-    // Düzenle kaydet
+    // Save changes
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Project model,
@@ -138,7 +138,7 @@ public class ElectronicsController : AdminBaseController
         var existing = await _db.Projects.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (existing == null) return NotFound();
 
-        // Slug sadece başlık değiştiyse güncelle
+        // Update the slug only when the title changes.
         if (existing.Title != model.Title)
             existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Projects", id);
 
@@ -171,7 +171,7 @@ public class ElectronicsController : AdminBaseController
 
         await _db.SaveChangesAsync();
 
-        // Yeni görseller
+        // New images
         if (Images != null && Images.Any())
         {
             foreach (var file in Images.Where(f => f.Length > 0))
@@ -181,7 +181,7 @@ public class ElectronicsController : AdminBaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // Görsel sil
+    // Delete an image
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteImage(int mediaId, int projectId)
@@ -192,7 +192,7 @@ public class ElectronicsController : AdminBaseController
         return RedirectToAction(nameof(Edit), new { id = projectId });
     }
 
-    // Cover seç
+    // Select a cover image
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetCover(int mediaId, int projectId)
@@ -203,7 +203,7 @@ public class ElectronicsController : AdminBaseController
         return RedirectToAction(nameof(Edit), new { id = projectId });
     }
 
-    // Görünürlük toggle
+    // Toggle visibility
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Toggle(int id)
@@ -224,7 +224,7 @@ public class ElectronicsController : AdminBaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // Sil
+    // Delete
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
@@ -232,7 +232,7 @@ public class ElectronicsController : AdminBaseController
         var project = await _db.Projects.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (project == null) return NotFound();
 
-        // Önce görselleri sil
+        // Delete related images first.
         var images = await _media.GetByEntityAsync("project", id);
         foreach (var img in images)
             await _media.DeleteAsync(img.Id);

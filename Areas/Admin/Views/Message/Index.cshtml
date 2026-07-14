@@ -1,13 +1,13 @@
 ﻿@model List<Portfolio.Models.ContactMessage>
 @{
-    ViewData["Title"] = "Mesajlar";
+    ViewData["Title"] = "Messages";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Mesajlar</h2>
+    <h2 class="text-2xl font-bold text-white">Messages</h2>
     <p class="text-gray-500 mt-1">
-        @Model.Count(m => !m.IsRead) okunmamış mesaj
+        @Model.Count(m => !m.IsRead) unread @(Model.Count(m => !m.IsRead) == 1 ? "message" : "messages")
     </p>
 </div>
 
@@ -15,12 +15,12 @@
     <table class="w-full text-sm">
         <thead>
             <tr class="border-b border-gray-800">
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Gönderen</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Konu</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Hizmet</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Durum</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Tarih</th>
-                <th class="text-right px-6 py-3 text-gray-400 font-medium">İşlemler</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Sender</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Subject</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Service</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Status</th>
+                <th class="text-left px-6 py-3 text-gray-400 font-medium">Date</th>
+                <th class="text-right px-6 py-3 text-gray-400 font-medium">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -61,14 +61,14 @@
                         <div class="flex items-center justify-end gap-2">
                             <a href="@Url.Action("Detail", "Message", new { area = "Admin", id = m.Id })"
                                class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
-                                Oku
+                                Open
                             </a>
                             <form method="post" action="@Url.Action("Delete", "Message", new { area = "Admin", id = m.Id })"
-                                  onsubmit="return confirm('Bu mesajı silmek istediğine emin misin?')">
+                                  onsubmit="return confirm('Are you sure you want to delete this message?')">
                                 @Html.AntiForgeryToken()
                                 <button type="submit"
                                         class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
-                                    Sil
+                                    Delete
                                 </button>
                             </form>
                         </div>
@@ -81,7 +81,7 @@
     @if (!Model.Any())
     {
         <div class="text-center py-16 text-gray-600">
-            Henüz mesaj yok.
+            No messages yet.
         </div>
     }
 </div>

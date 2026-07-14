@@ -34,7 +34,7 @@ public class PageController : AdminBaseController
     {
         if (string.IsNullOrWhiteSpace(model.Title))
         {
-            TempData["Error"] = "Başlık zorunlu.";
+            TempData["Error"] = "Title is required.";
             return View(model);
         }
 
@@ -45,7 +45,7 @@ public class PageController : AdminBaseController
         _db.Pages.Add(model);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Sayfa oluşturuldu.";
+        TempData["Success"] = "The page was created.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -65,7 +65,7 @@ public class PageController : AdminBaseController
 
         if (string.IsNullOrWhiteSpace(model.Title))
         {
-            TempData["Error"] = "Başlık zorunlu.";
+            TempData["Error"] = "Title is required.";
             return View(model);
         }
 
@@ -82,7 +82,7 @@ public class PageController : AdminBaseController
 
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Sayfa güncellendi.";
+        TempData["Success"] = "The page was updated.";
         return RedirectToAction(nameof(Index));
     }
 

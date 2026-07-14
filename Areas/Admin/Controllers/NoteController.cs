@@ -61,7 +61,7 @@ public class NoteController : AdminBaseController
         existing.IsCompleted = model.IsCompleted;
         existing.DueDate = model.DueDate;
         existing.Priority = model.Priority;
-        existing.RelatedUrl = model.RelatedUrl;    // ← bu satır var mı kontrol et
+        existing.RelatedUrl = model.RelatedUrl;
         existing.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();

@@ -4,22 +4,22 @@ using Portfolio.Models.Enums;
 namespace Portfolio.Models;
 
 /// <summary>
-/// Kod yazmadan admin panelinden eklenebilen basit statik sayfalar.
-/// Hakkımda, SSS, Gizlilik Politikası gibi özel alan gerektirmeyen içerikler için.
+/// Simple static pages that can be added from the admin panel without changing code.
+/// Content that does not require custom fields, such as About, FAQ, or Privacy Policy pages.
 /// </summary>
 public class Page
 {
     public int Id { get; set; }
 
     public string Title { get; set; } = string.Empty;
-    public string Slug { get; set; } = string.Empty;          // /pages/{slug} ile erişilir
+    public string Slug { get; set; } = string.Empty;          // Accessible at /pages/{slug}
 
     public string Content { get; set; } = string.Empty;       // Markdown
     public string? CoverImageUrl { get; set; }
 
     public VisibilityStatus Status { get; set; } = VisibilityStatus.Draft;
 
-    public bool ShowInNav { get; set; } = false;               // Navbar'da gösterilsin mi
+    public bool ShowInNav { get; set; } = false;               // Show in the main navigation
     public int SortOrder { get; set; } = 0;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -11,12 +11,12 @@ namespace Portfolio.Models
         public int EntityId { get; set; }
 
         public string Url { get; set; } = string.Empty;           // Tam URL veya /uploads/... yolu
-        public string Filename { get; set; } = string.Empty;      // Orijinal dosya adı
-        public string? AltText { get; set; }                      // SEO + erişilebilirlik
-        public string? Caption { get; set; }                      // "ESP32'nin Wi-Fi çipi"
+        public string Filename { get; set; } = string.Empty;      // Original filename
+        public string? AltText { get; set; }                      // SEO and accessibility text
+        public string? Caption { get; set; }                      // "ESP32 Wi-Fi chip"
         public string? MimeType { get; set; }                     // "image/webp"
         public long? FileSizeBytes { get; set; }
-        public int? WidthPx { get; set; }                        // Responsive img için
+        public int? WidthPx { get; set; }                        // Used for responsive images
         public int? HeightPx { get; set; }
 
         public int SortOrder { get; set; } = 0;
@@ -25,7 +25,7 @@ namespace Portfolio.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 
-    // ── Etiketler ─────────────────────────────────────────────────────────────
+    // ── Tags ──────────────────────────────────────────────────────────────────
 
     public class Tag
     {
@@ -37,7 +37,7 @@ namespace Portfolio.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Many-to-many — UsingEntity("Taggables") ile yönetilir
+        // Many-to-many relationship managed through UsingEntity("Taggables").
         public ICollection<Project> Projects { get; set; } = new List<Project>();
         public ICollection<SecurityResearch> SecurityResearches { get; set; } = new List<SecurityResearch>();
         public ICollection<HomelabPost> HomelabPosts { get; set; } = new List<HomelabPost>();
@@ -45,13 +45,13 @@ namespace Portfolio.Models
         public ICollection<TeamProject> TeamProjects { get; set; } = new List<TeamProject>();
     }
 
-    // ── Hizmetler ─────────────────────────────────────────────────────────────
+    // ── Services ──────────────────────────────────────────────────────────────
 
     public class Service
     {
         public int Id { get; set; }
 
-        public string Title { get; set; } = string.Empty;         // "Ev Ağı Güvenlik Testi"
+        public string Title { get; set; } = string.Empty;         // "Home Network Security Assessment"
         public string Description { get; set; } = string.Empty;
         public string? IconClass { get; set; }
 
@@ -66,9 +66,9 @@ namespace Portfolio.Models
     }
 
     /// <summary>
-    /// Bir hizmeti ilgili içerik çalışmalarına bağlar.
-    /// Polimorfik: RefType + RefId → hangi içerik.
-    /// Bileşik PK: (ServiceId, RefType, RefId)
+    /// Links a service to related portfolio content.
+    /// Polymorphic: RefType + RefId identifies the referenced content.
+    /// Composite primary key: (ServiceId, RefType, RefId)
     /// </summary>
     public class ServiceReference
     {
@@ -82,7 +82,7 @@ namespace Portfolio.Models
         public string? CustomLabel { get; set; }                   
     }
 
-    // ── İletişim ──────────────────────────────────────────────────────────────
+    // ── Contact ──────────────────────────────────────────────────────────────
 
     public class ContactMessage
     {
@@ -94,11 +94,11 @@ namespace Portfolio.Models
         public string? Subject { get; set; }
         public string Message { get; set; } = string.Empty;
 
-        // Hangi hizmetle ilgileniyor — FK, nullable
+        // Optional foreign key for the service of interest.
         public int? ServiceId { get; set; }
         public Service? Service { get; set; }
 
-        public string? IpAddress { get; set; }                    // Spam kontrolü (IPv6: max 45 char)
+        public string? IpAddress { get; set; }                    // Spam checks (IPv6: maximum 45 characters)
         public string? UserAgent { get; set; }
 
         public bool IsRead { get; set; } = false;
@@ -110,20 +110,20 @@ namespace Portfolio.Models
     // ── Audit Log ─────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Admin panelindeki tüm değişiklikler.
-    /// AuditService tarafından SaveChanges() override'ında otomatik doldurulur.
+    /// Records changes made through the admin panel.
+    /// Populated automatically by AuditService in the SaveChanges() override.
     /// </summary>
     public class AuditLog
     {
-        public long Id { get; set; }                              // BIGSERIAL — büyük tablo
+        public long Id { get; set; }                              // BIGSERIAL for a high-volume table
 
         public AuditAction Action { get; set; }
         public string EntityType { get; set; } = string.Empty;   // "Project", "Category" vs.
         public int EntityId { get; set; }
-        public string? EntityTitle { get; set; }                  // Silinen kayıtlar için başlık snapshot'ı
+        public string? EntityTitle { get; set; }                  // Title snapshot for deleted records
 
-        public string? OldValues { get; set; }                   // JSON — değişmeden önceki hali
-        public string? NewValues { get; set; }                   // JSON — değişmeden sonraki hali
+        public string? OldValues { get; set; }                   // JSON state before the change
+        public string? NewValues { get; set; }                   // JSON state after the change
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

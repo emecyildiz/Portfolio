@@ -14,7 +14,7 @@ public class CategoryController : AdminBaseController
 
     public CategoryController(AppDbContext db) : base(db) { }
 
-    // Liste
+    // List
     public async Task<IActionResult> Index()
     {
         var categories = await _db.Categories
@@ -23,10 +23,10 @@ public class CategoryController : AdminBaseController
         return View(categories);
     }
 
-    // Yeni kategori formu
+    // New category form
     public IActionResult Create() => View(new Category());
 
-    // Yeni kategori kaydet
+    // Save a new category
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Category model)
@@ -43,7 +43,7 @@ public class CategoryController : AdminBaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // Düzenle formu
+    // Edit form
     public async Task<IActionResult> Edit(int id)
     {
         var category = await _db.Categories.FindAsync(id);
@@ -51,7 +51,7 @@ public class CategoryController : AdminBaseController
         return View(category);
     }
 
-    // Düzenle kaydet
+    // Save changes
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Category model)
@@ -59,11 +59,11 @@ public class CategoryController : AdminBaseController
         if (id != model.Id) return BadRequest();
         if (!ModelState.IsValid) return View(model);
 
-        // Veritabanındaki mevcut kaydı al
+        // Load the existing database record.
         var existing = await _db.Categories.FindAsync(id);
         if (existing == null) return NotFound();
 
-        // Sadece değişen alanları güncelle — DateTime sorununu önler
+        // Update only editable fields to preserve database-managed values.
         existing.Name = model.Name;
         existing.Slug = model.Slug;
         existing.Description = model.Description;
@@ -78,7 +78,7 @@ public class CategoryController : AdminBaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // Görünürlük toggle — sidebar'daki aç/kapat butonu
+    // Toggle visibility from the sidebar control.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Toggle(int id)
@@ -96,7 +96,7 @@ public class CategoryController : AdminBaseController
         return RedirectToAction(nameof(Index));
     }
 
-    // Sil
+    // Delete
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
