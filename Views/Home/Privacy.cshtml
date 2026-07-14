@@ -1,6 +1,43 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+@{
+    ViewData["Title"] = "Privacy Notice";
+    ViewData["Description"] = "How this portfolio collects and uses visitor and contact-request information.";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<article class="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <header class="border-b border-white/[0.07] pb-10">
+        <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan">System policy / Privacy</p>
+        <h1 class="mt-5 text-4xl font-semibold tracking-[-0.045em] text-white sm:text-6xl">Privacy notice.</h1>
+        <p class="mt-5 max-w-3xl text-base leading-7 text-slate-400">This notice explains what this portfolio records when you browse the site, submit a work request, or track an existing ticket.</p>
+        <p class="mt-4 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-700">Last updated / July 2026</p>
+    </header>
+
+    <div class="mt-10 space-y-5">
+        <section class="technical-frame surface rounded-2xl p-6 sm:p-8">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">01 / Visitor analytics</p>
+            <h2 class="mt-3 text-2xl font-semibold text-white">Minimal, self-hosted traffic records</h2>
+            <p class="mt-4 text-sm leading-7 text-slate-400">The site records one visitor entry per IP address per day. That record can contain the requested path, IP address, visit time, country, and city. Location is resolved locally with a GeoIP database; the address is not sent to an external geolocation API.</p>
+            <p class="mt-3 text-sm leading-7 text-slate-500">These records are used for aggregate visitor counts, operational monitoring, abuse prevention, and weekly reports. Google Analytics and advertising trackers are not used.</p>
+        </section>
+
+        <section class="technical-frame surface rounded-2xl p-6 sm:p-8">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-signal">02 / Contact and ticket data</p>
+            <h2 class="mt-3 text-2xl font-semibold text-white">Information you submit intentionally</h2>
+            <p class="mt-4 text-sm leading-7 text-slate-400">A work request stores the name, email address, optional subject, message, selected service, submission time, IP address, browser user-agent, generated ticket number, and request status.</p>
+            <p class="mt-3 text-sm leading-7 text-slate-500">This information is used only to review the request, respond to it, track its status, and protect the form from abuse. Do not include passwords, access tokens, private keys, confidential datasets, or other secrets in the message.</p>
+        </section>
+
+        <section class="grid gap-5 md:grid-cols-2">
+            <div class="surface rounded-2xl p-6 sm:p-8"><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-violet-300">03 / Cookies</p><h2 class="mt-3 text-xl font-semibold text-white">Essential security only</h2><p class="mt-4 text-sm leading-7 text-slate-500">The public site does not use advertising or analytics cookies. Essential cookies may be created for form security and anti-forgery protection. The private admin area uses a secure authentication cookie.</p></div>
+            <div class="surface rounded-2xl p-6 sm:p-8"><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-orange-300">04 / External resources</p><h2 class="mt-3 text-xl font-semibold text-white">Third-party delivery networks</h2><p class="mt-4 text-sm leading-7 text-slate-500">Fonts and interface libraries are currently delivered through Google Fonts, the Tailwind CDN, and unpkg. Those providers may receive standard request information such as your IP address and user-agent when the browser downloads a resource.</p></div>
+        </section>
+
+        <section class="surface rounded-2xl p-6 sm:p-8">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">05 / Retention and control</p>
+            <h2 class="mt-3 text-2xl font-semibold text-white">Operational retention</h2>
+            <p class="mt-4 text-sm leading-7 text-slate-400">Records are kept only for site operation, security review, visitor reporting, and handling submitted requests. They are removed manually when they are no longer needed for those purposes.</p>
+            <p class="mt-3 text-sm leading-7 text-slate-500">To ask about a submitted request or request deletion of contact information, use the work-request form and include the relevant ticket number when available.</p>
+        </section>
+    </div>
+
+    <footer class="mt-12 flex flex-col gap-3 border-t border-white/[0.07] pt-8 sm:flex-row"><a href="/" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-5 py-3 text-sm text-slate-300 transition hover:border-cyan/30 hover:text-white">← Return home</a><a href="/hire" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md bg-signal px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white">Open a request <span aria-hidden="true">↗</span></a></footer>
+</article>

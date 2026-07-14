@@ -1,168 +1,106 @@
-﻿@{
+@{
     ViewData["Title"] = "Hire Me";
-    ViewData["Description"] = "Cybersecurity, network configuration, and electronics project consulting";
+    ViewData["Description"] = "Cybersecurity, network infrastructure, software, and electronics project consulting.";
     var services = ViewBag.Services as List<Portfolio.Models.Service> ?? new();
 }
 
-<div class="max-w-5xl mx-auto px-6 py-16">
-
-    <!-- Header -->
-    <div class="text-center mb-16">
-        <div class="flex items-center justify-center gap-3 mb-3">
-            <p class="font-mono text-blue-400 text-sm">// hire me</p>
-            <button onclick="openTrackModal()"
-                    class="text-xs border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white px-3 py-1 rounded-full transition">
-                Track Request
-            </button>
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <header class="relative overflow-hidden border-b border-white/[0.07] pb-16">
+        <div aria-hidden="true" class="site-grid absolute inset-0 -z-10 opacity-50"></div>
+        <div class="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+                <div class="flex flex-wrap items-center gap-3"><span class="inline-flex items-center gap-2 rounded-full border border-signal/20 bg-signal/[0.06] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-signal"><span class="h-1.5 w-1.5 rounded-full bg-signal"></span>Available for selected work</span><span class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Secure · Traceable · Direct</span></div>
+                <h1 class="mt-7 max-w-5xl text-5xl font-semibold leading-[.95] tracking-[-0.055em] text-white sm:text-7xl">Bring me a system worth understanding<span class="text-signal">.</span></h1>
+                <p class="mt-7 max-w-3xl text-lg leading-8 text-slate-400">Cybersecurity research, network infrastructure, software, and electronics support—approached with clear scope, documented decisions, and practical outcomes.</p>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                <button type="button" onclick="openTrackModal()" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm font-medium text-slate-300 transition hover:border-cyan/30 hover:text-white">Track a request <span aria-hidden="true">→</span></button>
+                @if (ViewBag.CvUrl != null)
+                {
+                    <a href="@ViewBag.CvUrl" download class="focus-ring inline-flex items-center justify-center gap-2 rounded-md bg-signal px-5 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Download CV <span aria-hidden="true">↓</span></a>
+                }
+            </div>
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
-            Let's work together
-        </h1>
-        <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-6">
-            I provide professional support in cybersecurity consulting, network security,
-            and electronics project development.
-        </p>
+    </header>
 
-        @if (ViewBag.CvUrl != null)
-        {
-            <a href="@ViewBag.CvUrl" download
-               class="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white text-sm px-5 py-2.5 rounded-lg transition">
-                📄 Download CV
-            </a>
-        }
-    </div>
-
-
-    <!-- Services -->
     @if (services.Any())
     {
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
-            @foreach (var service in services)
-            {
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-blue-900/50 transition">
-                    @if (!string.IsNullOrEmpty(service.IconClass))
-                    {
-                        <div class="w-10 h-10 bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
-                            <i class="@service.IconClass text-blue-400"></i>
-                        </div>
-                    }
-                    <h3 class="text-white font-semibold text-lg mb-2">@service.Title</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mb-4">@service.Description</p>
-                    <button onclick="selectService(@service.Id, '@service.Title')"
-                            class="text-sm text-blue-400 hover:text-blue-300 transition">
-                        Request this service →
-                    </button>
-                </div>
-            }
-        </div>
+        <section class="py-16 lg:py-20">
+            <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p class="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan">Service modules / @services.Count.ToString("D2")</p><h2 class="mt-3 text-3xl font-semibold tracking-[-0.03em] text-white">Ways I can contribute.</h2></div><p class="max-w-md text-sm leading-6 text-slate-500">Choose a service to prefill the request form, or describe a custom scope below.</p></div>
+            <div class="grid gap-4 md:grid-cols-2">
+                @foreach (var service in services)
+                {
+                    <article class="card-lift technical-frame surface flex min-h-60 flex-col rounded-2xl p-6 hover:border-cyan/30">
+                        <div class="flex items-start justify-between gap-4"><span class="grid h-10 w-10 place-items-center rounded-lg border border-cyan/20 bg-cyan/[0.05] font-mono text-[10px] text-cyan">@service.SortOrder.ToString("D2")</span>@if (!string.IsNullOrEmpty(service.IconClass)){<i aria-hidden="true" class="@service.IconClass text-cyan"></i>}</div>
+                        <h3 class="mt-7 text-xl font-semibold tracking-[-0.02em] text-white">@service.Title</h3>
+                        <p class="mt-3 text-sm leading-6 text-slate-500">@service.Description</p>
+                        <button type="button" data-service-id="@service.Id" data-service-title="@service.Title" onclick="selectService(this)" class="focus-ring mt-auto inline-flex w-fit items-center gap-2 rounded-sm pt-7 text-sm font-medium text-cyan transition hover:text-white">Request this service <span aria-hidden="true">→</span></button>
+                    </article>
+                }
+            </div>
+        </section>
     }
 
-    <!-- Contact form -->
-    <div class="max-w-2xl mx-auto">
-        <div class="text-center mb-8">
-            <p class="font-mono text-gray-600 text-sm mb-2">// contact</p>
-            <h2 class="text-2xl font-bold text-white">Get in Touch</h2>
+    <section class="grid gap-10 border-t border-white/[0.07] pt-16 lg:grid-cols-[.65fr_1.35fr] lg:gap-16 lg:pt-20">
+        <div>
+            <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-signal">Open a channel</p>
+            <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Start with the problem, not the solution.</h2>
+            <p class="mt-5 text-sm leading-7 text-slate-500">Share the context, desired outcome, and any constraints. A ticket number is generated after submission so you can check the request status later.</p>
+            <ol class="mt-8 space-y-4 border-l border-line pl-5">
+                <li><span class="font-mono text-[9px] uppercase tracking-[0.16em] text-signal">01 / Submit</span><p class="mt-1 text-sm text-slate-400">Describe the system or project.</p></li>
+                <li><span class="font-mono text-[9px] uppercase tracking-[0.16em] text-cyan">02 / Retain</span><p class="mt-1 text-sm text-slate-400">Save the generated ticket number.</p></li>
+                <li><span class="font-mono text-[9px] uppercase tracking-[0.16em] text-violet-300">03 / Track</span><p class="mt-1 text-sm text-slate-400">Check the review status at any time.</p></li>
+            </ol>
         </div>
 
-        @if (TempData["Success"] != null)
-        {
-            <div class="bg-green-900/30 border border-green-800 text-green-400 rounded-xl p-4 mb-6 text-sm">
-                ✓ @TempData["Success"]
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="bg-red-900/30 border border-red-800 text-red-400 rounded-xl p-4 mb-6 text-sm">
-                ✕ @TempData["Error"]
-            </div>
-        }
-
-        <form method="post" asp-controller="Hire" asp-action="Contact" asp-route-area="" class="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-4">
-            <div style="position: absolute; left: -9999px;" aria-hidden="true">
-                <label for="website">Website</label>
-                <input type="text" name="Website" id="website" maxlength="200" tabindex="-1" autocomplete="off" />
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Full Name</label>
-                    <input name="Name" type="text" required maxlength="100"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
-                           placeholder="Your full name" />
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Email</label>
-                    <input name="Email" type="email" required maxlength="300"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
-                           placeholder="you@example.com" />
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm text-gray-400 mb-1">Subject</label>
-                <input name="Subject" type="text" maxlength="200"
-                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
-                       placeholder="What would you like to discuss?" />
-            </div>
-
-            @if (services.Any())
+        <div>
+            @if (TempData["Success"] != null)
             {
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Service of Interest</label>
-                    <select name="ServiceId" id="serviceSelect"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition">
-                        <option value="">Select a service (optional)</option>
-                        @foreach (var s in services)
-                        {
-                            <option value="@s.Id">@s.Title</option>
-                        }
-                    </select>
-                </div>
+                <div role="status" class="mb-4 rounded-xl border border-signal/20 bg-signal/[0.06] p-4 text-sm text-signal">@TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div role="alert" class="mb-4 rounded-xl border border-rose-300/20 bg-rose-300/[0.06] p-4 text-sm text-rose-200">@TempData["Error"]</div>
             }
 
-            <div>
-                <label class="block text-sm text-gray-400 mb-1">Message</label>
-                <textarea name="Message" rows="5" required maxlength="5000"
-                          class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition resize-none"
-                          placeholder="Tell me briefly about your project or what you need..."></textarea>
-            </div>
+            <form id="contactForm" method="post" asp-controller="Hire" asp-action="Contact" asp-route-area="" class="technical-frame surface space-y-5 rounded-2xl p-5 sm:p-8">
+                <div class="absolute -left-[9999px]" aria-hidden="true"><label for="website">Website</label><input type="text" name="Website" id="website" maxlength="200" tabindex="-1" autocomplete="off" /></div>
 
-            <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition">
-                Send Message
-            </button>
-        </form>
-    </div>
-    <!-- Request tracking modal -->
-    <div id="trackModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full relative">
-            <button onclick="closeTrackModal()"
-                    class="absolute top-4 right-4 text-gray-500 hover:text-white transition">
-                ✕
-            </button>
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <div><label for="contactName" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Full name</label><input id="contactName" name="Name" type="text" required maxlength="100" autocomplete="name" placeholder="Your full name" class="w-full rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none" /></div>
+                    <div><label for="contactEmail" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Email</label><input id="contactEmail" name="Email" type="email" required maxlength="300" autocomplete="email" placeholder="you@example.com" class="w-full rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none" /></div>
+                </div>
 
-            <div class="text-center mb-6">
-                <p class="font-mono text-gray-600 text-sm mb-2">// track</p>
-                <h3 class="text-lg font-bold text-white">Track Request</h3>
-            </div>
+                <div><label for="contactSubject" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Subject</label><input id="contactSubject" name="Subject" type="text" maxlength="200" placeholder="What would you like to discuss?" class="w-full rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none" /></div>
+
+                @if (services.Any())
+                {
+                    <div><label for="serviceSelect" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Service of interest</label><select name="ServiceId" id="serviceSelect" class="w-full rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm text-white transition focus:border-cyan/40 focus:outline-none"><option value="">Select a service (optional)</option>@foreach (var service in services){<option value="@service.Id">@service.Title</option>}</select></div>
+                }
+
+                <div><label for="contactMessage" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Message</label><textarea id="contactMessage" name="Message" rows="6" required maxlength="5000" placeholder="Describe the project, system, or question..." class="w-full resize-y rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm leading-6 text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none"></textarea><p class="mt-2 text-xs text-slate-700">Avoid including passwords, access tokens, private keys, or confidential datasets.</p></div>
+
+                <button type="submit" class="focus-ring inline-flex w-full items-center justify-center gap-3 rounded-md bg-signal px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Submit request <span aria-hidden="true">↗</span></button>
+            </form>
+        </div>
+    </section>
+
+    <div id="trackModal" class="hidden fixed inset-0 z-[80] items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="trackModalTitle" aria-hidden="true">
+        <div id="trackModalOverlay" class="absolute inset-0 bg-ink/85 backdrop-blur-sm"></div>
+        <div class="technical-frame surface relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl p-5 sm:p-8">
+            <button id="trackModalClose" type="button" onclick="closeTrackModal()" aria-label="Close request tracking" class="focus-ring absolute right-4 top-4 rounded-md border border-white/10 px-3 py-2 font-mono text-[10px] text-slate-400 transition hover:text-white">ESC</button>
+            <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan">Request channel</p>
+            <h2 id="trackModalTitle" class="mt-3 text-2xl font-semibold tracking-[-0.025em] text-white">Track a request</h2>
+            <p class="mt-3 text-sm leading-6 text-slate-500">Paste the ticket number generated when the request was submitted.</p>
 
             @if (TempData["Success"] != null && TempData["TicketNumber"] != null)
             {
-                <div class="bg-green-900/30 border border-green-800 rounded-xl p-4 mb-6 text-center">
-                    <p class="text-green-400 text-sm mb-2">✓ Your request has been received!</p>
-                    <p class="text-xs text-gray-500 mb-2">Your ticket number:</p>
-                    <p class="font-mono text-white text-sm bg-gray-800 rounded-lg px-3 py-2 select-all">
-                        @TempData["TicketNumber"]
-                    </p>
-                    <p class="text-xs text-gray-600 mt-2">Keep this number; you will need it to track your request.</p>
-                </div>
+                <div class="mt-6 rounded-xl border border-signal/20 bg-signal/[0.06] p-5"><p class="text-sm font-medium text-signal">Your request has been received.</p><p class="mt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Ticket number</p><p class="mt-2 select-all break-all rounded-lg border border-white/[0.07] bg-ink/60 px-3 py-2.5 font-mono text-sm text-white">@TempData["TicketNumber"]</p><p class="mt-2 text-xs text-slate-600">Store this number somewhere safe; it is required for tracking.</p></div>
             }
 
             @if (TempData["TrackError"] != null)
             {
-                <div class="bg-red-900/30 border border-red-800 text-red-400 rounded-xl p-4 mb-6 text-sm text-center">
-                    @TempData["TrackError"]
-                </div>
+                <div role="alert" class="mt-6 rounded-xl border border-rose-300/20 bg-rose-300/[0.06] p-4 text-sm text-rose-200">@TempData["TrackError"]</div>
             }
 
             @if (ViewBag.TrackedMessage != null)
@@ -179,56 +117,56 @@
                 };
                 var statusColor = tracked.Status switch
                 {
-                    Portfolio.Models.Enums.ContactStatus.Replied => "text-green-400 bg-green-900/30",
-                    Portfolio.Models.Enums.ContactStatus.New => "text-blue-400 bg-blue-900/30",
-                    _ => "text-gray-400 bg-gray-800"
+                    Portfolio.Models.Enums.ContactStatus.Replied => "border-signal/20 bg-signal/[0.06] text-signal",
+                    Portfolio.Models.Enums.ContactStatus.New => "border-cyan/20 bg-cyan/[0.06] text-cyan",
+                    _ => "border-white/10 bg-white/[0.04] text-slate-400"
                 };
-
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6">
-                    <p class="text-xs text-gray-600 mb-2">Request submitted on @tracked.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
-                    <span class="text-sm px-3 py-1 rounded-full @statusColor">@statusText</span>
-                </div>
+                <div class="mt-6 rounded-xl border border-white/[0.07] bg-white/[0.02] p-5"><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Submitted @tracked.CreatedAt.ToString("dd MMM yyyy HH:mm") UTC</p><span class="mt-3 inline-block rounded-full border px-3 py-1.5 text-xs @statusColor">@statusText</span></div>
             }
 
-            <form method="post" asp-controller="Hire" asp-action="TrackTicket" asp-route-area="" class="flex gap-2">
-                <input name="ticketNumber" type="text" required maxlength="36"
-                       placeholder="Paste your ticket number"
-                       class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-blue-500 transition" />
-                <button type="submit"
-                        class="bg-gray-800 hover:bg-gray-700 text-white text-sm px-5 py-2.5 rounded-lg transition">
-                    Track
-                </button>
-            </form>
+            <form method="post" asp-controller="Hire" asp-action="TrackTicket" asp-route-area="" class="mt-6 flex flex-col gap-3 sm:flex-row"><label for="ticketNumber" class="sr-only">Ticket number</label><input id="ticketNumber" name="ticketNumber" type="text" required maxlength="36" autocomplete="off" placeholder="00000000-0000-0000-0000-000000000000" class="min-w-0 flex-1 rounded-lg border border-white/10 bg-ink/60 px-4 py-3 font-mono text-xs text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none" /><button type="submit" class="focus-ring rounded-md bg-signal px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white">Check status</button></form>
         </div>
     </div>
-</div>
+</section>
+
 <script>
-    function selectService(id, title) {
-        document.getElementById('serviceSelect').value = id;
-        document.querySelector('input[name="Subject"]').value = 'Regarding ' + title;
-        document.querySelector('form[action*="contact"]').scrollIntoView({ behavior: 'smooth' });
+    let trackModalPreviousFocus = null;
+
+    function selectService(button) {
+        const serviceSelect = document.getElementById('serviceSelect');
+        if (!serviceSelect) return;
+
+        serviceSelect.value = button.dataset.serviceId;
+        document.getElementById('contactSubject').value = `Regarding ${button.dataset.serviceTitle}`;
+        document.getElementById('contactForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function openTrackModal() {
-        document.getElementById('trackModal').classList.remove('hidden');
+        const modal = document.getElementById('trackModal');
+        trackModalPreviousFocus = document.activeElement;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('overflow-hidden');
+        window.setTimeout(() => document.getElementById('ticketNumber').focus(), 0);
     }
 
     function closeTrackModal() {
-        document.getElementById('trackModal').classList.add('hidden');
+        const modal = document.getElementById('trackModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('overflow-hidden');
+        if (trackModalPreviousFocus) trackModalPreviousFocus.focus();
     }
 
-    // Open the modal automatically when the server returns a result through TempData.
     @if (TempData["Success"] != null || TempData["TrackError"] != null || ViewBag.TrackedMessage != null)
     {
-            <text>
-            document.addEventListener('DOMContentLoaded', function() {
-                openTrackModal();
-            });
-            </text>
+        <text>document.addEventListener('DOMContentLoaded', openTrackModal);</text>
     }
 
-    // Close the modal when the user clicks outside it.
-    document.getElementById('trackModal').addEventListener('click', function(e) {
-        if (e.target === this) closeTrackModal();
+    document.getElementById('trackModalOverlay').addEventListener('click', closeTrackModal);
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !document.getElementById('trackModal').classList.contains('hidden')) closeTrackModal();
     });
 </script>

@@ -61,5 +61,6 @@ public class HomeController : BaseController
         return View(model);
     }
 
-
+    [HttpGet("/privacy")]
+    public IActionResult Privacy() => View();
 }

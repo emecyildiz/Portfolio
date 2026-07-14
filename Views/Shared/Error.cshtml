@@ -1,22 +1,15 @@
-﻿@{
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Page Not Found";
+    ViewData["Description"] = "The requested portfolio page could not be found.";
 }
 
-<div class="max-w-2xl mx-auto px-6 py-32 text-center">
-    <p class="font-mono text-red-400 text-6xl font-bold mb-4">404</p>
-    <h1 class="text-3xl font-bold text-white mb-4">Page not found</h1>
-    <p class="text-gray-500 mb-10">
-        The page may have moved, been removed, or never existed.
-    </p>
-    <div class="flex items-center justify-center gap-4">
-        <a href="/"
-           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition">
-            Return Home
-        </a>
-        <a href="/search"
-           class="border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white px-6 py-3 rounded-lg font-medium transition">
-            Search
-        </a>
+<section class="mx-auto grid min-h-[72vh] max-w-6xl place-items-center px-4 py-20 sm:px-6 lg:px-8">
+    <div class="technical-frame surface relative w-full overflow-hidden rounded-2xl px-6 py-14 sm:px-12 sm:py-20">
+        <div aria-hidden="true" class="site-grid absolute inset-0 opacity-60"></div>
+        <div class="relative grid gap-10 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-16">
+            <p class="font-mono text-[clamp(5rem,18vw,10rem)] font-semibold leading-none tracking-[-0.08em] text-rose-300">404</p>
+            <div><p class="font-mono text-[10px] uppercase tracking-[0.2em] text-rose-300">Route not found</p><h1 class="mt-4 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-5xl">This path is outside the documented system.</h1><p class="mt-5 max-w-xl text-sm leading-7 text-slate-500">The page may have moved, been removed, or never existed. Return to the main archive or search for the record you expected.</p><div class="mt-8 flex flex-col gap-3 sm:flex-row"><a href="/" class="focus-ring inline-flex items-center justify-center rounded-md bg-signal px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Return home</a><a href="/search" class="focus-ring inline-flex items-center justify-center rounded-md border border-white/10 px-6 py-3.5 text-sm text-slate-300 transition hover:border-cyan/30 hover:text-white">Search the archive</a></div></div>
+        </div>
     </div>
-</div>
+</section>

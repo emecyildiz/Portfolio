@@ -1,16 +1,15 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Something Went Wrong";
+    ViewData["Description"] = "The request could not be completed because of an unexpected server error.";
 }
 
-<div class="max-w-2xl mx-auto px-6 py-32 text-center">
-    <p class="font-mono text-red-400 text-6xl font-bold mb-4">500</p>
-    <h1 class="text-3xl font-bold text-white mb-4">The request could not be completed</h1>
-    <p class="text-gray-500 mb-10">
-        An unexpected problem occurred. Please try again later.
-    </p>
-    <a href="/"
-       class="inline-flex bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition">
-        Return Home
-    </a>
-</div>
+<section class="mx-auto grid min-h-[72vh] max-w-6xl place-items-center px-4 py-20 sm:px-6 lg:px-8">
+    <div class="technical-frame surface relative w-full overflow-hidden rounded-2xl px-6 py-14 sm:px-12 sm:py-20">
+        <div aria-hidden="true" class="site-grid absolute inset-0 opacity-60"></div>
+        <div class="relative grid gap-10 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-16">
+            <p class="font-mono text-[clamp(5rem,18vw,10rem)] font-semibold leading-none tracking-[-0.08em] text-orange-300">500</p>
+            <div><p class="font-mono text-[10px] uppercase tracking-[0.2em] text-orange-300">Unexpected system state</p><h1 class="mt-4 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-5xl">The request could not be completed.</h1><p class="mt-5 max-w-xl text-sm leading-7 text-slate-500">An unexpected problem occurred. No further action is required from you; return to the homepage and try again later.</p><div class="mt-8"><a href="/" class="focus-ring inline-flex items-center justify-center rounded-md bg-signal px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Return home</a></div></div>
+        </div>
+    </div>
+</section>
