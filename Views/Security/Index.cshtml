@@ -1,101 +1,95 @@
-﻿@model List<Portfolio.Models.SecurityResearch>
+@model List<Portfolio.Models.SecurityResearch>
 @{
     ViewData["Title"] = "Security Research";
     ViewData["Description"] = "Research into malware analysis, hardware vulnerabilities, RF security, and network attacks.";
     var currentType = ViewBag.CurrentType as string;
+    Func<Portfolio.Models.Enums.ResearchType, string> researchTypeLabel = type => type switch
+    {
+        Portfolio.Models.Enums.ResearchType.MalwareAnalysis => "Malware Analysis",
+        Portfolio.Models.Enums.ResearchType.HardwareVuln => "Hardware Vulnerability",
+        Portfolio.Models.Enums.ResearchType.RFSecurity => "RF Security",
+        Portfolio.Models.Enums.ResearchType.WebSecurity => "Web Security",
+        Portfolio.Models.Enums.ResearchType.NetworkSecurity => "Network Security",
+        Portfolio.Models.Enums.ResearchType.MobileSecurity => "Mobile Security",
+        _ => "Other"
+    };
 }
 
-<div class="max-w-6xl mx-auto px-6 py-16">
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <header class="grid gap-8 border-b border-white/[0.07] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+            <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-rose-300">Archive / Security / 01</p>
+            <h1 class="mt-5 max-w-4xl text-4xl font-semibold tracking-[-0.045em] text-white sm:text-6xl">Security research under controlled conditions.</h1>
+            <p class="mt-5 max-w-2xl text-base leading-7 text-slate-400">Malware analysis, reverse engineering, hardware vulnerabilities, RF attacks, and network security documented from observation to outcome.</p>
+        </div>
+        <div class="flex items-center gap-4 lg:flex-col lg:items-end">
+            <span class="font-mono text-4xl font-semibold text-rose-300">@Model.Count.ToString("D2")</span>
+            <span class="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600">Published records</span>
+        </div>
+    </header>
 
-    <!-- Header -->
-    <div class="mb-12">
-        <p class="font-mono text-red-400 text-sm mb-2">// security research</p>
-        <h1 class="text-4xl font-bold text-white mb-4">Security Research</h1>
-        <p class="text-gray-400 max-w-2xl">
-            Research into malware analysis, hardware vulnerabilities, RF attacks, and network security.
-        </p>
-    </div>
-
-    <!-- Filters -->
-    <div class="flex flex-wrap gap-2 mb-10">
-        <a href="/security"
-           class="text-xs px-3 py-1.5 rounded-full border transition
-                  @(string.IsNullOrEmpty(currentType) ? "border-red-600 text-red-400 bg-red-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
-            All
-        </a>
+    <nav aria-label="Research type filters" class="surface my-8 flex flex-wrap items-center gap-2 rounded-xl p-2">
+        <span class="hidden px-3 font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600 sm:block">Filter</span>
+        <a href="/security" class="focus-ring rounded-lg border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.12em] transition @(string.IsNullOrEmpty(currentType) ? "border-rose-300/30 bg-rose-300/10 text-rose-200" : "border-transparent text-slate-500 hover:bg-white/[0.04] hover:text-white")">All</a>
         @foreach (var type in Enum.GetValues<Portfolio.Models.Enums.ResearchType>())
         {
-            <a href="/security?type=@type"
-               class="text-xs px-3 py-1.5 rounded-full border transition
-                          @(currentType == type.ToString() ? "border-red-600 text-red-400 bg-red-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
-                @type
-            </a>
+            <a href="/security?type=@type" class="focus-ring rounded-lg border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.12em] transition @(currentType == type.ToString() ? "border-rose-300/30 bg-rose-300/10 text-rose-200" : "border-transparent text-slate-500 hover:bg-white/[0.04] hover:text-white")">@researchTypeLabel(type)</a>
         }
-    </div>
+    </nav>
 
-    <!-- Research list -->
     @if (!Model.Any())
     {
-        <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// no published research yet</p>
+        <div class="technical-frame surface grid min-h-72 place-items-center rounded-2xl px-6 text-center">
+            <div><p class="font-mono text-[10px] uppercase tracking-[0.22em] text-rose-300">No public records</p><p class="mt-3 text-sm text-slate-500">Published security research will appear here.</p></div>
         </div>
     }
     else
     {
-        <div class="space-y-4">
-            @foreach (var r in Model)
+        <div class="grid gap-4 lg:grid-cols-2">
+            @foreach (var research in Model)
             {
-                <a href="/security/@r.Slug"
-                   class="block bg-gray-900 border border-gray-800 hover:border-red-900/50 rounded-xl p-6 transition group">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex flex-wrap items-center gap-2 mb-3">
-                                @if (!string.IsNullOrEmpty(r.SeverityLevel))
+                <a href="/security/@research.Slug" class="focus-ring card-lift technical-frame surface group flex min-h-72 flex-col rounded-2xl p-5 hover:border-rose-300/30 sm:p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                @if (!string.IsNullOrEmpty(research.SeverityLevel))
                                 {
-                                    var sevColor = r.SeverityLevel switch
+                                    var severityColor = research.SeverityLevel switch
                                     {
-                                        "critical" => "text-red-400 bg-red-900/30 border-red-900",
-                                        "high" => "text-orange-400 bg-orange-900/30 border-orange-900",
-                                        "medium" => "text-amber-400 bg-amber-900/30 border-amber-900",
-                                        "low" => "text-blue-400 bg-blue-900/30 border-blue-900",
-                                        _ => "text-gray-400 bg-gray-800 border-gray-700"
+                                        "critical" => "border-red-400/30 bg-red-400/10 text-red-300",
+                                        "high" => "border-orange-400/30 bg-orange-400/10 text-orange-300",
+                                        "medium" => "border-amber-400/30 bg-amber-400/10 text-amber-300",
+                                        "low" => "border-cyan/30 bg-cyan/10 text-cyan",
+                                        _ => "border-white/10 bg-white/[0.04] text-slate-400"
                                     };
-                                    <span class="font-mono text-xs px-2 py-0.5 rounded border @sevColor">
-                                        @r.SeverityLevel.ToUpper()
-                                    </span>
+                                    <span class="rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] @severityColor">@research.SeverityLevel</span>
                                 }
-                                <span class="text-xs text-gray-600 font-mono">@r.ResearchType</span>
-                                @if (!string.IsNullOrEmpty(r.TargetCategory))
+                                <span class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">@researchTypeLabel(research.ResearchType)</span>
+                                @if (!string.IsNullOrEmpty(research.CveId))
                                 {
-                                    <span class="text-xs text-gray-600">· @r.TargetCategory</span>
-                                }
-                                @if (!string.IsNullOrEmpty(r.CveId))
-                                {
-                                    <span class="font-mono text-xs text-red-400 bg-red-900/20 px-2 py-0.5 rounded">@r.CveId</span>
+                                    <span class="font-mono text-[9px] text-rose-300">@research.CveId</span>
                                 }
                             </div>
-                            <h2 class="text-white font-semibold text-lg mb-2 group-hover:text-red-300 transition">
-                                @r.Title
-                            </h2>
-                            <p class="text-gray-500 text-sm leading-relaxed">@r.Summary</p>
+                            <h2 class="mt-7 text-xl font-semibold tracking-[-0.02em] text-white transition group-hover:text-rose-200">@research.Title</h2>
                         </div>
-
-                        @if (!string.IsNullOrEmpty(r.CoverImageUrl))
+                        @if (!string.IsNullOrEmpty(research.CoverImageUrl))
                         {
-                            <img src="@r.CoverImageUrl" alt="@r.Title"
-                                 class="w-24 h-24 object-cover rounded-lg flex-shrink-0 opacity-70 group-hover:opacity-100 transition" />
+                            <img src="@research.CoverImageUrl" alt="@research.Title" loading="lazy" class="h-20 w-20 shrink-0 rounded-xl object-cover opacity-75 transition group-hover:opacity-100 sm:h-24 sm:w-24" />
                         }
                     </div>
 
-                    <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-800">
-                        <span class="text-xs text-gray-600">
-                            @(r.PublishedAt?.ToString("dd MMM yyyy") ?? "")
-                        </span>
-                        <span class="text-xs text-gray-600">@r.ReadingTimeMinutes min read</span>
-                        <span class="text-xs text-gray-700 ml-auto">@r.ViewCount @(r.ViewCount == 1 ? "view" : "views")</span>
+                    <p class="mt-4 line-clamp-3 text-sm leading-6 text-slate-500">@research.Summary</p>
+                    @if (!string.IsNullOrEmpty(research.TargetCategory))
+                    {
+                        <p class="mt-4 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-700">Target / @research.TargetCategory</p>
+                    }
+                    <div class="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/[0.07] pt-5 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600">
+                        <span>@(research.PublishedAt?.ToString("dd MMM yyyy") ?? "Undated")</span>
+                        <span>@research.ReadingTimeMinutes min read</span>
+                        <span class="ml-auto">@research.ViewCount @(research.ViewCount == 1 ? "view" : "views")</span>
                     </div>
                 </a>
             }
         </div>
     }
-</div>
+</section>

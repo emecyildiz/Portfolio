@@ -1,54 +1,52 @@
-﻿@model List<Portfolio.Models.ViewModels.ActivityItem>
+@model List<Portfolio.Models.ViewModels.ActivityItem>
 @{
     ViewData["Title"] = "Activity";
-    ViewData["Description"] = "A chronological timeline of projects, research, homelab work, and blog posts.";
+    ViewData["Description"] = "A chronological timeline of projects, research, homelab work, and technical writing.";
 }
 
-<div class="max-w-3xl mx-auto px-6 py-16">
-    <div class="mb-12">
-        <p class="font-mono text-green-400 text-sm mb-2">// activity</p>
-        <h1 class="text-4xl font-bold text-white mb-4">All Work</h1>
-        <p class="text-gray-400">A chronological timeline of everything published on the site.</p>
-    </div>
+<section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <header class="grid gap-8 border-b border-white/[0.07] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+            <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-signal">System log / Chronological</p>
+            <h1 class="mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.045em] text-white sm:text-6xl">Everything published, in order.</h1>
+            <p class="mt-5 max-w-2xl text-base leading-7 text-slate-400">A single timeline connecting research, hardware builds, software releases, homelab changes, writing, and collaborative work.</p>
+        </div>
+        <div class="flex items-center gap-4 lg:flex-col lg:items-end"><span class="font-mono text-4xl font-semibold text-signal">@Model.Count.ToString("D2")</span><span class="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600">Timeline entries</span></div>
+    </header>
 
     @if (!Model.Any())
     {
-        <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// no published work yet</p>
-        </div>
+        <div class="technical-frame surface mt-8 grid min-h-72 place-items-center rounded-2xl px-6 text-center"><div><p class="font-mono text-[10px] uppercase tracking-[0.22em] text-signal">Log awaiting input</p><p class="mt-3 text-sm text-slate-500">Published work will appear here in chronological order.</p></div></div>
     }
     else
     {
         var grouped = Model
-        .GroupBy(i => new { i.Date!.Value.Year, i.Date.Value.Month })
-        .OrderByDescending(g => g.Key.Year)
-        .ThenByDescending(g => g.Key.Month);
+            .GroupBy(item => new { item.Date!.Value.Year, item.Date.Value.Month })
+            .OrderByDescending(group => group.Key.Year)
+            .ThenByDescending(group => group.Key.Month);
 
-        @foreach (var group in grouped)
-        {
-            var monthName = new DateTime(group.Key.Year, group.Key.Month, 1).ToString("MMMM yyyy");
-            <div class="mb-10">
-                <p class="font-mono text-xs text-gray-600 mb-4 uppercase tracking-wider">@monthName</p>
-                <div class="space-y-2">
-                    @foreach (var item in group.OrderByDescending(i => i.Date))
-                    {
-                        <a href="@item.Url"
-                           class="flex items-center gap-4 bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-lg px-5 py-3 transition group">
-                            <span class="text-xs px-2 py-1 rounded border font-mono @item.ColorClass whitespace-nowrap">
-                                @item.TypeLabel
-                            </span>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm text-gray-300 group-hover:text-white transition truncate">
-                                    @item.Title
-                                </p>
-                            </div>
-                            <span class="text-xs text-gray-600 whitespace-nowrap">
-                                @item.Date!.Value.ToString("dd MMM")
-                            </span>
-                        </a>
-                    }
-                </div>
-            </div>
-        }
+        <div class="relative mt-10 space-y-12 before:absolute before:bottom-3 before:left-[5px] before:top-3 before:w-px before:bg-gradient-to-b before:from-signal/40 before:via-line before:to-transparent sm:before:left-[9.25rem]">
+            @foreach (var group in grouped)
+            {
+                var monthName = new DateTime(group.Key.Year, group.Key.Month, 1).ToString("MMMM yyyy");
+                <section class="relative grid gap-5 sm:grid-cols-[8rem_1fr] sm:gap-10">
+                    <div class="relative pl-7 sm:pl-0 sm:text-right">
+                        <span aria-hidden="true" class="absolute left-0 top-1 h-3 w-3 rounded-full border-2 border-ink bg-signal shadow-[0_0_12px_rgba(184,243,107,.5)] sm:-right-[1.68rem] sm:left-auto"></span>
+                        <h2 class="font-mono text-[10px] uppercase tracking-[0.18em] text-signal">@monthName</h2>
+                        <p class="mt-2 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-700">@group.Count() @(group.Count() == 1 ? "entry" : "entries")</p>
+                    </div>
+                    <div class="surface overflow-hidden rounded-2xl p-2 sm:p-3">
+                        @foreach (var item in group.OrderByDescending(entry => entry.Date))
+                        {
+                            <a href="@item.Url" class="focus-ring group grid grid-cols-[auto_1fr] gap-3 rounded-xl border border-transparent px-3 py-4 transition hover:border-white/[0.07] hover:bg-white/[0.03] sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-4 sm:px-4">
+                                <span class="rounded border px-2 py-1 font-mono text-[9px] whitespace-nowrap @item.ColorClass">@item.TypeLabel</span>
+                                <span class="min-w-0 truncate text-sm text-slate-300 transition group-hover:text-white">@item.Title</span>
+                                <span class="col-start-2 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600 sm:col-auto">@item.Date!.Value.ToString("dd MMM")</span>
+                            </a>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
     }
-</div>
+</section>

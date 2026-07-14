@@ -1,14 +1,21 @@
-﻿@{
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Temporarily Unavailable";
+    ViewData["Description"] = "This portfolio section is temporarily unavailable.";
 }
 
-<div class="max-w-2xl mx-auto px-6 py-32 text-center">
-    <p class="font-mono text-amber-400 text-sm mb-4">// 503</p>
-    <h1 class="text-4xl font-bold text-white mb-4">This section is temporarily unavailable</h1>
-    <p class="text-gray-500 mb-8">It will be back soon. You can return to the homepage in the meantime.</p>
-    <a href="/"
-       class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition inline-block">
-        Return Home
-    </a>
-</div>
+<section class="mx-auto grid min-h-[72vh] max-w-5xl place-items-center px-4 py-20 sm:px-6 lg:px-8">
+    <div class="technical-frame surface relative w-full overflow-hidden rounded-2xl px-6 py-14 text-center sm:px-12 sm:py-20">
+        <div aria-hidden="true" class="site-grid absolute inset-0 opacity-60"></div>
+        <div aria-hidden="true" class="absolute left-1/2 top-0 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-orange-300/60 to-transparent"></div>
+        <div class="relative">
+            <span class="inline-flex items-center gap-2 rounded-full border border-orange-300/20 bg-orange-300/[0.06] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-orange-200"><span class="h-1.5 w-1.5 rounded-full bg-orange-300"></span>Section offline · 503</span>
+            <h1 class="mx-auto mt-7 max-w-2xl text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">This section is temporarily unavailable.</h1>
+            <p class="mx-auto mt-5 max-w-xl text-sm leading-7 text-slate-500">The category is currently private or undergoing maintenance. Other published areas of the portfolio remain available.</p>
+            <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+                <a href="/" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md bg-signal px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Return home <span aria-hidden="true">→</span></a>
+                <a href="/activity" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-6 py-3.5 text-sm font-medium text-slate-300 transition hover:border-cyan/30 hover:text-white">Browse activity</a>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,66 +1,55 @@
-﻿@model List<Portfolio.Models.ViewModels.SearchResultItem>
+@model List<Portfolio.Models.ViewModels.SearchResultItem>
 @{
     ViewData["Title"] = "Search";
+    ViewData["Description"] = "Search across projects, research, infrastructure notes, and technical writing.";
     var query = ViewBag.Query as string;
 }
 
-<div class="max-w-3xl mx-auto px-6 py-16">
+<section class="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <header>
+        <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan">Archive query / Full text</p>
+        <h1 class="mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.045em] text-white sm:text-6xl">Find a signal in the archive.</h1>
+        <p class="mt-5 max-w-2xl text-base leading-7 text-slate-400">Search across cybersecurity research, electronics, software, homelab notes, team projects, and writing.</p>
+    </header>
 
-    <!-- Search box -->
-    <div class="mb-12">
-        <p class="font-mono text-blue-400 text-sm mb-4">// search</p>
-        <form method="get" action="/search" class="flex gap-2">
-            <input type="text" name="q" value="@query" autofocus
-                   placeholder="What are you looking for?"
-                   class="flex-1 bg-gray-900 border border-gray-800 rounded-lg px-5 py-3 text-white text-base focus:outline-none focus:border-blue-500 transition" />
-            <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition">
-                Search
-            </button>
-        </form>
-    </div>
+    <form method="get" action="/search" class="technical-frame surface mt-10 flex flex-col gap-3 rounded-2xl p-3 sm:flex-row sm:items-center">
+        <label for="archiveQuery" class="sr-only">Search the portfolio archive</label>
+        <span aria-hidden="true" class="hidden pl-3 font-mono text-sm text-signal sm:block">$</span>
+        <input type="search" id="archiveQuery" name="q" value="@query" autofocus autocomplete="off" placeholder="malware analysis, ESP32, Docker..." class="min-w-0 flex-1 rounded-lg border border-white/[0.07] bg-ink/60 px-4 py-3.5 text-base text-white placeholder:text-slate-700 focus:border-cyan/40 focus:outline-none sm:border-0 sm:bg-transparent" />
+        <button type="submit" class="focus-ring rounded-md bg-signal px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Run query</button>
+    </form>
 
     @if (string.IsNullOrWhiteSpace(query))
     {
-        <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// enter a search term above</p>
-        </div>
+        <div class="mt-8 grid min-h-64 place-items-center rounded-2xl border border-dashed border-white/10 px-6 text-center"><div><p class="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan">Awaiting query</p><p class="mt-3 text-sm text-slate-600">Enter a term above to search the full archive.</p></div></div>
     }
     else if (!Model.Any())
     {
-        <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// no results found for "@query"</p>
-        </div>
+        <div class="mt-8 grid min-h-64 place-items-center rounded-2xl border border-dashed border-white/10 px-6 text-center"><div><p class="font-mono text-[10px] uppercase tracking-[0.2em] text-orange-300">No matching records</p><p class="mt-3 text-sm text-slate-500">Nothing was found for “<span class="text-white">@query</span>”. Try a broader technical term.</p></div></div>
     }
     else
     {
-        <p class="text-sm text-gray-500 mb-6">
-            @Model.Count @(Model.Count == 1 ? "result" : "results") found for "<span class="text-white">@query</span>"
-        </p>
-
-        <div class="space-y-3">
+        <div class="mt-10 flex items-center justify-between gap-4 border-b border-white/[0.07] pb-4">
+            <p class="text-sm text-slate-500"><span class="font-medium text-white">@Model.Count</span> @(Model.Count == 1 ? "result" : "results") for “<span class="text-cyan">@query</span>”</p>
+            <span class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-700">Ranked by relevance</span>
+        </div>
+        <div class="mt-4 space-y-3">
             @foreach (var item in Model)
             {
-                <a href="@item.Url"
-                   class="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition group">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-xs px-2 py-0.5 rounded border font-mono @item.ColorClass">
-                            @item.TypeLabel
-                        </span>
+                <a href="@item.Url" class="focus-ring card-lift surface group block rounded-2xl p-5 hover:border-cyan/30 sm:p-6">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="rounded border px-2 py-1 font-mono text-[9px] @item.ColorClass">@item.TypeLabel</span>
                         @if (item.Date.HasValue)
                         {
-                            <span class="text-xs text-gray-600">@item.Date.Value.ToString("dd MMM yyyy")</span>
+                            <span class="font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600">@item.Date.Value.ToString("dd MMM yyyy")</span>
                         }
                     </div>
-                    <h3 class="text-white font-medium group-hover:text-blue-300 transition mb-1">
-                        @item.Title
-                    </h3>
-                    @if (!string.IsNullOrEmpty(item.Summary))
-                    {
-                        <p class="text-gray-500 text-sm line-clamp-2">@item.Summary</p>
-                    }
+                    <div class="mt-4 flex items-start justify-between gap-5">
+                        <div class="min-w-0"><h2 class="text-lg font-semibold text-white transition group-hover:text-cyan">@item.Title</h2>@if (!string.IsNullOrEmpty(item.Summary)){<p class="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">@item.Summary</p>}</div>
+                        <span aria-hidden="true" class="shrink-0 text-slate-700 transition group-hover:translate-x-1 group-hover:text-cyan">→</span>
+                    </div>
                 </a>
             }
         </div>
     }
-</div>
+</section>

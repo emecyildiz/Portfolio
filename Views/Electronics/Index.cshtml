@@ -1,69 +1,60 @@
-﻿@model List<Portfolio.Models.Project>
+@model List<Portfolio.Models.Project>
 @{
     ViewData["Title"] = "Electronics Projects";
-    ViewData["Description"] = "Microcontroller projects, circuit designs, and electronics experiments";
+    ViewData["Description"] = "Microcontroller projects, circuit designs, and electronics experiments.";
 }
 
-<div class="max-w-6xl mx-auto px-6 py-16">
-    <div class="mb-12">
-        <p class="font-mono text-blue-400 text-sm mb-2">// electronics</p>
-        <h1 class="text-4xl font-bold text-white mb-4">Electronics Projects</h1>
-        <p class="text-gray-400 max-w-2xl">
-            Projects built with ESP32, Arduino, and other microcontrollers.
-            Device analysis, circuit design, and embedded systems work.
-        </p>
-    </div>
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <header class="grid gap-8 border-b border-white/[0.07] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+            <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-amber-300">Archive / Hardware / 02</p>
+            <h1 class="mt-5 max-w-4xl text-4xl font-semibold tracking-[-0.045em] text-white sm:text-6xl">Electronics built from the component level up.</h1>
+            <p class="mt-5 max-w-2xl text-base leading-7 text-slate-400">Embedded systems, circuit design, device analysis, and experiments built around ESP32, Arduino, sensors, and custom hardware.</p>
+        </div>
+        <div class="flex items-center gap-4 lg:flex-col lg:items-end"><span class="font-mono text-4xl font-semibold text-amber-300">@Model.Count.ToString("D2")</span><span class="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600">Documented builds</span></div>
+    </header>
 
     @if (!Model.Any())
     {
-        <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// no projects published yet</p>
-        </div>
+        <div class="technical-frame surface mt-8 grid min-h-72 place-items-center rounded-2xl px-6 text-center"><div><p class="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300">Workbench clear</p><p class="mt-3 text-sm text-slate-500">Published electronics projects will appear here.</p></div></div>
     }
     else
     {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach (var p in Model)
+        <div class="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            @foreach (var project in Model)
             {
-                <a href="/electronics/@p.Slug"
-                   class="bg-gray-900 border border-gray-800 hover:border-blue-900/50 rounded-xl overflow-hidden transition group">
-                    @if (!string.IsNullOrEmpty(p.CoverImageUrl))
-                    {
-                        <img src="@p.CoverImageUrl" alt="@p.Title"
-                             class="w-full h-48 object-cover group-hover:opacity-80 transition" />
-                    }
-                    else
-                    {
-                        <div class="w-full h-48 bg-gray-800 flex items-center justify-center">
-                            <span class="font-mono text-gray-600 text-sm">// no image</span>
-                        </div>
-                    }
-                    <div class="p-5">
-                        <h2 class="text-white font-semibold mb-2 group-hover:text-blue-300 transition">
-                            @p.Title
-                        </h2>
-                        <p class="text-gray-500 text-sm line-clamp-2 mb-4">@p.Summary</p>
+                var extra = new Portfolio.Models.ExtraData.ElectronicsExtraData();
+                if (!string.IsNullOrEmpty(project.ExtraData))
+                    extra = System.Text.Json.JsonSerializer.Deserialize<Portfolio.Models.ExtraData.ElectronicsExtraData>(project.ExtraData) ?? extra;
 
-                        @{
-                            var extra = new Portfolio.Models.ExtraData.ElectronicsExtraData();
-                            if (!string.IsNullOrEmpty(p.ExtraData))
-                                extra = System.Text.Json.JsonSerializer.Deserialize<Portfolio.Models.ExtraData.ElectronicsExtraData>(p.ExtraData) ?? extra;
+                <a href="/electronics/@project.Slug" class="focus-ring card-lift surface group flex flex-col overflow-hidden rounded-2xl hover:border-amber-300/30">
+                    <div class="relative h-52 overflow-hidden border-b border-white/[0.07] bg-raised">
+                        @if (!string.IsNullOrEmpty(project.CoverImageUrl))
+                        {
+                            <img src="@project.CoverImageUrl" alt="@project.Title" loading="lazy" class="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-[1.03] group-hover:opacity-100" />
                         }
-
+                        else
+                        {
+                            <div class="site-grid grid h-full place-items-center"><span class="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-700">Hardware image pending</span></div>
+                        }
+                        <span class="absolute left-4 top-4 rounded-full border border-amber-300/20 bg-ink/80 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-amber-200 backdrop-blur">Build log</span>
+                    </div>
+                    <div class="flex flex-1 flex-col p-5 sm:p-6">
                         @if (!string.IsNullOrEmpty(extra.Microcontroller))
                         {
-                            <span class="font-mono text-xs bg-gray-800 text-blue-300 px-2 py-1 rounded">
-                                @extra.Microcontroller
-                            </span>
+                            <span class="mb-4 w-fit rounded-md border border-amber-300/20 bg-amber-300/[0.06] px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-amber-200">@extra.Microcontroller</span>
                         }
-
-                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-                            <span class="text-xs text-gray-600">
-                                @(p.PublishedAt?.ToString("dd MMM yyyy") ?? "")
-                            </span>
-                            @if (p.IsFeatured)
+                        <h2 class="text-xl font-semibold tracking-[-0.02em] text-white transition group-hover:text-amber-200">@project.Title</h2>
+                        <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-500">@project.Summary</p>
+                        <div class="mt-auto flex items-center justify-between gap-4 border-t border-white/[0.07] pt-5 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600">
+                            <span>@(project.PublishedAt?.ToString("dd MMM yyyy") ?? "Undated")</span>
+                            @if (project.IsFeatured)
                             {
-                                <span class="text-xs text-amber-400">⭐ Featured</span>
+                                <span class="text-amber-300">Featured</span>
+                            }
+                            else
+                            {
+                                <span class="text-slate-700">Open record ↗</span>
                             }
                         </div>
                     </div>
@@ -71,4 +62,4 @@
             }
         </div>
     }
-</div>
+</section>

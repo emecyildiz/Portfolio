@@ -1,92 +1,89 @@
-﻿@model List<Portfolio.Models.HomelabPost>
+@model List<Portfolio.Models.HomelabPost>
 @{
     ViewData["Title"] = "Homelab";
-    ViewData["Description"] = "Network configuration, systems administration, and security testing";
+    ViewData["Description"] = "Network architecture, systems administration, self-hosting, and security testing.";
     var currentTopic = ViewBag.CurrentTopic as string;
+    Func<Portfolio.Models.Enums.HomelabTopic, string> topicLabel = topic => topic switch
+    {
+        Portfolio.Models.Enums.HomelabTopic.NetworkSetup => "Network Setup",
+        Portfolio.Models.Enums.HomelabTopic.ServerManagement => "Server Management",
+        Portfolio.Models.Enums.HomelabTopic.VPN => "VPN",
+        _ => topic.ToString()
+    };
 }
 
-<div class="max-w-6xl mx-auto px-6 py-16">
-    <div class="mb-12">
-        <p class="font-mono text-teal-400 text-sm mb-2">// homelab</p>
-        <h1 class="text-4xl font-bold text-white mb-4">Homelab</h1>
-        <p class="text-gray-400 max-w-2xl">
-            Infrastructure, security configurations, and systems administration work from my home lab.
-        </p>
-    </div>
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <header class="grid gap-8 border-b border-white/[0.07] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+            <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-teal-300">Archive / Infrastructure / 04</p>
+            <h1 class="mt-5 max-w-4xl text-4xl font-semibold tracking-[-0.045em] text-white sm:text-6xl">Infrastructure designed to be taken apart.</h1>
+            <p class="mt-5 max-w-2xl text-base leading-7 text-slate-400">Network architecture, virtualization, self-hosted services, security configurations, and the experiments behind an evolving home lab.</p>
+        </div>
+        <div class="flex items-center gap-4 lg:flex-col lg:items-end"><span class="font-mono text-4xl font-semibold text-teal-300">@Model.Count.ToString("D2")</span><span class="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600">Infrastructure notes</span></div>
+    </header>
 
-    <!-- Filters -->
-    <div class="flex flex-wrap gap-2 mb-10">
-        <a href="/homelab"
-           class="text-xs px-3 py-1.5 rounded-full border transition
-                  @(string.IsNullOrEmpty(currentTopic) ? "border-teal-600 text-teal-400 bg-teal-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
-            All
-        </a>
+    <nav aria-label="Homelab topic filters" class="surface my-8 flex flex-wrap items-center gap-2 rounded-xl p-2">
+        <span class="hidden px-3 font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600 sm:block">Filter</span>
+        <a href="/homelab" class="focus-ring rounded-lg border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.12em] transition @(string.IsNullOrEmpty(currentTopic) ? "border-teal-300/30 bg-teal-300/10 text-teal-200" : "border-transparent text-slate-500 hover:bg-white/[0.04] hover:text-white")">All</a>
         @foreach (var topic in Enum.GetValues<Portfolio.Models.Enums.HomelabTopic>())
         {
-            <a href="/homelab?topic=@topic"
-               class="text-xs px-3 py-1.5 rounded-full border transition
-                          @(currentTopic == topic.ToString() ? "border-teal-600 text-teal-400 bg-teal-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
-                @topic
-            </a>
+            <a href="/homelab?topic=@topic" class="focus-ring rounded-lg border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.12em] transition @(currentTopic == topic.ToString() ? "border-teal-300/30 bg-teal-300/10 text-teal-200" : "border-transparent text-slate-500 hover:bg-white/[0.04] hover:text-white")">@topicLabel(topic)</a>
         }
-    </div>
+    </nav>
 
     @if (!Model.Any())
     {
-        <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// no homelab posts published yet</p>
-        </div>
+        <div class="technical-frame surface grid min-h-72 place-items-center rounded-2xl px-6 text-center"><div><p class="font-mono text-[10px] uppercase tracking-[0.22em] text-teal-300">No active nodes</p><p class="mt-3 text-sm text-slate-500">Published homelab records will appear here.</p></div></div>
     }
     else
     {
-        var mainLab = Model.FirstOrDefault(h => h.IsMainLab);
-        var otherPosts = Model.Where(h => !h.IsMainLab).ToList();
-
+        var mainLab = Model.FirstOrDefault(post => post.IsMainLab);
+        var otherPosts = Model.Where(post => !post.IsMainLab).ToList();
 
         @if (mainLab != null)
         {
-            <a href="/homelab/@mainLab.Slug"
-               class="block bg-gradient-to-r from-blue-950/50 to-purple-950/50 border border-blue-800/50 hover:border-blue-600 rounded-2xl p-8 mb-10 transition group">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="text-lg">🗺</span>
-                    <span class="font-mono text-xs text-blue-400 uppercase tracking-wider">Main Lab — Full System Map</span>
+            <a href="/homelab/@mainLab.Slug" class="focus-ring card-lift technical-frame surface group relative mb-8 grid min-h-80 overflow-hidden rounded-2xl p-6 hover:border-teal-300/40 sm:p-8 lg:grid-cols-[1fr_.8fr] lg:items-end lg:p-10">
+                <div aria-hidden="true" class="site-grid absolute inset-0 opacity-60"></div>
+                <div aria-hidden="true" class="absolute right-[-5rem] top-[-8rem] h-72 w-72 rounded-full border border-teal-300/15"></div>
+                <div aria-hidden="true" class="absolute right-[-1rem] top-[-4rem] h-52 w-52 rounded-full border border-cyan/15"></div>
+                <div class="relative">
+                    <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_14px_rgba(94,234,212,.8)]"></span><span class="font-mono text-[10px] uppercase tracking-[0.2em] text-teal-300">Primary topology · Live map</span></div>
+                    <h2 class="mt-6 max-w-2xl text-3xl font-semibold tracking-[-0.035em] text-white transition group-hover:text-teal-200 sm:text-4xl">@mainLab.Title</h2>
+                    <p class="mt-4 max-w-xl text-sm leading-7 text-slate-400">@mainLab.Summary</p>
+                    <span class="mt-8 inline-flex items-center gap-2 text-sm font-medium text-teal-200">Explore the interactive system map <span aria-hidden="true">↗</span></span>
                 </div>
-                <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-blue-300 transition">
-                    @mainLab.Title
-                </h2>
-                <p class="text-gray-400 text-sm">@mainLab.Summary</p>
-                <p class="text-blue-400 text-sm mt-4">View the interactive map →</p>
+                <div class="relative mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.07] lg:mt-0">
+                    <div class="bg-panel/90 p-4"><span class="block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Mode</span><strong class="mt-2 block text-sm font-medium text-white">Interactive</strong></div>
+                    <div class="bg-panel/90 p-4"><span class="block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Scope</span><strong class="mt-2 block text-sm font-medium text-white">Full system</strong></div>
+                    <div class="bg-panel/90 p-4"><span class="block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Updated</span><strong class="mt-2 block text-sm font-medium text-white">@(mainLab.PublishedAt?.ToString("dd MMM yyyy") ?? "Ongoing")</strong></div>
+                    <div class="bg-panel/90 p-4"><span class="block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Status</span><strong class="mt-2 block text-sm font-medium text-signal">Online</strong></div>
+                </div>
             </a>
         }
-        <div class="space-y-4">
-            @foreach (var h in otherPosts)
-            {
-                <a href="/homelab/@h.Slug"
-                   class="block bg-gray-900 border border-gray-800 hover:border-teal-900/50 rounded-xl p-6 transition group">
-                    <div class="flex items-start gap-6">
-                        @if (!string.IsNullOrEmpty(h.CoverImageUrl))
-                        {
-                            <img src="@h.CoverImageUrl" alt="@h.Title"
-                                 class="w-24 h-24 object-cover rounded-lg flex-shrink-0" />
-                        }
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="font-mono text-xs text-teal-400">@h.Topic</span>
-                            </div>
-                            <h2 class="text-white font-semibold text-lg mb-2 group-hover:text-teal-300 transition">
-                                @h.Title
-                            </h2>
-                            <p class="text-gray-500 text-sm">@h.Summary</p>
 
-                            <div class="flex items-center gap-4 mt-4 text-xs text-gray-600">
-                                <span>@(h.PublishedAt?.ToString("dd MMM yyyy") ?? "")</span>
-                                <span>@h.ReadingTimeMinutes min read</span>
-                                <span>@h.ViewCount @(h.ViewCount == 1 ? "view" : "views")</span>
-                            </div>
+        @if (otherPosts.Any())
+        {
+            <div class="grid gap-4 lg:grid-cols-2">
+                @foreach (var post in otherPosts)
+                {
+                    <a href="/homelab/@post.Slug" class="focus-ring card-lift surface group grid gap-5 rounded-2xl p-5 hover:border-teal-300/30 sm:grid-cols-[7rem_1fr] sm:items-center sm:p-6">
+                        @if (!string.IsNullOrEmpty(post.CoverImageUrl))
+                        {
+                            <img src="@post.CoverImageUrl" alt="@post.Title" loading="lazy" class="h-32 w-full rounded-xl object-cover opacity-75 transition group-hover:opacity-100 sm:h-28" />
+                        }
+                        else
+                        {
+                            <div class="site-grid grid h-28 w-full place-items-center rounded-xl border border-white/[0.07] bg-raised"><span class="font-mono text-[9px] uppercase tracking-[0.16em] text-teal-300">Node</span></div>
+                        }
+                        <div class="min-w-0">
+                            <p class="font-mono text-[9px] uppercase tracking-[0.15em] text-teal-300">@topicLabel(post.Topic)</p>
+                            <h2 class="mt-3 text-lg font-semibold text-white transition group-hover:text-teal-200">@post.Title</h2>
+                            <p class="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">@post.Summary</p>
+                            <div class="mt-4 flex flex-wrap gap-3 font-mono text-[9px] uppercase tracking-[0.1em] text-slate-700"><span>@(post.PublishedAt?.ToString("dd MMM yyyy") ?? "Undated")</span><span>@post.ReadingTimeMinutes min</span><span>@post.ViewCount @(post.ViewCount == 1 ? "view" : "views")</span></div>
                         </div>
-                    </div>
-                </a>
-            }
-        </div>
+                    </a>
+                }
+            </div>
+        }
     }
-</div>
+</section>
