@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
+using Portfolio.Middleware;
 using Portfolio.Services;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -159,6 +160,8 @@ if (app.Environment.IsProduction())
 {
     app.UseForwardedHeaders();
 }
+
+app.UsePortfolioSecurityHeaders(adminPath);
 
 using (var scope = app.Services.CreateScope())
 {
