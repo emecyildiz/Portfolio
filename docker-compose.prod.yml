@@ -36,8 +36,10 @@ services:
       - AdminPassword=${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
     volumes:
       - uploads:/app/wwwroot/uploads
+      - dataprotection:/app/dataprotection-keys
     restart: unless-stopped
 
 volumes:
   pgdata:
   uploads:
+  dataprotection:
