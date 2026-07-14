@@ -106,6 +106,8 @@ public class MediaService : IMediaService
         var media = await _db.Media.FindAsync(mediaId)
             ?? throw new InvalidOperationException("Medya bulunamadı.");
 
+        await ClearCoverReferenceAsync(media);
+
         // Fiziksel dosyayı sil
         var physicalPath = Path.Combine(_env.WebRootPath, media.Url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
         if (File.Exists(physicalPath))
@@ -113,6 +115,47 @@ public class MediaService : IMediaService
 
         _db.Media.Remove(media);
         await _db.SaveChangesAsync();
+    }
+
+    private async Task ClearCoverReferenceAsync(Media media)
+    {
+        switch (media.EntityType)
+        {
+            case "project":
+                var project = await _db.Projects.IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(p => p.Id == media.EntityId);
+                if (project?.CoverImageUrl == media.Url)
+                    project.CoverImageUrl = null;
+                break;
+
+            case "security_research":
+                var research = await _db.SecurityResearches.IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(s => s.Id == media.EntityId);
+                if (research?.CoverImageUrl == media.Url)
+                    research.CoverImageUrl = null;
+                break;
+
+            case "homelab_post":
+                var homelabPost = await _db.HomelabPosts.IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(h => h.Id == media.EntityId);
+                if (homelabPost?.CoverImageUrl == media.Url)
+                    homelabPost.CoverImageUrl = null;
+                break;
+
+            case "blog_post":
+                var blogPost = await _db.BlogPosts.IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(b => b.Id == media.EntityId);
+                if (blogPost?.CoverImageUrl == media.Url)
+                    blogPost.CoverImageUrl = null;
+                break;
+
+            case "team_project":
+                var teamProject = await _db.TeamProjects.IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(t => t.Id == media.EntityId);
+                if (teamProject?.CoverImageUrl == media.Url)
+                    teamProject.CoverImageUrl = null;
+                break;
+        }
     }
 
     public async Task SetCoverAsync(int mediaId, string entityType, int entityId)
