@@ -143,6 +143,9 @@ namespace Portfolio.Data
             modelBuilder.Entity<HomelabPost>()
                 .Property(h => h.NetworkTopology).HasColumnType("jsonb");
 
+            modelBuilder.Entity<SiteSettings>()
+                .Property(s => s.FooterLinksJson).HasColumnType("jsonb");
+
             // ── Many-to-Many ilişkiler ─────────────────────────────────────────
             // EF Core ara tabloyu otomatik oluşturur.
 

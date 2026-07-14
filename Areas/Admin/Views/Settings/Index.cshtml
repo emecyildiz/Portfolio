@@ -8,26 +8,131 @@
     <h2 class="text-2xl font-bold text-white">Site Ayarları</h2>
 </div>
 
-<div class="max-w-xl bg-gray-900 border border-gray-800 rounded-xl p-6">
-    <h3 class="text-sm font-medium text-gray-400 mb-4">CV / Özgeçmiş</h3>
-
-    @if (!string.IsNullOrEmpty(Model.CvFileUrl))
-    {
-        <div class="bg-gray-800 rounded-lg p-4 mb-4 flex items-center justify-between">
-            <span class="text-sm text-gray-300">Mevcut CV yüklü</span>
-            <a href="@Model.CvFileUrl" target="_blank"
-               class="text-xs text-blue-400 hover:text-blue-300 transition">Görüntüle</a>
+<div class="max-w-3xl space-y-6">
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div class="flex items-center justify-between gap-4 mb-4">
+            <div>
+                <h3 class="text-sm font-medium text-gray-400">Footer Bağlantıları</h3>
+                <p class="text-xs text-gray-600 mt-1">GitHub, LinkedIn, e-posta veya başka bir dış bağlantı ekleyebilirsin.</p>
+            </div>
+            <button type="button" onclick="addFooterLink()"
+                    class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
+                + Bağlantı Ekle
+            </button>
         </div>
+
+        <form method="post" action="@Url.Action("SaveFooterLinks", "Settings", new { area = "Admin" })"
+              id="footerLinksForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="footerLinksJson" id="footerLinksJson" />
+            <div id="footer-links-container" class="space-y-3"></div>
+            <p id="footer-links-empty" class="hidden text-xs text-gray-600 py-3">
+                Henüz bağlantı eklenmedi. Public footer bu durumda bağlantı göstermez.
+            </p>
+            <button type="submit"
+                    class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+                Bağlantıları Kaydet
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <h3 class="text-sm font-medium text-gray-400 mb-4">CV / Özgeçmiş</h3>
+
+        @if (!string.IsNullOrEmpty(Model.CvFileUrl))
+        {
+            <div class="bg-gray-800 rounded-lg p-4 mb-4 flex items-center justify-between">
+                <span class="text-sm text-gray-300">Mevcut CV yüklü</span>
+                <a href="@Model.CvFileUrl" target="_blank" rel="noopener noreferrer"
+                   class="text-xs text-blue-400 hover:text-blue-300 transition">Görüntüle</a>
+            </div>
+        }
+
+        <form method="post" action="@Url.Action("UploadCv", "Settings", new { area = "Admin" })"
+              enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="file" name="cvFile" accept="application/pdf"
+                   class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700 mb-4" />
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+                Yükle
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let footerLinks = @Html.Raw(ViewBag.FooterLinksJson ?? "[]");
+
+    const footerLinkEscapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    function escapeFooterLinkHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => footerLinkEscapeMap[character]);
     }
 
-    <form method="post" action="@Url.Action("UploadCv", "Settings", new { area = "Admin" })"
-          enctype="multipart/form-data">
-        @Html.AntiForgeryToken()
-        <input type="file" name="cvFile" accept="application/pdf"
-               class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700 mb-4" />
-        <button type="submit"
-                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-            Yükle
-        </button>
-    </form>
-</div>
+    function addFooterLink() {
+        footerLinks.push({ label: '', url: '', openInNewTab: true });
+        renderFooterLinks();
+    }
+
+    function removeFooterLink(index) {
+        footerLinks.splice(index, 1);
+        renderFooterLinks();
+    }
+
+    function moveFooterLink(index, direction) {
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= footerLinks.length) return;
+
+        [footerLinks[index], footerLinks[targetIndex]] = [footerLinks[targetIndex], footerLinks[index]];
+        renderFooterLinks();
+    }
+
+    function updateFooterLink(index, field, value) {
+        footerLinks[index][field] = value;
+    }
+
+    function renderFooterLinks() {
+        const container = document.getElementById('footer-links-container');
+        const emptyState = document.getElementById('footer-links-empty');
+        emptyState.classList.toggle('hidden', footerLinks.length > 0);
+
+        container.innerHTML = footerLinks.map((link, index) => `
+            <div class="bg-gray-800 rounded-lg p-4 grid grid-cols-12 gap-3 items-end">
+                <div class="col-span-3">
+                    <label class="block text-xs text-gray-500 mb-1">Etiket</label>
+                    <input value="${escapeFooterLinkHtml(link.label)}"
+                           oninput="updateFooterLink(${index}, 'label', this.value)"
+                           maxlength="60" placeholder="GitHub"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+                <div class="col-span-5">
+                    <label class="block text-xs text-gray-500 mb-1">Adres</label>
+                    <input value="${escapeFooterLinkHtml(link.url)}"
+                           oninput="updateFooterLink(${index}, 'url', this.value)"
+                           maxlength="2000" placeholder="https://... veya mailto:..."
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+                <label class="col-span-2 flex items-center gap-2 text-xs text-gray-400 pb-2 cursor-pointer">
+                    <input type="checkbox" ${link.openInNewTab ? 'checked' : ''}
+                           onchange="updateFooterLink(${index}, 'openInNewTab', this.checked)"
+                           class="w-4 h-4 rounded" />
+                    Yeni sekme
+                </label>
+                <div class="col-span-2 flex justify-end gap-2 pb-1">
+                    <button type="button" onclick="moveFooterLink(${index}, -1)" aria-label="Yukarı taşı"
+                            class="text-gray-500 hover:text-white px-1">↑</button>
+                    <button type="button" onclick="moveFooterLink(${index}, 1)" aria-label="Aşağı taşı"
+                            class="text-gray-500 hover:text-white px-1">↓</button>
+                    <button type="button" onclick="removeFooterLink(${index})"
+                            class="text-xs text-red-400 hover:text-red-300">Kaldır</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('footerLinksForm').addEventListener('submit', function() {
+        document.getElementById('footerLinksJson').value = JSON.stringify(footerLinks);
+    });
+
+    renderFooterLinks();
+</script>

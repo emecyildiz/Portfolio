@@ -132,6 +132,7 @@ namespace Portfolio.Models
     {
         public int Id { get; set; }
         public string? CvFileUrl { get; set; }
+        public string? FooterLinksJson { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

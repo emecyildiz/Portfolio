@@ -20,7 +20,9 @@ public class HireController : BaseController
             .OrderBy(s => s.SortOrder)
             .ToListAsync();
         ViewBag.Services = services;
-        ViewBag.CvUrl = (await _db.SiteSettings.FirstOrDefaultAsync())?.CvFileUrl;
+        ViewBag.CvUrl = (await _db.SiteSettings
+            .OrderBy(settings => settings.Id)
+            .FirstOrDefaultAsync())?.CvFileUrl;
 
         return View();
     }

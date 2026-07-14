@@ -265,14 +265,7 @@
         <div class="max-w-6xl mx-auto px-6 py-10">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <p class="font-mono text-sm text-gray-600">~/portfolyo</p>
-                <div class="flex items-center gap-6">
-                    <a href="https://github.com" target="_blank"
-                       class="text-gray-600 hover:text-white transition text-sm">GitHub</a>
-                    <a href="https://linkedin.com" target="_blank"
-                       class="text-gray-600 hover:text-white transition text-sm">LinkedIn</a>
-                    <a href="mailto:email@email.com"
-                       class="text-gray-600 hover:text-white transition text-sm">E-posta</a>
-                </div>
+                @await Component.InvokeAsync("FooterLinks")
                 <p class="text-gray-700 text-xs font-mono">© 2026</p>
             </div>
         </div>

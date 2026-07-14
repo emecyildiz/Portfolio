@@ -18,9 +18,38 @@ public class SettingsController : AdminBaseController
 
     public async Task<IActionResult> Index()
     {
-        var settings = await _db.SiteSettings.FirstOrDefaultAsync();
+        var settings = await _db.SiteSettings.OrderBy(item => item.Id).FirstOrDefaultAsync();
         settings ??= new SiteSettings();
+        SiteLinksJsonService.TryNormalize(
+            settings.FooterLinksJson, out _, out var normalizedLinks);
+        ViewBag.FooterLinksJson = normalizedLinks;
         return View(settings);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveFooterLinks(string? footerLinksJson)
+    {
+        if (!SiteLinksJsonService.TryNormalize(
+                footerLinksJson, out _, out var normalizedLinks))
+        {
+            TempData["Error"] = "Bağlantılar geçersiz. Yalnızca https://, http:// ve mailto: adresleri kullanılabilir.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var settings = await _db.SiteSettings.OrderBy(item => item.Id).FirstOrDefaultAsync();
+        if (settings == null)
+        {
+            settings = new SiteSettings();
+            _db.SiteSettings.Add(settings);
+        }
+
+        settings.FooterLinksJson = normalizedLinks;
+        settings.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Footer bağlantıları kaydedildi.";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
@@ -64,7 +93,7 @@ public class SettingsController : AdminBaseController
                 System.IO.File.Delete(temporaryPath);
         }
 
-        var settings = await _db.SiteSettings.FirstOrDefaultAsync();
+        var settings = await _db.SiteSettings.OrderBy(item => item.Id).FirstOrDefaultAsync();
         if (settings == null)
         {
             settings = new SiteSettings();
