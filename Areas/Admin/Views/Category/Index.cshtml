@@ -1,97 +1,90 @@
-﻿@model List<Portfolio.Models.Category>
+@model List<Portfolio.Models.Category>
 @{
     ViewData["Title"] = "Categories";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="flex items-center justify-between mb-8">
+<div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
     <div>
-        <h2 class="text-2xl font-bold text-white">Categories</h2>
-        <p class="text-gray-500 mt-1">Manage section visibility and ordering</p>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Content structure</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Categories</h2>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Control section visibility, access level and navigation order.</p>
     </div>
-    <a href="@Url.Action("Create", "Category", new { area = "Admin" })"
-       class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-        + New Category
-    </a>
+    <div class="flex flex-wrap items-center gap-3">
+        <span class="border border-line bg-panel px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-slate-500">@Model.Count total</span>
+        <a href="@Url.Action("Create", "Category", new { area = "Admin" })"
+           class="focus-ring inline-flex items-center gap-2 bg-signal px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white">
+            <span aria-hidden="true">+</span>
+            New category
+        </a>
+    </div>
 </div>
 
-<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-    <table class="w-full text-sm">
-        <thead>
-            <tr class="border-b border-gray-800">
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Order</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Name</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Slug</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Status</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Private</th>
-                <th class="text-right px-6 py-3 text-gray-400 font-medium">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var cat in Model)
-            {
-                <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition">
-                    <td class="px-6 py-4 text-gray-400">@cat.SortOrder</td>
-                    <td class="px-6 py-4 text-white font-medium">@cat.Name</td>
-                    <td class="px-6 py-4 text-gray-400 font-mono text-xs">/@cat.Slug</td>
-                    <td class="px-6 py-4">
-                        @if (cat.Status == Portfolio.Models.Enums.VisibilityStatus.Public)
-                        {
-                            <span class="bg-green-900/40 text-green-400 text-xs px-2 py-1 rounded-full">Public</span>
-                        }
-                        else
-                        {
-                            <span class="bg-gray-800 text-gray-500 text-xs px-2 py-1 rounded-full">Hidden</span>
-                        }
-                    </td>
-                    <td class="px-6 py-4">
-                        @if (cat.IsPrivate)
-                        {
-                            <span class="bg-purple-900/40 text-purple-400 text-xs px-2 py-1 rounded-full">Private</span>
-                        }
-                </td>
-                <td class="px-6 py-4">
-                    <div class="flex items-center justify-end gap-2">
-                        <!-- Visibility toggle -->
-                        <form method="post"
-                              action="@Url.Action("Toggle", "Category", new { area = "Admin", id = cat.Id })">
-                            @Html.AntiForgeryToken()
-                            <button type="submit"
-                                    class="text-xs px-3 py-1.5 rounded-lg border transition
-                                        @(cat.Status == Portfolio.Models.Enums.VisibilityStatus.Public
-                                                                                ? "border-green-800 text-green-400 hover:bg-green-900/30"
-                                                                                : "border-gray-700 text-gray-400 hover:bg-gray-800")">
-                                @(cat.Status == Portfolio.Models.Enums.VisibilityStatus.Public ? "Hide" : "Publish")
-                            </button>
-                        </form>
-
-                            <!-- Edit -->
-                            <a href="@Url.Action("Edit", "Category", new { area = "Admin", id = cat.Id })"
-                               class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
-                                Edit
-                            </a>
-
-                            <!-- Delete -->
-                            <form method="post"
-                                  action="@Url.Action("Delete", "Category", new { area = "Admin", id = cat.Id })"
-                                  onsubmit="return confirm('Are you sure you want to delete the @cat.Name category?')">
-                                @Html.AntiForgeryToken()
-                                <button type="submit"
-                                        class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                        }
-        </tbody>
-    </table>
-
-    @if (!Model.Any())
+<section class="admin-surface overflow-hidden" aria-labelledby="category-table-heading">
+    <h3 id="category-table-heading" class="sr-only">Category records</h3>
+    @if (Model.Any())
     {
-        <div class="text-center py-16 text-gray-600">
-            No categories yet. Add a new category to get started.
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[880px] text-left text-sm">
+                <thead class="border-b border-line bg-ink/55">
+                    <tr>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Order</th>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Section</th>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Visibility</th>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Access</th>
+                        <th scope="col" class="px-5 py-3.5 text-right font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                    @foreach (var category in Model)
+                    {
+                        var isPublic = category.Status == Portfolio.Models.Enums.VisibilityStatus.Public;
+                        <tr class="transition hover:bg-white/[0.025]">
+                            <td class="px-5 py-4 font-mono text-xs text-slate-500">@category.SortOrder.ToString("00")</td>
+                            <td class="px-5 py-4">
+                                <p class="font-medium text-white">@category.Name</p>
+                                <p class="mt-1 font-mono text-[11px] text-slate-600">/@category.Slug</p>
+                            </td>
+                            <td class="px-5 py-4">
+                                <span class="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.13em] @(isPublic ? "text-signal" : "text-slate-500")">
+                                    <span class="h-1.5 w-1.5 rounded-full @(isPublic ? "bg-signal" : "bg-slate-600")" aria-hidden="true"></span>
+                                    @(isPublic ? "Public" : "Hidden")
+                                </span>
+                            </td>
+                            <td class="px-5 py-4">
+                                <span class="inline-flex border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] @(category.IsPrivate ? "border-violet-300/20 bg-violet-300/[0.06] text-violet-200" : "border-line text-slate-500")">
+                                    @(category.IsPrivate ? "Private" : "Standard")
+                                </span>
+                            </td>
+                            <td class="px-5 py-4">
+                                <div class="flex flex-wrap items-center justify-end gap-2">
+                                    <form method="post" action="@Url.Action("Toggle", "Category", new { area = "Admin", id = category.Id })">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="focus-ring border px-3 py-1.5 text-xs transition @(isPublic ? "border-signal/25 text-signal hover:bg-signal/10" : "border-line text-slate-400 hover:border-slate-500 hover:text-white")">
+                                            @(isPublic ? "Hide" : "Publish")
+                                        </button>
+                                    </form>
+                                    <a href="@Url.Action("Edit", "Category", new { area = "Admin", id = category.Id })"
+                                       class="focus-ring border border-line px-3 py-1.5 text-xs text-slate-400 transition hover:border-slate-500 hover:text-white">Edit</a>
+                                    <form method="post"
+                                          action="@Url.Action("Delete", "Category", new { area = "Admin", id = category.Id })"
+                                          onsubmit="return confirm('Delete this category? This action cannot be undone.');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="focus-ring border border-rose-300/20 px-3 py-1.5 text-xs text-rose-300 transition hover:bg-rose-300/10">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
-</div>
+    else
+    {
+        <div class="px-6 py-16 text-center">
+            <p class="font-mono text-xs uppercase tracking-[0.16em] text-slate-500">No categories yet</p>
+            <p class="mt-2 text-sm text-slate-600">Create the first category to define the portfolio structure.</p>
+        </div>
+    }
+</section>
