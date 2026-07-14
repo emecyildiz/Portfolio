@@ -34,8 +34,8 @@ public static class TeamMemberJsonService
                     member is null ||
                     !HasMaxLength(member.Name, 200) ||
                     !HasMaxLength(member.Role, 200) ||
-                    !IsSafeExternalUrl(member.GithubUrl) ||
-                    !IsSafeExternalUrl(member.LinkedinUrl)))
+                    !HasSafeExternalUrl(member.GithubUrl) ||
+                    !HasSafeExternalUrl(member.LinkedinUrl)))
             {
                 members = [];
                 return false;
@@ -54,13 +54,7 @@ public static class TeamMemberJsonService
     private static bool HasMaxLength(string? value, int maxLength) =>
         value == null || value.Length <= maxLength;
 
-    private static bool IsSafeExternalUrl(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return true;
-
-        return value.Length <= 2_048 &&
-               Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri) &&
-               uri.Scheme is "http" or "https";
-    }
+    private static bool HasSafeExternalUrl(string? value) =>
+        string.IsNullOrWhiteSpace(value) ||
+        (value.Length <= 2_048 && SafeUrlPolicy.IsSafeAbsoluteHttpUrl(value));
 }

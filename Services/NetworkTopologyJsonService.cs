@@ -79,8 +79,8 @@ public static class NetworkTopologyJsonService
                 !HasMaxLength(node.HomelabNotes, 5_000) ||
                 !HasMaxLength(node.StandaloneHardware, 2_000) ||
                 !HasMaxLength(node.LinkedProjectSlug, 200) ||
-                !IsSafeWebUrl(node.IconUrl) ||
-                !IsSafeWebUrl(node.StandaloneImageUrl))
+                !SafeUrlPolicy.IsSafeWebResourceUrl(node.IconUrl) ||
+                !SafeUrlPolicy.IsSafeWebResourceUrl(node.StandaloneImageUrl))
             {
                 return false;
             }
@@ -96,19 +96,4 @@ public static class NetworkTopologyJsonService
 
     private static bool HasMaxLength(string? value, int maxLength) =>
         value == null || value.Length <= maxLength;
-
-    private static bool IsSafeWebUrl(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return true;
-
-        var url = value.Trim();
-        if (url.StartsWith('/') && !url.StartsWith("//"))
-            return true;
-
-        if (Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
-            return absoluteUri.Scheme is "http" or "https";
-
-        return Uri.TryCreate(url, UriKind.Relative, out _) && !url.Contains(':');
-    }
 }
