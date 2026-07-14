@@ -50,7 +50,7 @@
         }
     </script>
 
-    <!-- JetBrains Mono — kod hissi için -->
+    <!-- Monospace font for the terminal-inspired interface -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -96,7 +96,7 @@
 </head>
 
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
-    <!-- Sayfa geçiş yükleme çubuğu -->
+    <!-- Page transition progress bar -->
     <div id="pageLoadBar" class="fixed top-0 left-0 h-0.5 bg-blue-500 z-[100] transition-all duration-300" style="width: 0%;"></div>
     <!-- Navbar -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800/50">
@@ -111,7 +111,7 @@
             <div class="hidden md:flex items-center gap-6">
                 <a href="/" class="nav-link text-sm text-gray-400 hover:text-white transition">Home</a>
 
-                <!-- İçerik dropdown -->
+                <!-- Work dropdown -->
                 <div class="relative group">
                     <button class="nav-link text-sm text-gray-400 hover:text-white transition flex items-center gap-1">
                         Work
@@ -160,7 +160,7 @@
 
                 <a href="/activity" class="nav-link text-sm text-gray-400 hover:text-white transition">Activity</a>
 
-                <!-- Arama ikonu -->
+                <!-- Search button -->
                 <button onclick="toggleSearch()" aria-label="Open search"
                         class="text-gray-400 hover:text-white transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,7 +228,7 @@
         </div>
     </nav>
 
-    <!-- Arama overlay -->
+    <!-- Search overlay -->
     <div id="searchOverlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-start justify-center pt-32 px-4">
         <div class="w-full max-w-xl">
             <form method="get" action="/search" class="flex gap-2">
@@ -269,7 +269,7 @@
         });
     </script>
 
-    <!-- İçerik -->
+    <!-- Page content -->
     <main class="flex-1 pt-16 fade-in">
         @RenderBody()
     </main>
@@ -286,11 +286,11 @@
     </footer>
 
     <script>
-        // Basit sayfa geçiş yükleme çubuğu
+        // Lightweight page transition progress bar.
         (function() {
             const bar = document.getElementById('pageLoadBar');
 
-            // Link tıklanınca çubuğu başlat
+            // Start progress for internal navigation.
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('a');
                 if (link && link.href && link.target !== '_blank' &&
@@ -301,7 +301,7 @@
                 }
             });
 
-            // Sayfa yüklenince çubuğu tamamla ve gizle
+            // Complete and reset the bar when the next page finishes loading.
             window.addEventListener('load', function() {
                 bar.style.width = '100%';
                 setTimeout(() => {

@@ -16,7 +16,7 @@ public class SecurityController : BaseController
         _viewCount = viewCount;
     }
 
-    // Liste sayfası — /security
+    // Public research index — /security
     public async Task<IActionResult> Index(string? type)
     {
         var category = await _db.Categories
@@ -33,7 +33,7 @@ public class SecurityController : BaseController
             .Include(s => s.Category)
             .AsQueryable();
 
-        // Tipe göre filtre
+        // Apply the optional research-type filter.
         if (!string.IsNullOrEmpty(type) && Enum.TryParse<ResearchType>(type, out var researchType))
             query = query.Where(s => s.ResearchType == researchType);
 
@@ -45,7 +45,7 @@ public class SecurityController : BaseController
         return View(researches);
     }
 
-    // Detay sayfası — /security/{slug}
+    // Public research detail — /security/{slug}
     public async Task<IActionResult> Detail(string slug)
     {
         var category = await _db.Categories
@@ -64,20 +64,20 @@ public class SecurityController : BaseController
 
         if (research == null) return NotFound();
 
-        // View count artır
+        // Increment the public view count without tracking this entity.
         await _viewCount.IncrementAsync("SecurityResearches", research.Id);
 
-        // Markdown'ı HTML'e çevir
+        // Render the stored Markdown through the shared safe renderer.
         ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(research.Content);
 
-        // İlgili araştırmalar — aynı tip
+        // Show other public research entries of the same type.
         ViewBag.Related = await _db.SecurityResearches
             .Where(s => s.ResearchType == research.ResearchType && s.Id != research.Id)
             .OrderByDescending(s => s.PublishedAt)
             .Take(3)
             .ToListAsync();
 
-        // Görseller
+        // Load media attached to this research entry.
         ViewBag.Images = await _db.Media
             .Where(m => m.EntityType == "security_research" && m.EntityId == research.Id)
             .OrderBy(m => m.SortOrder)

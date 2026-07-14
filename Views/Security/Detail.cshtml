@@ -48,24 +48,24 @@
 
         <div class="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-600">
             <span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "")</span>
-            <span>@Model.ReadingTimeMinutes dk okuma</span>
-            <span>@Model.ViewCount görüntülenme</span>
+            <span>@Model.ReadingTimeMinutes min read</span>
+            <span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span>
             @if (!string.IsNullOrEmpty(Model.GithubUrl))
             {
-                <a href="@Model.GithubUrl" target="_blank"
+                <a href="@Model.GithubUrl" target="_blank" rel="noopener noreferrer"
                    class="text-blue-400 hover:text-blue-300 transition">GitHub / PoC →</a>
             }
         </div>
     </div>
 
-    <!-- Kapak görseli -->
+    <!-- Cover image -->
     @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
     {
         <img src="@Model.CoverImageUrl" alt="@Model.Title"
              class="w-full rounded-xl mb-10 border border-gray-800" />
     }
 
-    <!-- Teknik bilgi kartı -->
+    <!-- Technical details -->
     @{
         var tools = new List<string>();
         if (!string.IsNullOrEmpty(Model.ToolsUsed))
@@ -78,14 +78,14 @@
             @if (!string.IsNullOrEmpty(Model.TargetCategory))
             {
                 <div>
-                    <p class="text-xs text-gray-600 font-mono mb-2">// hedef sistem</p>
+                    <p class="text-xs text-gray-600 font-mono mb-2">// target system</p>
                     <p class="text-gray-300 text-sm">@Model.TargetCategory</p>
                 </div>
             }
             @if (tools.Any())
             {
                 <div>
-                    <p class="text-xs text-gray-600 font-mono mb-2">// kullanılan araçlar</p>
+                    <p class="text-xs text-gray-600 font-mono mb-2">// tools used</p>
                     <div class="flex flex-wrap gap-2">
                         @foreach (var tool in tools)
                         {
@@ -97,7 +97,7 @@
         </div>
     }
 
-    <!-- Markdown içerik -->
+    <!-- Markdown content -->
     <div class="prose prose-invert prose-lg max-w-none
                 prose-headings:text-white prose-headings:font-bold
                 prose-p:text-gray-400 prose-p:leading-relaxed
@@ -109,11 +109,11 @@
         @Html.Raw(ViewBag.ContentHtml)
     </div>
 
-    <!-- Görsel galeri -->
+    <!-- Image gallery -->
     @if (images.Any())
     {
         <div class="mt-12">
-            <h3 class="text-sm font-mono text-gray-600 mb-4">// görseller</h3>
+            <h3 class="text-sm font-mono text-gray-600 mb-4">// images</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                 @foreach (var img in images)
                 {
@@ -130,11 +130,11 @@
         </div>
     }
 
-    <!-- İlgili araştırmalar -->
+    <!-- Related research -->
     @if (related.Any())
     {
         <div class="mt-16 pt-8 border-t border-gray-800">
-            <h3 class="text-sm font-mono text-gray-600 mb-6">// ilgili araştırmalar</h3>
+            <h3 class="text-sm font-mono text-gray-600 mb-6">// related research</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 @foreach (var r in related)
                 {
@@ -148,7 +148,7 @@
         </div>
     }
 
-    <!-- Geri dön -->
+    <!-- Back to research list -->
     <div class="mt-12 pt-8 border-t border-gray-800">
         <a href="/security" class="text-sm text-gray-500 hover:text-white transition font-mono">
             ← /security

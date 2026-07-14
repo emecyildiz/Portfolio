@@ -1,7 +1,7 @@
 ﻿@model List<Portfolio.Models.SecurityResearch>
 @{
-    ViewData["Title"] = "Güvenlik Araştırmaları";
-    ViewData["Description"] = "Malware analizi, donanım açıkları, RF güvenliği ve ağ saldırıları üzerine araştırmalar";
+    ViewData["Title"] = "Security Research";
+    ViewData["Description"] = "Research into malware analysis, hardware vulnerabilities, RF security, and network attacks.";
     var currentType = ViewBag.CurrentType as string;
 }
 
@@ -10,18 +10,18 @@
     <!-- Header -->
     <div class="mb-12">
         <p class="font-mono text-red-400 text-sm mb-2">// security research</p>
-        <h1 class="text-4xl font-bold text-white mb-4">Güvenlik Araştırmaları</h1>
+        <h1 class="text-4xl font-bold text-white mb-4">Security Research</h1>
         <p class="text-gray-400 max-w-2xl">
-            Malware analizi, donanım güvenlik açıkları, RF saldırıları ve ağ güvenliği üzerine yaptığım araştırmalar.
+            Research into malware analysis, hardware vulnerabilities, RF attacks, and network security.
         </p>
     </div>
 
-    <!-- Filtreler -->
+    <!-- Filters -->
     <div class="flex flex-wrap gap-2 mb-10">
         <a href="/security"
            class="text-xs px-3 py-1.5 rounded-full border transition
                   @(string.IsNullOrEmpty(currentType) ? "border-red-600 text-red-400 bg-red-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
-            Tümü
+            All
         </a>
         @foreach (var type in Enum.GetValues<Portfolio.Models.Enums.ResearchType>())
         {
@@ -33,11 +33,11 @@
         }
     </div>
 
-    <!-- Liste -->
+    <!-- Research list -->
     @if (!Model.Any())
     {
         <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// henüz araştırma yok</p>
+            <p class="font-mono">// no published research yet</p>
         </div>
     }
     else
@@ -91,8 +91,8 @@
                         <span class="text-xs text-gray-600">
                             @(r.PublishedAt?.ToString("dd MMM yyyy") ?? "")
                         </span>
-                        <span class="text-xs text-gray-600">@r.ReadingTimeMinutes dk okuma</span>
-                        <span class="text-xs text-gray-700 ml-auto">@r.ViewCount görüntülenme</span>
+                        <span class="text-xs text-gray-600">@r.ReadingTimeMinutes min read</span>
+                        <span class="text-xs text-gray-700 ml-auto">@r.ViewCount @(r.ViewCount == 1 ? "view" : "views")</span>
                     </div>
                 </a>
             }
