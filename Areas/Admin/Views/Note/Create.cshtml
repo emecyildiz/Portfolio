@@ -1,91 +1,108 @@
-﻿@model Portfolio.Models.Note
+@model Portfolio.Models.Note
 @{
     ViewData["Title"] = "New Note";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">New Note</h2>
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Private workspace</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">New note</h2>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Capture a private reference or add an operational task.</p>
+    </div>
+    <a href="@Url.Action("Index", "Note", new { area = "Admin" })" class="focus-ring w-fit border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to notes</a>
 </div>
 
-<form method="post">
+<aside class="mb-6 max-w-6xl border border-amber-300/20 bg-amber-300/[0.05] px-4 py-3.5 text-sm leading-6 text-amber-100/80" aria-label="Privacy reminder">
+    <span class="font-medium text-amber-100">Privacy reminder:</span>
+    An open High or Critical task can expose its title and related link in the public Current Focus widget. Note content remains private.
+</aside>
+
+<form method="post" class="max-w-6xl">
     @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
 
-    <div class="max-w-2xl space-y-4">
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(19rem,.75fr)]">
+        <section class="admin-surface p-5 sm:p-6" aria-labelledby="note-content-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Private material</p>
+            <h3 id="note-content-heading" class="mt-2 text-lg font-semibold text-white">Note content</h3>
 
-            <div>
-                <label class="block text-sm text-gray-400 mb-1">Title</label>
-                <input asp-for="Title"
-                       class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
-            </div>
-
-            <div>
-                <label class="block text-sm text-gray-400 mb-1">Content</label>
-                <textarea asp-for="Content" rows="6"
-                          class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 font-mono"></textarea>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
+            <div class="mt-6 space-y-5">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Note Type</label>
-                    <select asp-for="NoteType"
-                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.NoteType>()"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </select>
+                    <label asp-for="Title" class="admin-label">Title</label>
+                    <input asp-for="Title" class="admin-input" autocomplete="off" aria-describedby="note-title-help" placeholder="Review firmware analysis notes" />
+                    <p id="note-title-help" class="admin-hint">Avoid confidential details if this may become a High or Critical task.</p>
+                    <span asp-validation-for="Title"></span>
                 </div>
+
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Priority</label>
-                    <select asp-for="Priority"
-                            asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.NotePriority>()"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Related Link (optional)</label>
-                    <input asp-for="RelatedUrl"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500"
-                           placeholder="/electronics/proje-slug veya harici bir link" />
-                    <p class="text-xs text-gray-600 mt-1">
-                        Used as the destination when this note appears in the "Current Focus" widget.
-                    </p>
+                    <label asp-for="Content" class="admin-label">Content</label>
+                    <textarea asp-for="Content" rows="16" class="admin-textarea font-mono" placeholder="Private notes, commands, findings or next steps..."></textarea>
+                    <span asp-validation-for="Content"></span>
                 </div>
             </div>
+        </section>
 
-            <div class="flex items-center gap-6">
-                <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                    <input asp-for="IsTodo" type="checkbox" class="w-4 h-4 rounded" id="isTodoCheck" />
-                    Add to task list
+        <aside class="admin-surface h-fit p-5 sm:p-6" aria-labelledby="note-settings-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Classification</p>
+            <h3 id="note-settings-heading" class="mt-2 text-lg font-semibold text-white">Note settings</h3>
+
+            <div class="mt-6 space-y-5">
+                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
+                    <div>
+                        <label asp-for="NoteType" class="admin-label">Note type</label>
+                        <select asp-for="NoteType" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.NoteType>()" class="admin-select"></select>
+                        <span asp-validation-for="NoteType"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Priority" class="admin-label">Priority</label>
+                        <select asp-for="Priority" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.NotePriority>()" class="admin-select"></select>
+                        <span asp-validation-for="Priority"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="RelatedUrl" class="admin-label">Related link <span class="font-normal text-slate-600">(optional)</span></label>
+                    <input asp-for="RelatedUrl" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:/(?!/).+|https://.+)" title="Use a root-relative path or an HTTPS URL." aria-describedby="related-url-help" placeholder="/electronics/project-slug or https://..." />
+                    <p id="related-url-help" class="admin-hint">Used as the public Current Focus destination when this task qualifies. Prefer a root-relative path or trusted HTTPS URL.</p>
+                    <span asp-validation-for="RelatedUrl"></span>
+                </div>
+
+                <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4">
+                    <input asp-for="IsTodo" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" id="isTodoCheck" />
+                    <span>
+                        <span class="block text-sm font-medium text-slate-300">Add to task list</span>
+                        <span class="mt-1 block text-xs leading-5 text-slate-600">Enables due-date tracking and Current Focus eligibility.</span>
+                    </span>
                 </label>
-            </div>
 
-            <div id="todoFields" class="hidden space-y-3">
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Due Date</label>
-                    <input asp-for="DueDate" type="date"
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500" />
+                <div id="todoFields" class="@(Model.IsTodo ? "" : "hidden") border-l border-cyan/25 pl-4">
+                    <label asp-for="DueDate" class="admin-label">Due date <span class="font-normal text-slate-600">(optional)</span></label>
+                    <input asp-for="DueDate" type="date" class="admin-input" />
+                    <span asp-validation-for="DueDate"></span>
                 </div>
             </div>
-        </div>
+        </aside>
+    </div>
 
-        <div class="flex gap-3">
-            <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-                Save
-            </button>
-            <a href="@Url.Action("Index", "Note", new { area = "Admin" })"
-               class="border border-gray-700 text-gray-400 hover:bg-gray-800 text-sm px-6 py-2.5 rounded-lg transition">
-                Cancel
-            </a>
-        </div>
+    <div class="mt-6 flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:justify-end">
+        <a href="@Url.Action("Index", "Note", new { area = "Admin" })" class="focus-ring border border-line px-5 py-2.5 text-center text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Cancel</a>
+        <button type="submit" class="focus-ring bg-signal px-6 py-2.5 text-sm font-semibold text-ink transition hover:bg-white">Create note</button>
     </div>
 </form>
 
-<script>
-    const isTodoCheck = document.getElementById('isTodoCheck');
-    const todoFields = document.getElementById('todoFields');
+@section Scripts {
+    <script>
+        const isTodoCheck = document.getElementById('isTodoCheck');
+        const todoFields = document.getElementById('todoFields');
 
-    isTodoCheck.addEventListener('change', function() {
-        todoFields.classList.toggle('hidden', !this.checked);
-    });
-</script>
+        function syncTodoFields() {
+            const enabled = isTodoCheck.checked;
+            todoFields.classList.toggle('hidden', !enabled);
+            todoFields.querySelectorAll('input, select, textarea').forEach(field => field.disabled = !enabled);
+        }
+
+        isTodoCheck.addEventListener('change', syncTodoFields);
+        syncTodoFields();
+    </script>
+}
