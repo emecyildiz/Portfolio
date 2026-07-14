@@ -74,6 +74,7 @@ public class HireController : BaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("TicketTrackingLimit")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> TrackTicket(string ticketNumber)
     {

@@ -23,6 +23,7 @@ public class AccountController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("AdminLoginLimit")]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid)

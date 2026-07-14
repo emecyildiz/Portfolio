@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Services;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading.RateLimiting;
 
@@ -87,10 +88,39 @@ builder.Services.AddRateLimiter(options =>
                 AutoReplenishment = true
             }));
 
+    options.AddPolicy("AdminLoginLimit", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(15),
+                PermitLimit = 5,
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
+    options.AddPolicy("TicketTrackingLimit", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(1),
+                PermitLimit = 10,
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
     options.OnRejected = async (context, cancellationToken) =>
     {
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
         context.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter = Math.Ceiling(retryAfter.TotalSeconds)
+                .ToString(CultureInfo.InvariantCulture);
+        }
+
         await context.HttpContext.Response.WriteAsync(
             "Too many requests. Please wait before trying again.", cancellationToken);
     };
