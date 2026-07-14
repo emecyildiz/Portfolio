@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models;
+using Portfolio.Services;
 
 namespace Portfolio.Areas.Admin.Controllers;
 
 public class SettingsController : AdminBaseController
 {
+    private const long MaxCvFileSize = 10_485_760;
     private readonly IWebHostEnvironment _env;
 
     public SettingsController(AppDbContext db, IWebHostEnvironment env) : base(db)
@@ -31,9 +33,15 @@ public class SettingsController : AdminBaseController
             return RedirectToAction(nameof(Index));
         }
 
-        if (Path.GetExtension(cvFile.FileName).ToLower() != ".pdf")
+        if (cvFile.Length > MaxCvFileSize)
         {
-            TempData["Error"] = "Sadece PDF dosyası yükleyebilirsin.";
+            TempData["Error"] = "CV dosyası en fazla 10 MB olabilir.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!await UploadFileValidator.ValidatePdfAsync(cvFile))
+        {
+            TempData["Error"] = "Dosya uzantısı, içerik türü ve içeriği geçerli bir PDF olmalı.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -42,8 +50,19 @@ public class SettingsController : AdminBaseController
         var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
         Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
 
-        await using var stream = new FileStream(physicalPath, FileMode.Create);
-        await cvFile.CopyToAsync(stream);
+        var temporaryPath = $"{physicalPath}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            await using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                await cvFile.CopyToAsync(stream);
+
+            System.IO.File.Move(temporaryPath, physicalPath, true);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(temporaryPath))
+                System.IO.File.Delete(temporaryPath);
+        }
 
         var settings = await _db.SiteSettings.FirstOrDefaultAsync();
         if (settings == null)

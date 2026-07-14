@@ -224,21 +224,21 @@ public class HomelabController : AdminBaseController
         if (icon == null || icon.Length == 0)
             return Json(new { success = false, message = "Dosya seçilmedi." });
 
-        var allowedTypes = new[] { "image/svg+xml", "image/png", "image/webp" };
-        if (!allowedTypes.Contains(icon.ContentType))
-            return Json(new { success = false, message = "Sadece SVG, PNG veya WebP yükleyebilirsin." });
-
         if (icon.Length > 500_000) // 500KB limit — ikonlar küçük olmalı
             return Json(new { success = false, message = "Dosya çok büyük (max 500KB)." });
 
-        var extension = Path.GetExtension(icon.FileName);
-        var uniqueName = $"{Guid.NewGuid()}{extension}";
+        // Kullanıcı SVG'si aynı origin üzerinde script çalıştırabildiği için yalnızca raster ikon kabul edilir.
+        var validatedUpload = await UploadFileValidator.ValidateImageAsync(icon, ".png", ".webp");
+        if (validatedUpload == null)
+            return Json(new { success = false, message = "Dosya geçerli bir PNG veya WebP ikonu olmalı." });
+
+        var uniqueName = $"{Guid.NewGuid()}{validatedUpload.Extension}";
         var relativePath = Path.Combine("uploads", "network-icons", uniqueName);
         var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
 
         Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
 
-        await using var stream = new FileStream(physicalPath, FileMode.Create);
+        await using var stream = new FileStream(physicalPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
         await icon.CopyToAsync(stream);
 
         var url = "/" + relativePath.Replace('\\', '/');

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models;
 using Portfolio.Models.Enums;
+using Portfolio.Models.ViewModels;
 
 namespace Portfolio.Controllers;
 
@@ -27,39 +28,53 @@ public class HireController : BaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("ContactFormLimit")]
-    public async Task<IActionResult> Contact(ContactMessage model, int? serviceId, string? website)
+    public async Task<IActionResult> Contact(ContactRequestViewModel request)
     {
-        if (!string.IsNullOrEmpty(website))
+        if (!string.IsNullOrEmpty(request.Website))
         {
             TempData["Success"] = "Talebin alındı!";
             return RedirectToAction("Index", "Hire", new { area = "" });
         }
 
-        if (string.IsNullOrWhiteSpace(model.Name) ||
-            string.IsNullOrWhiteSpace(model.Email) ||
-            string.IsNullOrWhiteSpace(model.Message))
+        if (!ModelState.IsValid)
         {
-            TempData["Error"] = "Ad, e-posta ve mesaj zorunlu.";
+            TempData["Error"] = "Form alanlarını ve e-posta adresini kontrol et.";
             return RedirectToAction("Index", "Hire", new { area = "" });
         }
 
-        model.TicketNumber = Guid.NewGuid();
-        model.ServiceId = serviceId;
-        model.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        model.UserAgent = Request.Headers["User-Agent"].ToString();
-        model.IsRead = false;
-        model.Status = ContactStatus.New;
-        model.CreatedAt = DateTime.UtcNow;
+        if (request.ServiceId.HasValue && !await _db.Services.AnyAsync(s =>
+                s.Id == request.ServiceId.Value && s.Status == VisibilityStatus.Public))
+        {
+            TempData["Error"] = "Seçilen hizmet geçerli değil.";
+            return RedirectToAction("Index", "Hire", new { area = "" });
+        }
 
-        _db.ContactMessages.Add(model);
+        var message = new ContactMessage
+        {
+            TicketNumber = Guid.NewGuid(),
+            Name = request.Name.Trim(),
+            Email = request.Email.Trim(),
+            Subject = string.IsNullOrWhiteSpace(request.Subject) ? null : request.Subject.Trim(),
+            Message = request.Message.Trim(),
+            ServiceId = request.ServiceId,
+            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            UserAgent = Request.Headers["User-Agent"].ToString(),
+            IsRead = false,
+            Status = ContactStatus.New,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _db.ContactMessages.Add(message);
         await _db.SaveChangesAsync();
 
         TempData["Success"] = "Talebin alındı!";
-        TempData["TicketNumber"] = model.TicketNumber.ToString();
+        TempData["TicketNumber"] = message.TicketNumber.ToString();
         return RedirectToAction("Index", "Hire", new { area = "" });
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> TrackTicket(string ticketNumber)
     {
         if (!Guid.TryParse(ticketNumber, out var guid))

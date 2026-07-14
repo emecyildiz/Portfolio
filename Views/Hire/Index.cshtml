@@ -78,22 +78,21 @@
         }
 
         <form method="post" asp-controller="Hire" asp-action="Contact" asp-route-area="" class="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-4">
-            @Html.AntiForgeryToken()
             <div style="position: absolute; left: -9999px;" aria-hidden="true">
                 <label for="website">Website</label>
-                <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
+                <input type="text" name="Website" id="website" maxlength="200" tabindex="-1" autocomplete="off" />
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm text-gray-400 mb-1">Ad Soyad</label>
-                    <input name="Name" type="text" required
+                    <input name="Name" type="text" required maxlength="100"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
                            placeholder="Adın Soyadın" />
                 </div>
                 <div>
                     <label class="block text-sm text-gray-400 mb-1">E-posta</label>
-                    <input name="Email" type="email" required
+                    <input name="Email" type="email" required maxlength="300"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
                            placeholder="ornek@email.com" />
                 </div>
@@ -101,7 +100,7 @@
 
             <div>
                 <label class="block text-sm text-gray-400 mb-1">Konu</label>
-                <input name="Subject" type="text"
+                <input name="Subject" type="text" maxlength="200"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
                        placeholder="Ne hakkında konuşmak istiyorsun?" />
             </div>
@@ -110,7 +109,7 @@
             {
                 <div>
                     <label class="block text-sm text-gray-400 mb-1">İlgilendiğin Hizmet</label>
-                    <select name="serviceId" id="serviceSelect"
+                    <select name="ServiceId" id="serviceSelect"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition">
                         <option value="">Seçiniz (opsiyonel)</option>
                         @foreach (var s in services)
@@ -123,7 +122,7 @@
 
             <div>
                 <label class="block text-sm text-gray-400 mb-1">Mesaj</label>
-                <textarea name="Message" rows="5" required
+                <textarea name="Message" rows="5" required maxlength="5000"
                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition resize-none"
                           placeholder="Projen veya ihtiyacın hakkında kısaca anlat..."></textarea>
             </div>
@@ -191,9 +190,8 @@
                 </div>
             }
 
-            <form method="post" action="/hire/track" class="flex gap-2">
-                @Html.AntiForgeryToken()
-                <input name="ticketNumber" type="text" required
+            <form method="post" asp-controller="Hire" asp-action="TrackTicket" asp-route-area="" class="flex gap-2">
+                <input name="ticketNumber" type="text" required maxlength="36"
                        placeholder="Bilet numaranı yapıştır"
                        class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-blue-500 transition" />
                 <button type="submit"

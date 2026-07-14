@@ -30,12 +30,12 @@ public interface IMediaService
 
 public class MediaService : IMediaService
 {
+    private static readonly HashSet<string> AllowedEntityTypes =
+        ["project", "security_research", "homelab_post", "blog_post", "team_project"];
+
     private readonly AppDbContext _db;
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _config;
-
-    // İzin verilen dosya tipleri
-    private readonly string[] _allowedMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
     public MediaService(AppDbContext db, IWebHostEnvironment env, IConfiguration config)
     {
@@ -47,18 +47,24 @@ public class MediaService : IMediaService
     public async Task<Media> SaveAsync(IFormFile file, string entityType, int entityId,
                                        string? altText = null, string? caption = null)
     {
-        // Dosya tipi kontrolü
-        if (!_allowedMimeTypes.Contains(file.ContentType.ToLower()))
-            throw new InvalidOperationException($"Desteklenmeyen dosya tipi: {file.ContentType}");
+        if (!AllowedEntityTypes.Contains(entityType) || entityId <= 0)
+            throw new InvalidOperationException("Geçersiz medya hedefi.");
 
         // Boyut kontrolü (appsettings'ten alır — varsayılan 10MB)
         var maxSize = _config.GetValue<long>("MediaStorage:MaxFileSizeBytes", 10_485_760);
+        if (file.Length <= 0)
+            throw new InvalidOperationException("Boş dosya yüklenemez.");
+
         if (file.Length > maxSize)
             throw new InvalidOperationException($"Dosya çok büyük. Maksimum: {maxSize / 1_048_576}MB");
 
-        // Benzersiz dosya adı — orijinal adı sakla ama çakışma olmasın
-        var extension = Path.GetExtension(file.FileName).ToLower();
-        var uniqueName = $"{Guid.NewGuid()}{extension}";
+        // Uzantı, MIME ve gerçek dosya imzası birbiriyle eşleşmeli.
+        var validatedUpload = await UploadFileValidator.ValidateImageAsync(file);
+        if (validatedUpload == null)
+            throw new InvalidOperationException("Dosya geçerli bir JPEG, PNG, WebP veya GIF görseli değil.");
+
+        // Benzersiz dosya adı — kullanıcıdan gelen ad hiçbir zaman fiziksel yola eklenmez.
+        var uniqueName = $"{Guid.NewGuid()}{validatedUpload.Extension}";
 
         // Kayıt yolu: wwwroot/uploads/project/42/dosya.jpg
         var relativePath = Path.Combine("uploads", entityType, entityId.ToString(), uniqueName);
@@ -68,7 +74,7 @@ public class MediaService : IMediaService
         Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
 
         // Dosyayı kaydet
-        await using var stream = new FileStream(physicalPath, FileMode.Create);
+        await using var stream = new FileStream(physicalPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
         await file.CopyToAsync(stream);
 
         // Media kaydı oluştur
@@ -77,10 +83,10 @@ public class MediaService : IMediaService
             EntityType = entityType,
             EntityId = entityId,
             Url = "/" + relativePath.Replace('\\', '/'),
-            Filename = file.FileName,
+            Filename = UploadFileValidator.GetSafeFileName(file.FileName),
             AltText = altText,
             Caption = caption,
-            MimeType = file.ContentType,
+            MimeType = validatedUpload.MimeType,
             FileSizeBytes = file.Length,
             SortOrder = await GetNextSortOrderAsync(entityType, entityId),
             IsCover = false,
