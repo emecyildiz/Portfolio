@@ -39,19 +39,23 @@ namespace Portfolio.Data
 
             modelBuilder.Entity<Project>().HasQueryFilter(p =>
                 p.Status == VisibilityStatus.Public &&
-                p.Category.Status == VisibilityStatus.Public);
+                p.Category.Status == VisibilityStatus.Public &&
+                !p.Category.IsPrivate);
 
             modelBuilder.Entity<HomelabPost>().HasQueryFilter(h =>
                 h.Status == VisibilityStatus.Public &&
-                h.Category.Status == VisibilityStatus.Public);
+                h.Category.Status == VisibilityStatus.Public &&
+                !h.Category.IsPrivate);
 
             modelBuilder.Entity<BlogPost>().HasQueryFilter(b =>
                 b.Status == VisibilityStatus.Public &&
-                b.Category.Status == VisibilityStatus.Public);
+                b.Category.Status == VisibilityStatus.Public &&
+                !b.Category.IsPrivate);
 
             modelBuilder.Entity<TeamProject>().HasQueryFilter(t =>
                 t.Status == VisibilityStatus.Public &&
-                t.Category.Status == VisibilityStatus.Public);
+                t.Category.Status == VisibilityStatus.Public &&
+                !t.Category.IsPrivate);
 
             modelBuilder.Entity<Page>().HasQueryFilter(p =>
                 p.Status == VisibilityStatus.Public);
@@ -63,6 +67,7 @@ namespace Portfolio.Data
             modelBuilder.Entity<SecurityResearch>().HasQueryFilter(s =>
                 s.Status == VisibilityStatus.Public &&
                 s.Category.Status == VisibilityStatus.Public &&
+                !s.Category.IsPrivate &&
                 s.DisclosureStatus == DisclosureStatus.PubliclyDisclosed);
 
             // ── Enum → String dönüşümleri ─────────────────────────────────────
