@@ -126,18 +126,21 @@ public class ViewCountService : IViewCountService
 
     public async Task IncrementAsync(string table, int id)
     {
-        var tableName = table switch
+        var sql = table switch
         {
-            "Project" => "Projects",
-            "SecurityResearch" => "SecurityResearches",
-            "HomelabPost" => "HomelabPosts",
-            "BlogPost" => "BlogPosts",
-            "TeamProject" => "TeamProjects",
-            _ => table
+            "Project" or "Projects" =>
+                "UPDATE \"Projects\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
+            "SecurityResearch" or "SecurityResearches" =>
+                "UPDATE \"SecurityResearches\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
+            "HomelabPost" or "HomelabPosts" =>
+                "UPDATE \"HomelabPosts\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
+            "BlogPost" or "BlogPosts" =>
+                "UPDATE \"BlogPosts\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
+            "TeamProject" or "TeamProjects" =>
+                "UPDATE \"TeamProjects\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
+            _ => throw new ArgumentOutOfRangeException(nameof(table), table, "Desteklenmeyen içerik tablosu.")
         };
 
-        await _db.Database.ExecuteSqlRawAsync(
-            $"UPDATE \"{tableName}\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {{0}}", id
-        );
+        await _db.Database.ExecuteSqlRawAsync(sql, id);
     }
 }
