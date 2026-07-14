@@ -1,4 +1,4 @@
-﻿@model Portfolio.Models.HomelabPost
+@model Portfolio.Models.HomelabPost
 @{
     ViewData["Title"] = Model.Title;
     ViewData["Description"] = Model.Summary;
@@ -7,110 +7,70 @@
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
     var related = ViewBag.Related as List<Portfolio.Models.HomelabPost> ?? new();
     var topologyJson = ViewBag.NetworkTopologyJson as string;
+    Func<Portfolio.Models.Enums.HomelabTopic, string> topicLabel = topic => topic switch
+    {
+        Portfolio.Models.Enums.HomelabTopic.NetworkSetup => "Network Setup",
+        Portfolio.Models.Enums.HomelabTopic.ServerManagement => "Server Management",
+        Portfolio.Models.Enums.HomelabTopic.VPN => "VPN",
+        _ => topic.ToString()
+    };
 }
 
-<div class="max-w-4xl mx-auto px-6 py-16">
+<article class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+    <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 overflow-hidden font-mono text-[9px] uppercase tracking-[0.15em] text-slate-700"><a href="/" class="focus-ring rounded-sm transition hover:text-white">Home</a><span>/</span><a href="/homelab" class="focus-ring rounded-sm transition hover:text-teal-300">Homelab</a><span>/</span><span class="truncate text-slate-500">@Model.Slug</span></nav>
 
-    <div class="flex items-center gap-2 text-sm text-gray-600 mb-8 font-mono">
-        <a href="/" class="hover:text-white transition">~</a>
-        <span>/</span>
-        <a href="/homelab" class="hover:text-white transition">homelab</a>
-        <span>/</span>
-        <span class="text-gray-400">@Model.Slug</span>
-    </div>
-
-    <div class="mb-10">
-        <div class="flex items-center gap-2 mb-4">
-            <span class="font-mono text-xs text-teal-400 bg-teal-900/20 px-2 py-1 rounded">@Model.Topic</span>
+    <header class="mt-10 grid gap-8 border-b border-white/[0.07] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+            <div class="flex flex-wrap items-center gap-2"><span class="rounded-full border border-teal-300/20 bg-teal-300/[0.06] px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-teal-200">@topicLabel(Model.Topic)</span>@if (Model.IsMainLab){<span class="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-signal"><span class="h-1.5 w-1.5 rounded-full bg-signal"></span>Primary topology</span>}</div>
+            <h1 class="mt-6 max-w-5xl text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl">@Model.Title</h1>
+            <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-400">@Model.Summary</p>
+            <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600"><span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "Undated")</span><span>@Model.ReadingTimeMinutes min read</span><span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span></div>
         </div>
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">@Model.Title</h1>
-        <p class="text-gray-400 text-lg">@Model.Summary</p>
-
-        <div class="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-600">
-            <span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "")</span>
-            <span>@Model.ReadingTimeMinutes min read</span>
-            <span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span>
-        </div>
-    </div>
+        <div class="rounded-xl border border-teal-300/15 bg-teal-300/[0.04] px-5 py-4 text-right"><p class="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-600">Infrastructure status</p><p class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-teal-200"><span class="h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_12px_rgba(94,234,212,.7)]"></span>Documented</p></div>
+    </header>
 
     @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
     {
-        <img src="@Model.CoverImageUrl" alt="@Model.Title"
-             class="w-full rounded-xl mb-10 border border-gray-800" />
+        <figure class="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-panel"><img src="@Model.CoverImageUrl" alt="@Model.Title" class="max-h-[38rem] w-full object-cover" /></figure>
     }
 
-    <!-- Hardware and software card -->
     @if (hardware.Any() || software.Any())
     {
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10">
-            <p class="text-xs text-gray-600 font-mono mb-4">// setup</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section class="technical-frame surface mt-10 rounded-2xl p-5 sm:p-7">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-teal-300">Deployment inventory</p>
+            <div class="mt-6 grid gap-8 md:grid-cols-2">
                 @if (hardware.Any())
                 {
-                    <div>
-                        <p class="text-xs text-gray-600 mb-3">Hardware</p>
-                        <div class="space-y-1">
-                            @foreach (var hw in hardware)
-                            {
-                                <div class="flex items-center gap-2">
-                                    <span class="text-teal-400 text-xs">▸</span>
-                                    <span class="font-mono text-sm text-gray-300">@hw</span>
-                                </div>
-                            }
-                        </div>
-                    </div>
+                    <div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Hardware / @hardware.Count.ToString("D2")</p><div class="mt-4 grid gap-2 sm:grid-cols-2">@foreach (var item in hardware){<div class="flex items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2.5"><span class="text-teal-300">›</span><span class="min-w-0 truncate font-mono text-[10px] text-slate-300">@item</span></div>}</div></div>
                 }
                 @if (software.Any())
                 {
-                    <div>
-                        <p class="text-xs text-gray-600 mb-3">Software</p>
-                        <div class="space-y-1">
-                            @foreach (var sw in software)
-                            {
-                                <div class="flex items-center gap-2">
-                                    <span class="text-teal-400 text-xs">▸</span>
-                                    <span class="font-mono text-sm text-gray-300">@sw</span>
-                                </div>
-                            }
-                        </div>
-                    </div>
+                    <div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Software / @software.Count.ToString("D2")</p><div class="mt-4 grid gap-2 sm:grid-cols-2">@foreach (var item in software){<div class="flex items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2.5"><span class="text-cyan">›</span><span class="min-w-0 truncate font-mono text-[10px] text-slate-300">@item</span></div>}</div></div>
                 }
             </div>
-        </div>
+        </section>
     }
 
-    <!-- Network diagram -->
     @if (!string.IsNullOrEmpty(Model.NetworkDiagramUrl))
     {
-        <div class="mb-10">
-            <p class="text-xs text-gray-600 font-mono mb-3">// network topology</p>
-            <img src="@Model.NetworkDiagramUrl" alt="Network topology"
-                 class="w-full rounded-xl border border-gray-800" />
-        </div>
+        <section class="mt-12"><div class="mb-4 flex items-end justify-between gap-4"><div><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-teal-300">Static topology</p><h2 class="mt-2 text-2xl font-semibold text-white">Network diagram</h2></div><span class="font-mono text-[9px] uppercase tracking-[0.12em] text-slate-700">Reference image</span></div><img src="@Model.NetworkDiagramUrl" alt="Network topology for @Model.Title" class="w-full rounded-2xl border border-white/[0.08] bg-panel" /></section>
     }
-    <!-- Interactive network map -->
+
     @if (!string.IsNullOrEmpty(topologyJson))
     {
-        <div class="mb-10">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-xs text-gray-600 font-mono">// interactive network map</p>
-                <p class="text-xs text-gray-700">Select a device to view its details</p>
-            </div>
-            <div id="network-map" class="w-full h-[500px] bg-gray-950 border border-gray-800 rounded-xl"></div>
-        </div>
+        <section class="mt-12">
+            <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-teal-300">Interactive topology</p><h2 class="mt-2 text-2xl font-semibold text-white">Explore the network</h2></div><p class="font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600">Select a device · Drag to reposition · Scroll to zoom</p></div>
+            <div class="technical-frame surface overflow-hidden rounded-2xl p-2 sm:p-3"><div id="network-map" aria-label="Interactive network topology" class="h-[420px] w-full rounded-xl border border-white/[0.07] bg-ink sm:h-[560px]"></div></div>
+        </section>
 
-        <!-- Device details panel -->
-        <div id="deviceDetailPanel" class="hidden fixed inset-0 z-50">
-            <div id="deviceDetailOverlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-            <div class="absolute right-0 top-0 h-full w-full max-w-md bg-gray-900 border-l border-gray-800 overflow-y-auto">
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <p class="font-mono text-xs text-gray-600">// device details</p>
-                        <button onclick="closeDeviceDetail()" class="text-gray-500 hover:text-white transition">✕</button>
-                    </div>
+        <div id="deviceDetailPanel" class="hidden fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-labelledby="deviceDetailTitle">
+            <div id="deviceDetailOverlay" class="absolute inset-0 bg-ink/85 backdrop-blur-sm"></div>
+            <aside class="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-white/[0.08] bg-panel shadow-2xl">
+                <div class="p-5 sm:p-7">
+                    <div class="mb-7 flex items-center justify-between border-b border-white/[0.07] pb-4"><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-teal-300">Device record</p><button type="button" onclick="closeDeviceDetail()" aria-label="Close device details" class="focus-ring rounded-md border border-white/10 px-3 py-2 font-mono text-[10px] text-slate-400 transition hover:text-white">ESC</button></div>
                     <div id="deviceDetailContent"></div>
                 </div>
-            </div>
+            </aside>
         </div>
 
         <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -134,104 +94,83 @@
                 }
             }
 
-            // Color palette by device type
             const typeColors = {
-                router: '#3B82F6', switch: '#8B5CF6', firewall: '#EF4444',
-                server: '#10B981', pc: '#6B7280', laptop: '#6B7280',
-                microcontroller: '#F59E0B', mobile: '#6B7280', custom: '#EC4899',
-                sensor: '#F59E0B', audio: '#14B8A6', antenna: '#06B6D4'
+                router: '#55D6FF', switch: '#A78BFA', firewall: '#FB7185',
+                server: '#B8F36B', pc: '#94A3B8', laptop: '#94A3B8',
+                microcontroller: '#FBBF24', mobile: '#94A3B8', custom: '#F472B6',
+                sensor: '#FBBF24', audio: '#5EEAD4', antenna: '#22D3EE'
             };
 
             const connectionStyles = {
-                ethernet: { dashes: false, color: '#6B7280' },
-                wifi: { dashes: [5, 5], color: '#3B82F6' },
-                usb: { dashes: [2, 4], color: '#8B5CF6' },
-                power: { dashes: false, color: '#EF4444', width: 3 },
-                other: { dashes: false, color: '#F59E0B' }
+                ethernet: { dashes: false, color: '#64748B' },
+                wifi: { dashes: [5, 5], color: '#55D6FF' },
+                usb: { dashes: [2, 4], color: '#A78BFA' },
+                power: { dashes: false, color: '#FB7185', width: 3 },
+                other: { dashes: false, color: '#FBBF24' }
             };
 
-            // Use a backward-compatible grid layout when older records have no coordinates.
-            const gridPositions = (topologyData.nodes || []).map((n, i) => ({
-                ...n,
-                x: Number.isFinite(n.x) ? n.x : (i % 4) * 150,
-                y: Number.isFinite(n.y) ? n.y : Math.floor(i / 4) * 150
+            // Older topology records receive stable grid coordinates.
+            const gridPositions = (topologyData.nodes || []).map((node, index) => ({
+                ...node,
+                x: Number.isFinite(node.x) ? node.x : (index % 4) * 150,
+                y: Number.isFinite(node.y) ? node.y : Math.floor(index / 4) * 150
             }));
 
-            const nodes = new vis.DataSet(
-                gridPositions.map(n => {
-                    const imageUrl = safeWebUrl(n.iconUrl);
-                    return {
-                        id: n.id,
-                        label: n.label,
-                        shape: imageUrl ? 'image' : 'dot',
-                        image: imageUrl || undefined,
-                        color: imageUrl ? undefined : (typeColors[n.deviceType] || '#6B7280'),
-                        size: 24,
-                        font: { color: '#D1D5DB', size: 13, face: 'Inter' },
-                        title: escapeHtml(n.shortInfo || n.label),
-                        borderWidth: 2,
-                        shapeProperties: { useImageSize: false },
-                        x: n.x,
-                        y: n.y
-                    };
-                })
-            );
+            const nodes = new vis.DataSet(gridPositions.map(node => {
+                const imageUrl = safeWebUrl(node.iconUrl);
+                return {
+                    id: node.id,
+                    label: node.label,
+                    shape: imageUrl ? 'image' : 'dot',
+                    image: imageUrl || undefined,
+                    color: imageUrl ? undefined : (typeColors[node.deviceType] || '#94A3B8'),
+                    size: 24,
+                    font: { color: '#CBD5E1', size: 13, face: 'Space Grotesk' },
+                    title: escapeHtml(node.shortInfo || node.label),
+                    borderWidth: 2,
+                    shapeProperties: { useImageSize: false },
+                    x: node.x,
+                    y: node.y
+                };
+            }));
 
-            const edges = new vis.DataSet(
-                (topologyData.edges || []).map((e, i) => {
-                    const style = connectionStyles[e.connectionType] || connectionStyles.other;
-                    return {
-                        id: i,
-                        from: e.from,
-                        to: e.to,
-                        label: e.label || '',
-                        dashes: style.dashes,
-                        color: { color: style.color },
-                        width: style.width || 2,
-                        font: { color: '#6B7280', size: 10, strokeWidth: 0 },
-                        smooth: false
-                    };
-                })
-            );
+            const edges = new vis.DataSet((topologyData.edges || []).map((edge, index) => {
+                const style = connectionStyles[edge.connectionType] || connectionStyles.other;
+                return {
+                    id: index,
+                    from: edge.from,
+                    to: edge.to,
+                    label: edge.label || '',
+                    dashes: style.dashes,
+                    color: { color: style.color },
+                    width: style.width || 2,
+                    font: { color: '#64748B', size: 10, strokeWidth: 0 },
+                    smooth: false
+                };
+            }));
 
             const container = document.getElementById('network-map');
-            const data = { nodes, edges };
-                        const options = {
-                physics: {
-                    enabled: false   // Keep devices fixed by disabling the physics engine.
-                },
-                interaction: {
-                    hover: true,
-                    tooltipDelay: 100,
-                    dragNodes: true,      // Allow devices to be repositioned.
-                    dragView: true,       // Allow panning by dragging empty space.
-                    zoomView: true        // Allow zooming.
-                },
-                layout: {
-                    improvedLayout: true
-                },
-                edges: {
-                    smooth: false         // Use straight connection lines.
-                }
-            };
+            const network = new vis.Network(container, { nodes, edges }, {
+                physics: { enabled: false },
+                interaction: { hover: true, tooltipDelay: 100, dragNodes: true, dragView: true, zoomView: true },
+                layout: { improvedLayout: true },
+                edges: { smooth: false }
+            });
 
-            const network = new vis.Network(container, data, options);
-
-            network.on('click', function(params) {
+            network.on('click', function (params) {
                 if (params.nodes.length > 0) {
-                    const nodeId = params.nodes[0];
-                    const device = (topologyData.nodes || []).find(n => n.id === nodeId);
+                    const device = (topologyData.nodes || []).find(node => node.id === params.nodes[0]);
                     if (device) showDeviceDetail(device);
                 }
             });
 
             function showDeviceDetail(device) {
                 let imageUrl = device.standaloneImageUrl;
-                let hardware = device.standaloneHardware;
+                let hardwareDescription = device.standaloneHardware;
                 let projectLink = null;
 
                 if (device.linkedProjectSlug) {
-                    const linked = linkedProjects.find(p => p.slug === device.linkedProjectSlug);
+                    const linked = linkedProjects.find(project => project.slug === device.linkedProjectSlug);
                     if (linked) {
                         imageUrl = linked.coverImageUrl;
                         projectLink = `/electronics/${encodeURIComponent(linked.slug)}`;
@@ -239,62 +178,30 @@
                         try {
                             const extra = JSON.parse(linked.extraData || '{}');
                             if (extra.components && extra.components.length) {
-                                hardware = extra.components.join(', ');
+                                hardwareDescription = extra.components.join(', ');
                             } else if (extra.microcontroller) {
-                                hardware = extra.microcontroller;
+                                hardwareDescription = extra.microcontroller;
                             }
-                        } catch (e) {}
+                        } catch (error) { }
                     }
                 }
 
-                const content = document.getElementById('deviceDetailContent');
                 const safeImageUrl = safeWebUrl(imageUrl);
-                content.innerHTML = `
-                    ${safeImageUrl ? `<img src="${escapeHtml(safeImageUrl)}" class="w-full rounded-xl mb-4 border border-gray-800" />` : ''}
-
-                    <h2 class="text-xl font-bold text-white mb-1">${escapeHtml(device.label)}</h2>
-                    <span class="inline-block text-xs px-2 py-0.5 rounded font-mono mb-4"
-                          style="background: ${typeColors[device.deviceType] || '#6B7280'}22; color: ${typeColors[device.deviceType] || '#6B7280'}">
+                document.getElementById('deviceDetailContent').innerHTML = `
+                    ${safeImageUrl ? `<img src="${escapeHtml(safeImageUrl)}" alt="" class="mb-5 w-full rounded-xl border border-white/10" />` : ''}
+                    <h2 id="deviceDetailTitle" class="text-2xl font-semibold tracking-[-0.02em] text-white">${escapeHtml(device.label)}</h2>
+                    <span class="mt-3 inline-block rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em]"
+                          style="background: ${typeColors[device.deviceType] || '#94A3B8'}18; color: ${typeColors[device.deviceType] || '#94A3B8'}">
                         ${escapeHtml(device.deviceType)}
                     </span>
-
-                    ${device.shortInfo ? `<p class="text-gray-400 text-sm mb-4">${escapeHtml(device.shortInfo)}</p>` : ''}
-
-                    <div class="space-y-3 border-t border-gray-800 pt-4">
-                        ${device.ipAddress ? `
-                            <div>
-                                <p class="text-xs text-gray-600 mb-1">IP Address</p>
-                                <p class="font-mono text-sm text-gray-300">${escapeHtml(device.ipAddress)}</p>
-                            </div>
-                        ` : ''}
-
-                        ${hardware ? `
-                            <div>
-                                <p class="text-xs text-gray-600 mb-1">Hardware</p>
-                                <p class="text-sm text-gray-300">${escapeHtml(hardware)}</p>
-                            </div>
-                        ` : ''}
-
-                        ${device.homelabRole ? `
-                            <div>
-                                <p class="text-xs text-gray-600 mb-1">Role on This Network</p>
-                                <p class="text-sm text-gray-300">${escapeHtml(device.homelabRole)}</p>
-                            </div>
-                        ` : ''}
-
-                        ${device.homelabNotes ? `
-                            <div>
-                                <p class="text-xs text-gray-600 mb-1">Notes</p>
-                                <p class="text-sm text-gray-400">${escapeHtml(device.homelabNotes)}</p>
-                            </div>
-                        ` : ''}
+                    ${device.shortInfo ? `<p class="mt-5 text-sm leading-6 text-slate-400">${escapeHtml(device.shortInfo)}</p>` : ''}
+                    <div class="mt-6 space-y-5 border-t border-white/[0.07] pt-6">
+                        ${device.ipAddress ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">IP address</p><p class="mt-2 font-mono text-sm text-white">${escapeHtml(device.ipAddress)}</p></div>` : ''}
+                        ${hardwareDescription ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Hardware</p><p class="mt-2 text-sm leading-6 text-slate-300">${escapeHtml(hardwareDescription)}</p></div>` : ''}
+                        ${device.homelabRole ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Network role</p><p class="mt-2 text-sm leading-6 text-slate-300">${escapeHtml(device.homelabRole)}</p></div>` : ''}
+                        ${device.homelabNotes ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Notes</p><p class="mt-2 text-sm leading-6 text-slate-400">${escapeHtml(device.homelabNotes)}</p></div>` : ''}
                     </div>
-
-                    ${projectLink ? `
-                        <a href="${escapeHtml(projectLink)}" class="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
-                            View build details →
-                        </a>
-                    ` : ''}
+                    ${projectLink ? `<a href="${escapeHtml(projectLink)}" class="mt-7 inline-flex items-center gap-2 rounded-md bg-signal px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white">View build details <span aria-hidden="true">→</span></a>` : ''}
                 `;
 
                 document.getElementById('deviceDetailPanel').classList.remove('hidden');
@@ -305,60 +212,23 @@
             }
 
             document.getElementById('deviceDetailOverlay').addEventListener('click', closeDeviceDetail);
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') closeDeviceDetail();
+            });
         </script>
     }
 
-    <div class="prose prose-invert prose-lg max-w-none
-                prose-headings:text-white prose-headings:font-bold
-                prose-p:text-gray-400 prose-p:leading-relaxed
-                prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-                prose-code:text-green-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-code:text-sm
-                prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
-                prose-strong:text-white prose-li:text-gray-400">
-        @Html.Raw(ViewBag.ContentHtml)
-    </div>
+    <div class="mx-auto mt-12 max-w-3xl prose prose-lg prose-invert prose-headings:font-semibold prose-headings:tracking-[-0.025em] prose-headings:text-white prose-p:leading-8 prose-p:text-slate-400 prose-a:text-teal-300 prose-a:no-underline hover:prose-a:text-white prose-code:rounded prose-code:bg-raised prose-code:px-1.5 prose-code:py-0.5 prose-code:text-signal prose-pre:border prose-pre:border-white/[0.08] prose-pre:bg-panel prose-blockquote:border-teal-300 prose-blockquote:text-slate-400 prose-strong:text-white prose-li:text-slate-400">@Html.Raw(ViewBag.ContentHtml)</div>
 
     @if (images.Any())
     {
-        <div class="mt-12">
-            <h3 class="text-sm font-mono text-gray-600 mb-4">// images</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                @foreach (var img in images)
-                {
-                    <div>
-                        <img src="@img.Url" alt="@img.AltText"
-                             class="w-full rounded-lg border border-gray-800 hover:border-gray-600 transition" />
-                        @if (!string.IsNullOrEmpty(img.Caption))
-                        {
-                            <p class="text-xs text-gray-600 mt-1 text-center">@img.Caption</p>
-                        }
-                    </div>
-                }
-            </div>
-        </div>
+        <section class="mt-16 border-t border-white/[0.07] pt-10"><p class="mb-5 font-mono text-[9px] uppercase tracking-[0.18em] text-teal-300">Infrastructure gallery / @images.Count.ToString("D2")</p><div class="grid grid-cols-2 gap-3 md:grid-cols-3">@foreach (var image in images){<figure><img src="@image.Url" alt="@image.AltText" loading="lazy" class="aspect-[4/3] w-full rounded-xl border border-white/[0.08] object-cover transition hover:border-teal-300/30" />@if (!string.IsNullOrEmpty(image.Caption)){<figcaption class="mt-2 text-center text-xs text-slate-600">@image.Caption</figcaption>}</figure>}</div></section>
     }
 
     @if (related.Any())
     {
-        <div class="mt-16 pt-8 border-t border-gray-800">
-            <h3 class="text-sm font-mono text-gray-600 mb-6">// related posts</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                @foreach (var r in related)
-                {
-                    <a href="/homelab/@r.Slug"
-                       class="bg-gray-900 border border-gray-800 hover:border-teal-900/50 rounded-xl p-4 transition group">
-                        <span class="font-mono text-xs text-teal-400">@r.Topic</span>
-                        <h4 class="text-white text-sm font-medium group-hover:text-teal-300 transition mt-1 mb-1">@r.Title</h4>
-                        <p class="text-gray-600 text-xs line-clamp-2">@r.Summary</p>
-                    </a>
-                }
-            </div>
-        </div>
+        <section class="mt-20 border-t border-white/[0.07] pt-10"><div class="mb-6 flex items-end justify-between gap-4"><div><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-teal-300">Continue exploring</p><h2 class="mt-2 text-2xl font-semibold text-white">Related infrastructure</h2></div><a href="/homelab" class="focus-ring rounded-sm text-sm text-slate-500 hover:text-white">All notes →</a></div><div class="grid gap-3 md:grid-cols-3">@foreach (var item in related){<a href="/homelab/@item.Slug" class="focus-ring card-lift surface group rounded-xl p-5 hover:border-teal-300/30"><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-teal-300">@topicLabel(item.Topic)</p><h3 class="mt-3 text-sm font-medium text-white transition group-hover:text-teal-200">@item.Title</h3><p class="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">@item.Summary</p></a>}</div></section>
     }
 
-    <div class="mt-12 pt-8 border-t border-gray-800">
-        <a href="/homelab" class="text-sm text-gray-500 hover:text-white transition font-mono">
-            ← /homelab
-        </a>
-    </div>
-</div>
+    <footer class="mt-14 border-t border-white/[0.07] pt-8"><a href="/homelab" class="focus-ring inline-flex items-center gap-2 rounded-sm font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500 transition hover:text-teal-300"><span aria-hidden="true">←</span> Back to infrastructure</a></footer>
+</article>

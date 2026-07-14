@@ -1,163 +1,37 @@
-﻿@model Portfolio.Models.Project
+@model Portfolio.Models.Project
 @{
     ViewData["Title"] = Model.Title;
     ViewData["Description"] = Model.Summary;
-    var extra = ViewBag.Extra as Portfolio.Models.ExtraData.ElectronicsExtraData
-                ?? new Portfolio.Models.ExtraData.ElectronicsExtraData();
+    var extra = ViewBag.Extra as Portfolio.Models.ExtraData.ElectronicsExtraData ?? new Portfolio.Models.ExtraData.ElectronicsExtraData();
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
     var related = ViewBag.Related as List<Portfolio.Models.Project> ?? new();
 }
 
-<div class="max-w-4xl mx-auto px-6 py-16">
+<article class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+    <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 overflow-hidden font-mono text-[9px] uppercase tracking-[0.15em] text-slate-700"><a href="/" class="focus-ring rounded-sm transition hover:text-white">Home</a><span>/</span><a href="/electronics" class="focus-ring rounded-sm transition hover:text-amber-300">Electronics</a><span>/</span><span class="truncate text-slate-500">@Model.Slug</span></nav>
 
-    <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-sm text-gray-600 mb-8 font-mono">
-        <a href="/" class="hover:text-white transition">~</a>
-        <span>/</span>
-        <a href="/electronics" class="hover:text-white transition">electronics</a>
-        <span>/</span>
-        <span class="text-gray-400">@Model.Slug</span>
-    </div>
+    <header class="mt-10 grid gap-8 border-b border-white/[0.07] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div><p class="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-300">Hardware build record</p><h1 class="mt-5 max-w-5xl text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl">@Model.Title</h1><p class="mt-6 max-w-3xl text-lg leading-8 text-slate-400">@Model.Summary</p><div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600"><span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "Undated")</span><span>@Model.ReadingTimeMinutes min read</span><span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span></div></div>
+        <div class="flex flex-wrap gap-2 lg:max-w-48 lg:justify-end">@if (!string.IsNullOrEmpty(Model.GithubUrl)){<a href="@Model.GithubUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-white/10 px-4 py-2.5 text-xs text-slate-300 transition hover:border-amber-300/30 hover:text-white">GitHub ↗</a>}@if (!string.IsNullOrEmpty(Model.LiveDemoUrl)){<a href="@Model.LiveDemoUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md bg-signal px-4 py-2.5 text-xs font-semibold text-ink transition hover:bg-white">Demo ↗</a>}</div>
+    </header>
 
-    <!-- Header -->
-    <div class="mb-10">
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">@Model.Title</h1>
-        <p class="text-gray-400 text-lg">@Model.Summary</p>
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl)){<figure class="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-panel"><img src="@Model.CoverImageUrl" alt="@Model.Title" class="max-h-[38rem] w-full object-cover" /></figure>}
 
-        <div class="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-600">
-            <span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "")</span>
-            <span>@Model.ReadingTimeMinutes min read</span>
-            <span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span>
-            @if (!string.IsNullOrEmpty(Model.GithubUrl))
-            {
-                <a href="@Model.GithubUrl" target="_blank" rel="noopener noreferrer"
-                   class="text-blue-400 hover:text-blue-300 transition">GitHub →</a>
-            }
-            @if (!string.IsNullOrEmpty(Model.LiveDemoUrl))
-            {
-                <a href="@Model.LiveDemoUrl" target="_blank" rel="noopener noreferrer"
-                   class="text-green-400 hover:text-green-300 transition">Demo →</a>
-            }
-        </div>
-    </div>
-
-    <!-- Cover image -->
-    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    @if (!string.IsNullOrEmpty(extra.Microcontroller) || !string.IsNullOrEmpty(extra.ProgrammingLanguage) || (extra.Components?.Any() ?? false) || !string.IsNullOrEmpty(extra.SchematicUrl) || extra.IsOpenSource == true)
     {
-        <img src="@Model.CoverImageUrl" alt="@Model.Title"
-             class="w-full rounded-xl mb-10 border border-gray-800" />
+        <section class="technical-frame surface mt-10 rounded-2xl p-5 sm:p-7"><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-amber-300">Technical specification</p><div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            @if (!string.IsNullOrEmpty(extra.Microcontroller)){<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Microcontroller</p><p class="mt-2 text-sm text-white">@extra.Microcontroller</p></div>}
+            @if (!string.IsNullOrEmpty(extra.ProgrammingLanguage)){<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Language</p><p class="mt-2 text-sm text-white">@extra.ProgrammingLanguage</p></div>}
+            @if (extra.IsOpenSource == true){<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">License</p><p class="mt-2 text-sm text-signal">Open source</p></div>}
+            @if (!string.IsNullOrEmpty(extra.SchematicUrl)){<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Schematic</p><a href="@extra.SchematicUrl" target="_blank" rel="noopener noreferrer" class="focus-ring mt-2 inline-block rounded-sm text-sm text-amber-200 hover:text-white">Open file ↗</a></div>}
+        </div>@if (extra.Components?.Any() ?? false){<div class="mt-6 border-t border-white/[0.07] pt-6"><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Components</p><div class="mt-3 flex flex-wrap gap-2">@foreach (var component in extra.Components!){<span class="rounded-md border border-amber-300/15 bg-amber-300/[0.04] px-2.5 py-1 font-mono text-[9px] text-amber-200">@component</span>}</div></div>}</section>
     }
 
-    <!-- Technical details card -->
-    @if (!string.IsNullOrEmpty(extra.Microcontroller) || (extra.Components?.Any() ?? false))
-    {
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10">
-            <p class="text-xs text-gray-600 font-mono mb-4">// technical details</p>
-            <div class="grid grid-cols-2 gap-6">
-                @if (!string.IsNullOrEmpty(extra.Microcontroller))
-                {
-                    <div>
-                        <p class="text-xs text-gray-600 mb-2">Microcontroller</p>
-                        <p class="font-mono text-blue-300 text-sm">@extra.Microcontroller</p>
-                    </div>
-                }
-                @if (!string.IsNullOrEmpty(extra.ProgrammingLanguage))
-                {
-                    <div>
-                        <p class="text-xs text-gray-600 mb-2">Programming Language</p>
-                        <p class="font-mono text-blue-300 text-sm">@extra.ProgrammingLanguage</p>
-                    </div>
-                }
-                @if (extra.Components?.Any() ?? false)
-                {
-                    <div class="col-span-2">
-                        <p class="text-xs text-gray-600 mb-2">Components</p>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach (var component in extra.Components!)
-                            {
-                                <span class="font-mono text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded">
-                                    @component
-                                </span>
-                            }
-                        </div>
-                    </div>
-                }
-                @if (!string.IsNullOrEmpty(extra.SchematicUrl))
-                {
-                    <div>
-                        <p class="text-xs text-gray-600 mb-2">Circuit Schematic</p>
-                        <a href="@extra.SchematicUrl" target="_blank"
-                           rel="noopener noreferrer"
-                           class="text-blue-400 hover:text-blue-300 text-sm transition">Download →</a>
-                    </div>
-                }
-                @if (extra.IsOpenSource == true)
-                {
-                    <div>
-                        <p class="text-xs text-gray-600 mb-2">License</p>
-                        <span class="text-green-400 text-sm">Open Source</span>
-                    </div>
-                }
-            </div>
-        </div>
-    }
+    <div class="mx-auto mt-12 max-w-3xl prose prose-lg prose-invert prose-headings:font-semibold prose-headings:tracking-[-0.025em] prose-headings:text-white prose-p:leading-8 prose-p:text-slate-400 prose-a:text-amber-300 prose-a:no-underline hover:prose-a:text-white prose-code:rounded prose-code:bg-raised prose-code:px-1.5 prose-code:py-0.5 prose-code:text-signal prose-pre:border prose-pre:border-white/[0.08] prose-pre:bg-panel prose-blockquote:border-amber-300 prose-blockquote:text-slate-400 prose-strong:text-white prose-li:text-slate-400">@Html.Raw(ViewBag.ContentHtml)</div>
 
-    <!-- Markdown content -->
-    <div class="prose prose-invert prose-lg max-w-none
-                prose-headings:text-white prose-headings:font-bold
-                prose-p:text-gray-400 prose-p:leading-relaxed
-                prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-                prose-code:text-green-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-code:text-sm
-                prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
-                prose-blockquote:border-blue-600 prose-blockquote:text-gray-400
-                prose-strong:text-white prose-li:text-gray-400">
-        @Html.Raw(ViewBag.ContentHtml)
-    </div>
+    @if (images.Any()){<section class="mt-16 border-t border-white/[0.07] pt-10"><p class="mb-5 font-mono text-[9px] uppercase tracking-[0.18em] text-amber-300">Build gallery / @images.Count.ToString("D2")</p><div class="grid grid-cols-2 gap-3 md:grid-cols-3">@foreach (var image in images){<figure><img src="@image.Url" alt="@image.AltText" loading="lazy" class="aspect-[4/3] w-full rounded-xl border border-white/[0.08] object-cover transition hover:border-amber-300/30" />@if (!string.IsNullOrEmpty(image.Caption)){<figcaption class="mt-2 text-center text-xs text-slate-600">@image.Caption</figcaption>}</figure>}</div></section>}
 
-    <!-- Image gallery -->
-    @if (images.Any())
-    {
-        <div class="mt-12">
-            <h3 class="text-sm font-mono text-gray-600 mb-4">// images</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                @foreach (var img in images)
-                {
-                    <div>
-                        <img src="@img.Url" alt="@img.AltText"
-                             class="w-full rounded-lg border border-gray-800 hover:border-gray-600 transition" />
-                        @if (!string.IsNullOrEmpty(img.Caption))
-                        {
-                            <p class="text-xs text-gray-600 mt-1 text-center">@img.Caption</p>
-                        }
-                    </div>
-                }
-            </div>
-        </div>
-    }
+    @if (related.Any()){<section class="mt-20 border-t border-white/[0.07] pt-10"><div class="mb-6 flex items-end justify-between gap-4"><div><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-amber-300">Continue building</p><h2 class="mt-2 text-2xl font-semibold text-white">Related projects</h2></div><a href="/electronics" class="focus-ring rounded-sm text-sm text-slate-500 hover:text-white">All hardware →</a></div><div class="grid gap-3 md:grid-cols-3">@foreach (var item in related){<a href="/electronics/@item.Slug" class="focus-ring card-lift surface group rounded-xl p-5 hover:border-amber-300/30"><h3 class="text-sm font-medium text-white transition group-hover:text-amber-200">@item.Title</h3><p class="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">@item.Summary</p></a>}</div></section>}
 
-    <!-- Related projects -->
-    @if (related.Any())
-    {
-        <div class="mt-16 pt-8 border-t border-gray-800">
-            <h3 class="text-sm font-mono text-gray-600 mb-6">// related projects</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                @foreach (var r in related)
-                {
-                    <a href="/electronics/@r.Slug"
-                       class="bg-gray-900 border border-gray-800 hover:border-blue-900/50 rounded-xl p-4 transition group">
-                        <h4 class="text-white text-sm font-medium group-hover:text-blue-300 transition mb-1">
-                            @r.Title
-                        </h4>
-                        <p class="text-gray-600 text-xs line-clamp-2">@r.Summary</p>
-                    </a>
-                }
-            </div>
-        </div>
-    }
-
-    <div class="mt-12 pt-8 border-t border-gray-800">
-        <a href="/electronics" class="text-sm text-gray-500 hover:text-white transition font-mono">
-            ← /electronics
-        </a>
-    </div>
-</div>
+    <footer class="mt-14 border-t border-white/[0.07] pt-8"><a href="/electronics" class="focus-ring inline-flex items-center gap-2 rounded-sm font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500 transition hover:text-amber-300"><span aria-hidden="true">←</span> Back to hardware</a></footer>
+</article>

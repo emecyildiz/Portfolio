@@ -1,157 +1,79 @@
-﻿@model Portfolio.Models.SecurityResearch
+@model Portfolio.Models.SecurityResearch
 @{
     ViewData["Title"] = Model.Title;
     ViewData["Description"] = Model.Summary;
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
     var related = ViewBag.Related as List<Portfolio.Models.SecurityResearch> ?? new();
+    var tools = string.IsNullOrEmpty(Model.ToolsUsed)
+        ? new List<string>()
+        : System.Text.Json.JsonSerializer.Deserialize<List<string>>(Model.ToolsUsed) ?? new List<string>();
+    var researchTypeLabel = Model.ResearchType switch
+    {
+        Portfolio.Models.Enums.ResearchType.MalwareAnalysis => "Malware Analysis",
+        Portfolio.Models.Enums.ResearchType.HardwareVuln => "Hardware Vulnerability",
+        Portfolio.Models.Enums.ResearchType.RFSecurity => "RF Security",
+        Portfolio.Models.Enums.ResearchType.WebSecurity => "Web Security",
+        Portfolio.Models.Enums.ResearchType.NetworkSecurity => "Network Security",
+        Portfolio.Models.Enums.ResearchType.MobileSecurity => "Mobile Security",
+        _ => "Other"
+    };
 }
 
-<div class="max-w-4xl mx-auto px-6 py-16">
+<article class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+    <nav aria-label="Breadcrumb" class="flex min-w-0 items-center gap-2 overflow-hidden font-mono text-[9px] uppercase tracking-[0.15em] text-slate-700"><a href="/" class="focus-ring rounded-sm transition hover:text-white">Home</a><span>/</span><a href="/security" class="focus-ring rounded-sm transition hover:text-rose-300">Security</a><span>/</span><span class="truncate text-slate-500">@Model.Slug</span></nav>
 
-    <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-sm text-gray-600 mb-8 font-mono">
-        <a href="/" class="hover:text-white transition">~</a>
-        <span>/</span>
-        <a href="/security" class="hover:text-white transition">security</a>
-        <span>/</span>
-        <span class="text-gray-400">@Model.Slug</span>
-    </div>
-
-    <!-- Header -->
-    <div class="mb-10">
-        <div class="flex flex-wrap items-center gap-2 mb-4">
-            @if (!string.IsNullOrEmpty(Model.SeverityLevel))
-            {
-                var sevColor = Model.SeverityLevel switch
+    <header class="mt-10 grid gap-8 border-b border-white/[0.07] pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+            <div class="flex flex-wrap items-center gap-2">
+                @if (!string.IsNullOrEmpty(Model.SeverityLevel))
                 {
-                    "critical" => "text-red-400 bg-red-900/30 border-red-900",
-                    "high" => "text-orange-400 bg-orange-900/30 border-orange-900",
-                    "medium" => "text-amber-400 bg-amber-900/30 border-amber-900",
-                    "low" => "text-blue-400 bg-blue-900/30 border-blue-900",
-                    _ => "text-gray-400 bg-gray-800 border-gray-700"
-                };
-                <span class="font-mono text-xs px-2 py-1 rounded border @sevColor">
-                    @Model.SeverityLevel.ToUpper()
-                </span>
-            }
-            <span class="text-xs text-gray-500 font-mono">@Model.ResearchType</span>
-            @if (!string.IsNullOrEmpty(Model.CveId))
-            {
-                <span class="font-mono text-xs text-red-400 bg-red-900/20 px-2 py-1 rounded border border-red-900/50">
-                    @Model.CveId
-                </span>
-            }
+                    var severityColor = Model.SeverityLevel switch
+                    {
+                        "critical" => "border-red-400/30 bg-red-400/10 text-red-300",
+                        "high" => "border-orange-400/30 bg-orange-400/10 text-orange-300",
+                        "medium" => "border-amber-400/30 bg-amber-400/10 text-amber-300",
+                        "low" => "border-cyan/30 bg-cyan/10 text-cyan",
+                        _ => "border-white/10 bg-white/[0.04] text-slate-400"
+                    };
+                    <span class="rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] @severityColor">@Model.SeverityLevel</span>
+                }
+                <span class="font-mono text-[9px] uppercase tracking-[0.15em] text-rose-300">@researchTypeLabel</span>
+                @if (!string.IsNullOrEmpty(Model.CveId)){<span class="font-mono text-[9px] uppercase tracking-[0.12em] text-slate-500">@Model.CveId</span>}
+            </div>
+            <h1 class="mt-6 max-w-5xl text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl">@Model.Title</h1>
+            <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-400">@Model.Summary</p>
+            <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600"><span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "Undated")</span><span>@Model.ReadingTimeMinutes min read</span><span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span></div>
         </div>
+        @if (!string.IsNullOrEmpty(Model.GithubUrl))
+        {
+            <a href="@Model.GithubUrl" target="_blank" rel="noopener noreferrer" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-rose-300/20 bg-rose-300/[0.05] px-5 py-3 text-xs font-medium text-rose-200 transition hover:border-rose-300/40 hover:bg-rose-300/10">GitHub / PoC <span aria-hidden="true">↗</span></a>
+        }
+    </header>
 
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">@Model.Title</h1>
-        <p class="text-gray-400 text-lg">@Model.Summary</p>
-
-        <div class="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-600">
-            <span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "")</span>
-            <span>@Model.ReadingTimeMinutes min read</span>
-            <span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span>
-            @if (!string.IsNullOrEmpty(Model.GithubUrl))
-            {
-                <a href="@Model.GithubUrl" target="_blank" rel="noopener noreferrer"
-                   class="text-blue-400 hover:text-blue-300 transition">GitHub / PoC →</a>
-            }
-        </div>
-    </div>
-
-    <!-- Cover image -->
     @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
     {
-        <img src="@Model.CoverImageUrl" alt="@Model.Title"
-             class="w-full rounded-xl mb-10 border border-gray-800" />
-    }
-
-    <!-- Technical details -->
-    @{
-        var tools = new List<string>();
-        if (!string.IsNullOrEmpty(Model.ToolsUsed))
-            tools = System.Text.Json.JsonSerializer.Deserialize<List<string>>(Model.ToolsUsed) ?? tools;
+        <figure class="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-panel"><img src="@Model.CoverImageUrl" alt="@Model.Title" class="max-h-[38rem] w-full object-cover" /></figure>
     }
 
     @if (!string.IsNullOrEmpty(Model.TargetCategory) || tools.Any())
     {
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10 grid grid-cols-2 gap-6">
-            @if (!string.IsNullOrEmpty(Model.TargetCategory))
-            {
-                <div>
-                    <p class="text-xs text-gray-600 font-mono mb-2">// target system</p>
-                    <p class="text-gray-300 text-sm">@Model.TargetCategory</p>
-                </div>
-            }
-            @if (tools.Any())
-            {
-                <div>
-                    <p class="text-xs text-gray-600 font-mono mb-2">// tools used</p>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach (var tool in tools)
-                        {
-                            <span class="font-mono text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded">@tool</span>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
+        <section class="technical-frame surface mt-10 grid gap-6 rounded-2xl p-5 sm:grid-cols-2 sm:p-7">
+            @if (!string.IsNullOrEmpty(Model.TargetCategory)){<div><p class="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-600">Target system</p><p class="mt-3 text-sm text-white">@Model.TargetCategory</p></div>}
+            @if (tools.Any()){<div><p class="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-600">Tools used</p><div class="mt-3 flex flex-wrap gap-2">@foreach (var tool in tools){<span class="rounded-md border border-rose-300/15 bg-rose-300/[0.04] px-2.5 py-1 font-mono text-[9px] text-rose-200">@tool</span>}</div></div>}
+        </section>
     }
 
-    <!-- Markdown content -->
-    <div class="prose prose-invert prose-lg max-w-none
-                prose-headings:text-white prose-headings:font-bold
-                prose-p:text-gray-400 prose-p:leading-relaxed
-                prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-                prose-code:text-green-400 prose-code:bg-gray-800 prose-code:px-1 prose-code:rounded prose-code:text-sm
-                prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
-                prose-blockquote:border-red-600 prose-blockquote:text-gray-400
-                prose-strong:text-white prose-li:text-gray-400">
-        @Html.Raw(ViewBag.ContentHtml)
-    </div>
+    <div class="mx-auto mt-12 max-w-3xl prose prose-lg prose-invert prose-headings:font-semibold prose-headings:tracking-[-0.025em] prose-headings:text-white prose-p:leading-8 prose-p:text-slate-400 prose-a:text-rose-300 prose-a:no-underline hover:prose-a:text-white prose-code:rounded prose-code:bg-raised prose-code:px-1.5 prose-code:py-0.5 prose-code:text-signal prose-pre:border prose-pre:border-white/[0.08] prose-pre:bg-panel prose-blockquote:border-rose-300 prose-blockquote:text-slate-400 prose-strong:text-white prose-li:text-slate-400">@Html.Raw(ViewBag.ContentHtml)</div>
 
-    <!-- Image gallery -->
     @if (images.Any())
     {
-        <div class="mt-12">
-            <h3 class="text-sm font-mono text-gray-600 mb-4">// images</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                @foreach (var img in images)
-                {
-                    <div>
-                        <img src="@img.Url" alt="@img.AltText"
-                             class="w-full rounded-lg border border-gray-800 hover:border-gray-600 transition cursor-pointer" />
-                        @if (!string.IsNullOrEmpty(img.Caption))
-                        {
-                            <p class="text-xs text-gray-600 mt-1 text-center">@img.Caption</p>
-                        }
-                    </div>
-                }
-            </div>
-        </div>
+        <section class="mt-16 border-t border-white/[0.07] pt-10"><p class="mb-5 font-mono text-[9px] uppercase tracking-[0.18em] text-rose-300">Evidence gallery / @images.Count.ToString("D2")</p><div class="grid grid-cols-2 gap-3 md:grid-cols-3">@foreach (var image in images){<figure><img src="@image.Url" alt="@image.AltText" loading="lazy" class="aspect-[4/3] w-full rounded-xl border border-white/[0.08] object-cover transition hover:border-rose-300/30" />@if (!string.IsNullOrEmpty(image.Caption)){<figcaption class="mt-2 text-center text-xs text-slate-600">@image.Caption</figcaption>}</figure>}</div></section>
     }
 
-    <!-- Related research -->
     @if (related.Any())
     {
-        <div class="mt-16 pt-8 border-t border-gray-800">
-            <h3 class="text-sm font-mono text-gray-600 mb-6">// related research</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                @foreach (var r in related)
-                {
-                    <a href="/security/@r.Slug"
-                       class="bg-gray-900 border border-gray-800 hover:border-red-900/50 rounded-xl p-4 transition group">
-                        <h4 class="text-white text-sm font-medium group-hover:text-red-300 transition mb-1">@r.Title</h4>
-                        <p class="text-gray-600 text-xs line-clamp-2">@r.Summary</p>
-                    </a>
-                }
-            </div>
-        </div>
+        <section class="mt-20 border-t border-white/[0.07] pt-10"><div class="mb-6 flex items-end justify-between gap-4"><div><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-rose-300">Continue investigating</p><h2 class="mt-2 text-2xl font-semibold text-white">Related research</h2></div><a href="/security" class="focus-ring rounded-sm text-sm text-slate-500 transition hover:text-white">All research →</a></div><div class="grid gap-3 md:grid-cols-3">@foreach (var item in related){<a href="/security/@item.Slug" class="focus-ring card-lift surface group rounded-xl p-5 hover:border-rose-300/30"><h3 class="text-sm font-medium text-white transition group-hover:text-rose-200">@item.Title</h3><p class="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">@item.Summary</p></a>}</div></section>
     }
 
-    <!-- Back to research list -->
-    <div class="mt-12 pt-8 border-t border-gray-800">
-        <a href="/security" class="text-sm text-gray-500 hover:text-white transition font-mono">
-            ← /security
-        </a>
-    </div>
-</div>
+    <footer class="mt-14 border-t border-white/[0.07] pt-8"><a href="/security" class="focus-ring inline-flex items-center gap-2 rounded-sm font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500 transition hover:text-rose-300"><span aria-hidden="true">←</span> Back to research</a></footer>
+</article>
