@@ -123,6 +123,9 @@ public class WebAppsController : AdminBaseController
         var existing = await _db.Projects.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (existing == null) return NotFound();
 
+        if (existing.Title != model.Title)
+            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Projects", id);
+
         existing.Title = model.Title;
         existing.Summary = model.Summary;
         existing.Content = model.Content;
@@ -132,9 +135,6 @@ public class WebAppsController : AdminBaseController
         existing.IsFeatured = model.IsFeatured;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
-
-        if (existing.Title != model.Title)
-            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Projects", id);
 
         var techStack = TechStack?
             .Split(',', StringSplitOptions.RemoveEmptyEntries)

@@ -69,6 +69,9 @@ public class PageController : AdminBaseController
             return View(model);
         }
 
+        if (existing.Title != model.Title)
+            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Pages", id);
+
         existing.Title = model.Title;
         existing.Content = model.Content;
         existing.CoverImageUrl = model.CoverImageUrl;
@@ -76,9 +79,6 @@ public class PageController : AdminBaseController
         existing.ShowInNav = model.ShowInNav;
         existing.SortOrder = model.SortOrder;
         existing.UpdatedAt = DateTime.UtcNow;
-
-        if (existing.Title != model.Title)
-            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Pages", id);
 
         await _db.SaveChangesAsync();
 

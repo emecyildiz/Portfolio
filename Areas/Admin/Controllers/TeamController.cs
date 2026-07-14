@@ -121,6 +121,9 @@ public class TeamController : AdminBaseController
         var existing = await _db.TeamProjects.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == id);
         if (existing == null) return NotFound();
 
+        if (existing.Title != model.Title)
+            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "TeamProjects", id);
+
         existing.Title      = model.Title;
         existing.Summary    = model.Summary;
         existing.Content    = model.Content;
@@ -134,9 +137,6 @@ public class TeamController : AdminBaseController
         existing.Status     = model.Status;
         existing.IsFeatured = model.IsFeatured;
         existing.UpdatedAt  = DateTime.UtcNow;
-
-        if (existing.Title != model.Title)
-            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "TeamProjects", id);
 
         if (!string.IsNullOrEmpty(TeamMembersJson))
             existing.TeamMembers = TeamMembersJson;

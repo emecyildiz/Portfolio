@@ -119,6 +119,9 @@ public class SecurityController : AdminBaseController
             .FirstOrDefaultAsync(s => s.Id == id);
         if (existing == null) return NotFound();
 
+        if (existing.Title != model.Title)
+            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "SecurityResearches", id);
+
         existing.Title = model.Title;
         existing.Summary = model.Summary;
         existing.Content = model.Content;
@@ -132,9 +135,6 @@ public class SecurityController : AdminBaseController
         existing.IsFeatured = model.IsFeatured;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
-
-        if (existing.Title != model.Title)
-            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "SecurityResearches", id);
 
         if (!string.IsNullOrEmpty(ToolsUsed))
         {

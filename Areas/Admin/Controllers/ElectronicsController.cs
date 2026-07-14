@@ -137,6 +137,10 @@ public class ElectronicsController : AdminBaseController
         var existing = await _db.Projects.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (existing == null) return NotFound();
 
+        // Slug sadece başlık değiştiyse güncelle
+        if (existing.Title != model.Title)
+            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Projects", id);
+
         existing.Title = model.Title;
         existing.Summary = model.Summary;
         existing.Content = model.Content;
@@ -146,10 +150,6 @@ public class ElectronicsController : AdminBaseController
         existing.IsFeatured = model.IsFeatured;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
-
-        // Slug sadece başlık değiştiyse güncelle
-        if (existing.Title != model.Title)
-            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Projects", id);
 
         var components = Components?
             .Split(',', StringSplitOptions.RemoveEmptyEntries)

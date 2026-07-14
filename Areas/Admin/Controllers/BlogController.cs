@@ -94,6 +94,9 @@ public class BlogController : AdminBaseController
         var existing = await _db.BlogPosts.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Id == id);
         if (existing == null) return NotFound();
 
+        if (existing.Title != model.Title)
+            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "BlogPosts", id);
+
         existing.Title = model.Title;
         existing.Summary = model.Summary;
         existing.Content = model.Content;
@@ -101,9 +104,6 @@ public class BlogController : AdminBaseController
         existing.IsFeatured = model.IsFeatured;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
-
-        if (existing.Title != model.Title)
-            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "BlogPosts", id);
 
         await _db.SaveChangesAsync();
 

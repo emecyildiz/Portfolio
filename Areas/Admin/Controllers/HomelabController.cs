@@ -121,6 +121,9 @@ public class HomelabController : AdminBaseController
         var existing = await _db.HomelabPosts.IgnoreQueryFilters().FirstOrDefaultAsync(h => h.Id == id);
         if (existing == null) return NotFound();
 
+        if (existing.Title != model.Title)
+            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "HomelabPosts", id);
+
         existing.Title = model.Title;
         existing.Summary = model.Summary;
         existing.Content = model.Content;
@@ -131,9 +134,6 @@ public class HomelabController : AdminBaseController
         existing.IsMainLab = model.IsMainLab;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
-
-        if (existing.Title != model.Title)
-            existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "HomelabPosts", id);
 
         if (!string.IsNullOrEmpty(HardwareUsed))
             existing.HardwareUsed = JsonSerializer.Serialize(

@@ -75,6 +75,10 @@ public class SlugService : ISlugService
                 ? await _db.TeamProjects.IgnoreQueryFilters().AnyAsync(t => t.Slug == slug && t.Id != excludeId)
                 : await _db.TeamProjects.IgnoreQueryFilters().AnyAsync(t => t.Slug == slug),
 
+            "Pages" => excludeId.HasValue
+                ? await _db.Pages.IgnoreQueryFilters().AnyAsync(p => p.Slug == slug && p.Id != excludeId)
+                : await _db.Pages.IgnoreQueryFilters().AnyAsync(p => p.Slug == slug),
+
             _ => false
         };
     }
