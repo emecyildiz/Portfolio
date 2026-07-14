@@ -29,11 +29,11 @@
         </div>
 
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-            <a href="/money/dashboard"
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Dashboard
             </a>
-            <a href="/money/category"
+            <a asp-area="Admin" asp-controller="Category" asp-action="Index"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Kategoriler
             </a>
@@ -46,20 +46,19 @@
             {
                 foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.Categories)
                 {
-                    var url = cat.Slug switch
+                    var controllerName = cat.Slug switch
                     {
-                        "security" => "/money/security",
-                        "electronics" => "/money/electronics",
-                        "webapps" => "/money/webapps",
-                        "homelab" => "/money/homelab",
-                        "blog" => "/money/blog",
-                        "team" => "/money/team",
-                        "notes" => "/money/note",
-                        "map" => "/money/category",  // ← map için kategori sayfasına yönlendir
-                        _ => "/money/category"   // ← bilinmeyenler kategori listesine gitsin
+                        "security" => "Security",
+                        "electronics" => "Electronics",
+                        "webapps" => "WebApps",
+                        "homelab" => "Homelab",
+                        "blog" => "Blog",
+                        "team" => "Team",
+                        "notes" => "Note",
+                        _ => "Category"
                     };
 
-                    <a href="@url"
+                    <a asp-area="Admin" asp-controller="@controllerName" asp-action="Index"
                        class="flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                         <span>@cat.Name</span>
                         @if (cat.Status != Portfolio.Models.Enums.VisibilityStatus.Public)
@@ -69,7 +68,7 @@
                     </a>
                 }
             }
-            <a href="/money/page"
+            <a asp-area="Admin" asp-controller="Page" asp-action="Index"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Sayfalar
             </a>
@@ -78,27 +77,26 @@
                 <p class="text-xs text-gray-600 px-3 uppercase tracking-wider">Diğer</p>
             </div>
 
-            <a href="/money/service"
+            <a asp-area="Admin" asp-controller="Service" asp-action="Index"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Hizmetler
             </a>
-            <a href="/money/certificate"
+            <a asp-area="Admin" asp-controller="Certificate" asp-action="Index"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Sertifikalar
             </a>
-            <a href="/money/message"
+            <a asp-area="Admin" asp-controller="Message" asp-action="Index"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Mesajlar
             </a>
-            <a href="/money/settings"
+            <a asp-area="Admin" asp-controller="Settings" asp-action="Index"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition">
                 Ayarlar
             </a>
         </nav>
 
         <div class="p-4 border-t border-gray-800">
-            <form method="post" action="/money/account/logout">
-                @Html.AntiForgeryToken()
+            <form method="post" asp-area="Admin" asp-controller="Account" asp-action="Logout">
                 <button type="submit"
                         class="w-full px-3 py-2 text-sm text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition text-left">
                     Çıkış Yap
