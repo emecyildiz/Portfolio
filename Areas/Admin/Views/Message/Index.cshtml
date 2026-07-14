@@ -1,87 +1,93 @@
-﻿@model List<Portfolio.Models.ContactMessage>
+@model List<Portfolio.Models.ContactMessage>
 @{
     ViewData["Title"] = "Messages";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var unreadCount = Model.Count(message => !message.IsRead);
 }
 
-<div class="mb-8">
-    <h2 class="text-2xl font-bold text-white">Messages</h2>
-    <p class="text-gray-500 mt-1">
-        @Model.Count(m => !m.IsRead) unread @(Model.Count(m => !m.IsRead) == 1 ? "message" : "messages")
-    </p>
+<div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Request inbox</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Messages</h2>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Review incoming project requests and manage their processing status.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+        <span class="border border-cyan/20 bg-cyan/[0.05] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-cyan">@unreadCount unread</span>
+        <span class="border border-line bg-panel px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-slate-500">@Model.Count total</span>
+    </div>
 </div>
 
-<div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-    <table class="w-full text-sm">
-        <thead>
-            <tr class="border-b border-gray-800">
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Sender</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Subject</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Service</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Status</th>
-                <th class="text-left px-6 py-3 text-gray-400 font-medium">Date</th>
-                <th class="text-right px-6 py-3 text-gray-400 font-medium">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var m in Model)
-            {
-                <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition
-                               @(!m.IsRead ? "bg-blue-950/20" : "")">
-                    <td class="px-6 py-4">
-                        <p class="text-white font-medium @(!m.IsRead ? "font-semibold" : "")">
-                            @(!m.IsRead ? "● " : "")@m.Name
-                        </p>
-                        <p class="text-gray-500 text-xs mt-0.5">@m.Email</p>
-                    </td>
-                    <td class="px-6 py-4 text-gray-400 text-xs">
-                        @(m.Subject ?? "—")
-                    </td>
-                    <td class="px-6 py-4 text-gray-500 text-xs">
-                        @(m.Service?.Title ?? "—")
-                    </td>
-                    <td class="px-6 py-4">
-                        @{
-                            var statusClass = m.Status switch
-                            {
-                                Portfolio.Models.Enums.ContactStatus.New => "bg-blue-900/40 text-blue-400",
-                                Portfolio.Models.Enums.ContactStatus.Read => "bg-gray-800 text-gray-500",
-                                Portfolio.Models.Enums.ContactStatus.Replied => "bg-green-900/40 text-green-400",
-                                Portfolio.Models.Enums.ContactStatus.Archived => "bg-gray-800 text-gray-600",
-                                Portfolio.Models.Enums.ContactStatus.Spam => "bg-red-900/40 text-red-400",
-                                _ => "bg-gray-800 text-gray-500"
-                            };
-                        }
-                        <span class="text-xs px-2 py-1 rounded-full @statusClass">@m.Status</span>
-                    </td>
-                    <td class="px-6 py-4 text-gray-500 text-xs">
-                        @m.CreatedAt.ToString("dd MMM yyyy HH:mm")
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center justify-end gap-2">
-                            <a href="@Url.Action("Detail", "Message", new { area = "Admin", id = m.Id })"
-                               class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
-                                Open
-                            </a>
-                            <form method="post" action="@Url.Action("Delete", "Message", new { area = "Admin", id = m.Id })"
-                                  onsubmit="return confirm('Are you sure you want to delete this message?')">
-                                @Html.AntiForgeryToken()
-                                <button type="submit"
-                                        class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<aside class="mb-6 border border-violet-300/15 bg-violet-300/[0.04] px-4 py-3 font-mono text-[10px] uppercase tracking-[0.11em] text-violet-200/70" aria-label="Data sensitivity notice">
+    Sensitive data · Messages may contain personal and project information
+</aside>
 
-    @if (!Model.Any())
+<section class="admin-surface overflow-hidden" aria-labelledby="messages-table-heading">
+    <h3 id="messages-table-heading" class="sr-only">Incoming message records</h3>
+    @if (Model.Any())
     {
-        <div class="text-center py-16 text-gray-600">
-            No messages yet.
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[1100px] text-left text-sm">
+                <thead class="border-b border-line bg-ink/55">
+                    <tr>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Sender</th>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Subject</th>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Service</th>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Status</th>
+                        <th scope="col" class="px-5 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Received</th>
+                        <th scope="col" class="px-5 py-3.5 text-right font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                    @foreach (var message in Model)
+                    {
+                        var statusClass = message.Status switch
+                        {
+                            Portfolio.Models.Enums.ContactStatus.New => "border-cyan/20 bg-cyan/[0.06] text-cyan",
+                            Portfolio.Models.Enums.ContactStatus.Read => "border-line text-slate-500",
+                            Portfolio.Models.Enums.ContactStatus.Replied => "border-signal/20 bg-signal/[0.05] text-signal",
+                            Portfolio.Models.Enums.ContactStatus.Archived => "border-line text-slate-600",
+                            Portfolio.Models.Enums.ContactStatus.Spam => "border-rose-300/20 bg-rose-300/[0.06] text-rose-300",
+                            _ => "border-line text-slate-500"
+                        };
+                        <tr class="transition hover:bg-white/[0.025] @(!message.IsRead ? "bg-cyan/[0.025]" : string.Empty)">
+                            <td class="px-5 py-4">
+                                <div class="flex items-start gap-2">
+                                    @if (!message.IsRead)
+                                    {
+                                        <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan shadow-[0_0_8px_rgba(85,214,255,.7)]" aria-label="Unread"></span>
+                                    }
+                                    <div>
+                                        <p class="font-medium text-white">@message.Name</p>
+                                        <p class="mt-1 text-xs text-slate-500">@message.Email</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-4 text-xs text-slate-400">@(string.IsNullOrWhiteSpace(message.Subject) ? "Not provided" : message.Subject)</td>
+                            <td class="px-5 py-4 text-xs text-slate-500">@(message.Service?.Title ?? "Not selected")</td>
+                            <td class="px-5 py-4">
+                                <span class="inline-flex border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.11em] @statusClass">@message.Status</span>
+                            </td>
+                            <td class="px-5 py-4 font-mono text-[10px] uppercase tracking-[0.08em] text-slate-500">@message.CreatedAt.ToString("dd MMM yyyy HH:mm")</td>
+                            <td class="px-5 py-4">
+                                <div class="flex flex-wrap items-center justify-end gap-2">
+                                    <a href="@Url.Action("Detail", "Message", new { area = "Admin", id = message.Id })" class="focus-ring border border-cyan/20 px-3 py-1.5 text-xs text-cyan transition hover:bg-cyan/10">Open</a>
+                                    <form method="post" action="@Url.Action("Delete", "Message", new { area = "Admin", id = message.Id })" onsubmit="return confirm('Delete this message? This action cannot be undone.');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="focus-ring border border-rose-300/20 px-3 py-1.5 text-xs text-rose-300 transition hover:bg-rose-300/10">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
-</div>
+    else
+    {
+        <div class="px-6 py-16 text-center">
+            <p class="font-mono text-xs uppercase tracking-[0.16em] text-slate-500">Inbox empty</p>
+            <p class="mt-2 text-sm text-slate-600">New project requests will appear here.</p>
+        </div>
+    }
+</section>

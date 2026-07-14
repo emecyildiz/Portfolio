@@ -1,126 +1,144 @@
-﻿@model List<Portfolio.Models.Note>
+@model List<Portfolio.Models.Note>
 @{
     ViewData["Title"] = "Notes";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    var todos = Model.Where(note => note.IsTodo).OrderBy(note => note.IsCompleted).ThenBy(note => note.DueDate).ToList();
+    var notes = Model.Where(note => !note.IsTodo).ToList();
+    var openTaskCount = todos.Count(todo => !todo.IsCompleted);
 }
 
-<div class="flex items-center justify-between mb-8">
+<div class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
     <div>
-        <h2 class="text-2xl font-bold text-white">Notes</h2>
-        <p class="text-gray-500 mt-1">Private notes and tasks</p>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Private workspace</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Notes</h2>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Track private references, working notes and operational tasks.</p>
     </div>
-    <a href="@Url.Action("Create", "Note", new { area = "Admin" })"
-       class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-        + New Note
-    </a>
+    <div class="flex flex-wrap items-center gap-3">
+        <span class="border border-line bg-panel px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-slate-500">@openTaskCount open tasks</span>
+        <a href="@Url.Action("Create", "Note", new { area = "Admin" })" class="focus-ring inline-flex items-center gap-2 bg-signal px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white">
+            <span aria-hidden="true">+</span>
+            New note
+        </a>
+    </div>
 </div>
 
-<!-- Tasks -->
-@{
-    var todos = Model.Where(n => n.IsTodo).OrderBy(n => n.IsCompleted).ThenBy(n => n.DueDate).ToList();
-    var notes = Model.Where(n => !n.IsTodo).ToList();
-}
+<aside class="mb-8 border border-amber-300/20 bg-amber-300/[0.05] px-4 py-3.5 text-sm leading-6 text-amber-100/80" aria-label="Privacy reminder">
+    <span class="font-medium text-amber-100">Privacy reminder:</span>
+    High-priority task titles may be selected for the public Now widget. Keep confidential details out of task titles.
+</aside>
 
-@if (todos.Any())
-{
-    <div class="mb-6">
-        <h3 class="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Tasks</h3>
-        <div class="space-y-2">
+<section class="mb-10" aria-labelledby="tasks-heading">
+    <div class="mb-4 flex items-end justify-between gap-4">
+        <div>
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Execution queue</p>
+            <h3 id="tasks-heading" class="mt-1 text-lg font-semibold text-white">Tasks</h3>
+        </div>
+        <span class="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600">@todos.Count total</span>
+    </div>
+
+    @if (todos.Any())
+    {
+        <div class="space-y-3">
             @foreach (var todo in todos)
             {
-                <div class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center justify-between
-                                    @(todo.IsCompleted ? "opacity-50" : "")">
-                    <div class="flex items-center gap-3">
-                        <form method="post" action="@Url.Action("ToggleComplete", "Note", new { area = "Admin", id = todo.Id })">
+                var priorityClass = todo.Priority switch
+                {
+                    Portfolio.Models.Enums.NotePriority.Critical => "border-rose-300/25 bg-rose-300/[0.06] text-rose-200",
+                    Portfolio.Models.Enums.NotePriority.High => "border-amber-300/25 bg-amber-300/[0.06] text-amber-200",
+                    Portfolio.Models.Enums.NotePriority.Normal => "border-line bg-white/[0.02] text-slate-400",
+                    Portfolio.Models.Enums.NotePriority.Low => "border-line text-slate-600",
+                    _ => "border-line text-slate-400"
+                };
+                <article class="admin-surface flex flex-col gap-4 p-4 transition sm:flex-row sm:items-center sm:justify-between @(todo.IsCompleted ? "opacity-55" : string.Empty)">
+                    <div class="flex min-w-0 items-start gap-3">
+                        <form method="post" action="@Url.Action("ToggleComplete", "Note", new { area = "Admin", id = todo.Id })" class="shrink-0">
                             @Html.AntiForgeryToken()
                             <button type="submit"
-                                    class="w-5 h-5 rounded border-2 flex items-center justify-center transition
-                                            @(todo.IsCompleted ? "bg-green-600 border-green-600" : "border-gray-600 hover:border-green-500")">
-                                @if (todo.IsCompleted)
-                                {
-                                    <span class="text-white text-xs">✓</span>
-                                }
+                                    aria-label="@(todo.IsCompleted ? "Mark task as incomplete" : "Mark task as complete")"
+                                    class="focus-ring grid h-8 w-8 place-items-center border font-mono text-[9px] font-semibold transition @(todo.IsCompleted ? "border-signal bg-signal text-ink" : "border-line text-slate-600 hover:border-signal hover:text-signal")">
+                                @(todo.IsCompleted ? "OK" : string.Empty)
                             </button>
                         </form>
-                        <div>
-                            <p class="text-white text-sm @(todo.IsCompleted ? "line-through" : "")">@todo.Title</p>
+                        <div class="min-w-0">
+                            <p class="break-words text-sm font-medium text-white @(todo.IsCompleted ? "line-through" : string.Empty)">@todo.Title</p>
                             @if (todo.DueDate.HasValue)
                             {
-                                <p class="text-xs text-gray-500 mt-0.5">Due: @todo.DueDate.Value.ToString("dd MMM yyyy")</p>
+                                <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-slate-600">Due @todo.DueDate.Value.ToString("dd MMM yyyy")</p>
+                            }
+                            else
+                            {
+                                <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-slate-700">No due date</p>
                             }
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        @{
-                            var priorityClass = todo.Priority switch
-                            {
-                                Portfolio.Models.Enums.NotePriority.Critical => "bg-red-900/40 text-red-400",
-                                Portfolio.Models.Enums.NotePriority.High => "bg-amber-900/40 text-amber-400",
-                                Portfolio.Models.Enums.NotePriority.Normal => "bg-gray-800 text-gray-400",
-                                Portfolio.Models.Enums.NotePriority.Low => "bg-gray-800 text-gray-600",
-                                _ => "bg-gray-800 text-gray-400"
-                            };
-                        }
-                        <span class="text-xs px-2 py-1 rounded-full @priorityClass">@todo.Priority</span>
-                        <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = todo.Id })"
-                           class="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-800 transition">
-                            Edit
-                        </a>
-                        <form method="post" action="@Url.Action("Delete", "Note", new { area = "Admin", id = todo.Id })"
-                              onsubmit="return confirm('Are you sure you want to delete this note?')">
+                    <div class="flex flex-wrap items-center gap-2 sm:justify-end">
+                        <span class="inline-flex border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.11em] @priorityClass">@todo.Priority</span>
+                        <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = todo.Id })" class="focus-ring border border-line px-3 py-1.5 text-xs text-slate-400 transition hover:border-slate-500 hover:text-white">Edit</a>
+                        <form method="post" action="@Url.Action("Delete", "Note", new { area = "Admin", id = todo.Id })" onsubmit="return confirm('Delete this task? This action cannot be undone.');">
                             @Html.AntiForgeryToken()
-                            <button type="submit"
-                                    class="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-400 hover:bg-red-900/30 transition">
-                                Delete
-                            </button>
+                            <button type="submit" class="focus-ring border border-rose-300/20 px-3 py-1.5 text-xs text-rose-300 transition hover:bg-rose-300/10">Delete</button>
                         </form>
                     </div>
-                </div>
+                </article>
             }
         </div>
-    </div>
-}
+    }
+    else
+    {
+        <div class="admin-surface px-6 py-10 text-center">
+            <p class="font-mono text-xs uppercase tracking-[0.16em] text-slate-500">No tasks</p>
+            <p class="mt-2 text-sm text-slate-600">Operational tasks will appear here.</p>
+        </div>
+    }
+</section>
 
-<!-- Notes -->
-@if (notes.Any())
-{
-    <div>
-        <h3 class="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Notes</h3>
-        <div class="grid grid-cols-2 gap-4">
+<section aria-labelledby="notes-heading">
+    <div class="mb-4 flex items-end justify-between gap-4">
+        <div>
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Reference archive</p>
+            <h3 id="notes-heading" class="mt-1 text-lg font-semibold text-white">Notes</h3>
+        </div>
+        <span class="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600">@notes.Count total</span>
+    </div>
+
+    @if (notes.Any())
+    {
+        <div class="grid gap-4 lg:grid-cols-2">
             @foreach (var note in notes)
             {
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                    <div class="flex items-start justify-between mb-2">
-                        <div>
-                            <p class="text-white font-medium text-sm">@note.Title</p>
-                            <span class="text-xs text-gray-600">@note.NoteType</span>
+                <article class="admin-surface flex min-h-48 flex-col p-5">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <h4 class="break-words text-sm font-medium text-white">@note.Title</h4>
+                            <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan">@note.NoteType</p>
                         </div>
-                        <div class="flex gap-2">
-                            <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = note.Id })"
-                               class="text-xs text-gray-500 hover:text-gray-300 transition">Edit</a>
-                            <form method="post" action="@Url.Action("Delete", "Note", new { area = "Admin", id = note.Id })"
-                                  onsubmit="return confirm('Are you sure you want to delete this note?')">
+                        <div class="flex shrink-0 items-center gap-2">
+                            <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = note.Id })" class="focus-ring text-xs text-slate-500 transition hover:text-white">Edit</a>
+                            <form method="post" action="@Url.Action("Delete", "Note", new { area = "Admin", id = note.Id })" onsubmit="return confirm('Delete this note? This action cannot be undone.');">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="text-xs text-red-500 hover:text-red-400 transition">Delete</button>
+                                <button type="submit" class="focus-ring text-xs text-rose-400 transition hover:text-rose-200">Delete</button>
                             </form>
                         </div>
                     </div>
-                    @if (!string.IsNullOrEmpty(note.Content))
+                    @if (!string.IsNullOrWhiteSpace(note.Content))
                     {
-                        <p class="text-gray-500 text-xs line-clamp-3">
-                            @(note.Content.Length > 150 ? note.Content[..150] + "..." : note.Content)
-                        </p>
+                        <p class="mt-5 line-clamp-4 break-words text-xs leading-6 text-slate-500">@(note.Content.Length > 220 ? note.Content[..220] + "..." : note.Content)</p>
                     }
-                    <p class="text-gray-700 text-xs mt-3">@note.CreatedAt.ToString("dd MMM yyyy")</p>
-                </div>
+                    else
+                    {
+                        <p class="mt-5 text-xs text-slate-700">No content</p>
+                    }
+                    <p class="mt-auto pt-5 font-mono text-[10px] uppercase tracking-[0.1em] text-slate-700">@note.CreatedAt.ToString("dd MMM yyyy")</p>
+                </article>
             }
         </div>
-    </div>
-}
-
-@if (!Model.Any())
-{
-    <div class="text-center py-16 text-gray-600">
-        No notes yet.
-    </div>
-}
+    }
+    else
+    {
+        <div class="admin-surface px-6 py-10 text-center">
+            <p class="font-mono text-xs uppercase tracking-[0.16em] text-slate-500">No reference notes</p>
+            <p class="mt-2 text-sm text-slate-600">Private working material will appear here.</p>
+        </div>
+    }
+</section>
