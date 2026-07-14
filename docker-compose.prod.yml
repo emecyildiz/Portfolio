@@ -31,6 +31,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - AdminPath=${ADMIN_PATH:?ADMIN_PATH is required}
+      - AdminEmail=${ADMIN_EMAIL:?ADMIN_EMAIL is required}
+      - AdminPassword=${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
     volumes:
       - uploads:/app/wwwroot/uploads
     restart: unless-stopped
