@@ -2,6 +2,10 @@
     ViewData["Title"] = "Hire Me";
     ViewData["Description"] = "Cybersecurity, network infrastructure, software, and electronics project consulting.";
     var services = ViewBag.Services as List<Portfolio.Models.Service> ?? new();
+    var cvUrl = (ViewBag.CvUrl as string)?.Trim();
+    var hasSafeCvUrl = !string.IsNullOrEmpty(cvUrl)
+        && ((cvUrl.StartsWith('/') && !cvUrl.StartsWith("//") && Uri.TryCreate(cvUrl, UriKind.Relative, out _))
+            || (Uri.TryCreate(cvUrl, UriKind.Absolute, out var cvUri) && cvUri.Scheme == Uri.UriSchemeHttps));
 }
 
 <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
@@ -15,9 +19,9 @@
             </div>
             <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
                 <button type="button" onclick="openTrackModal()" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm font-medium text-slate-300 transition hover:border-cyan/30 hover:text-white">Track a request <span aria-hidden="true">→</span></button>
-                @if (ViewBag.CvUrl != null)
+                @if (hasSafeCvUrl)
                 {
-                    <a href="@ViewBag.CvUrl" download class="focus-ring inline-flex items-center justify-center gap-2 rounded-md bg-signal px-5 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Download CV <span aria-hidden="true">↓</span></a>
+                    <a href="@cvUrl" download class="focus-ring inline-flex items-center justify-center gap-2 rounded-md bg-signal px-5 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Download CV <span aria-hidden="true">↓</span></a>
                 }
             </div>
         </div>
@@ -85,13 +89,13 @@
         </div>
     </section>
 
-    <div id="trackModal" class="hidden fixed inset-0 z-[80] items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="trackModalTitle" aria-hidden="true">
+    <div id="trackModal" class="hidden fixed inset-0 z-[80] items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="trackModalTitle" aria-describedby="trackModalDescription" aria-hidden="true">
         <div id="trackModalOverlay" class="absolute inset-0 bg-ink/85 backdrop-blur-sm"></div>
         <div class="technical-frame surface relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl p-5 sm:p-8">
             <button id="trackModalClose" type="button" onclick="closeTrackModal()" aria-label="Close request tracking" class="focus-ring absolute right-4 top-4 rounded-md border border-white/10 px-3 py-2 font-mono text-[10px] text-slate-400 transition hover:text-white">ESC</button>
             <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan">Request channel</p>
             <h2 id="trackModalTitle" class="mt-3 text-2xl font-semibold tracking-[-0.025em] text-white">Track a request</h2>
-            <p class="mt-3 text-sm leading-6 text-slate-500">Paste the ticket number generated when the request was submitted.</p>
+            <p id="trackModalDescription" class="mt-3 text-sm leading-6 text-slate-500">Paste the ticket number generated when the request was submitted.</p>
 
             @if (TempData["Success"] != null && TempData["TicketNumber"] != null)
             {
@@ -132,6 +136,24 @@
 <script>
     let trackModalPreviousFocus = null;
 
+    function trapTrackModalFocus(event) {
+        const modal = document.getElementById('trackModal');
+        const focusableElements = Array.from(modal.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )).filter(element => element.offsetParent !== null);
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+        if (event.shiftKey && document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+        }
+    }
+
     function selectService(button) {
         const serviceSelect = document.getElementById('serviceSelect');
         if (!serviceSelect) return;
@@ -157,7 +179,10 @@
         modal.classList.remove('flex');
         modal.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('overflow-hidden');
-        if (trackModalPreviousFocus) trackModalPreviousFocus.focus();
+        if (trackModalPreviousFocus) {
+            trackModalPreviousFocus.focus();
+            trackModalPreviousFocus = null;
+        }
     }
 
     @if (TempData["Success"] != null || TempData["TrackError"] != null || ViewBag.TrackedMessage != null)
@@ -167,6 +192,8 @@
 
     document.getElementById('trackModalOverlay').addEventListener('click', closeTrackModal);
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && !document.getElementById('trackModal').classList.contains('hidden')) closeTrackModal();
+        const modalIsOpen = !document.getElementById('trackModal').classList.contains('hidden');
+        if (modalIsOpen && event.key === 'Escape') closeTrackModal();
+        else if (modalIsOpen && event.key === 'Tab') trapTrackModalFocus(event);
     });
 </script>

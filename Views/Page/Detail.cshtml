@@ -2,6 +2,10 @@
 @{
     ViewData["Title"] = Model.Title;
     ViewData["Description"] = Model.Title;
+    var coverImageUrl = Model.CoverImageUrl?.Trim();
+    var hasSafeCoverImageUrl = !string.IsNullOrEmpty(coverImageUrl)
+        && ((coverImageUrl.StartsWith('/') && !coverImageUrl.StartsWith("//") && Uri.TryCreate(coverImageUrl, UriKind.Relative, out _))
+            || (Uri.TryCreate(coverImageUrl, UriKind.Absolute, out var coverImageUri) && coverImageUri.Scheme == Uri.UriSchemeHttps));
 }
 
 <article class="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
@@ -13,9 +17,9 @@
         <p class="mt-6 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-700">Last updated @Model.UpdatedAt.ToString("dd MMMM yyyy")</p>
     </header>
 
-    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    @if (hasSafeCoverImageUrl)
     {
-        <figure class="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-panel"><img src="@Model.CoverImageUrl" alt="@Model.Title" class="max-h-[34rem] w-full object-cover" /></figure>
+        <figure class="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-panel"><img src="@coverImageUrl" alt="@Model.Title" class="max-h-[34rem] w-full object-cover" /></figure>
     }
 
     <div class="mx-auto mt-12 max-w-3xl prose prose-lg prose-invert prose-headings:font-semibold prose-headings:tracking-[-0.025em] prose-headings:text-white prose-p:leading-8 prose-p:text-slate-400 prose-a:text-cyan prose-a:no-underline hover:prose-a:text-white prose-code:rounded prose-code:bg-raised prose-code:px-1.5 prose-code:py-0.5 prose-code:text-signal prose-pre:border prose-pre:border-white/[0.08] prose-pre:bg-panel prose-blockquote:border-cyan prose-blockquote:text-slate-400 prose-strong:text-white prose-li:text-slate-400">@Html.Raw(ViewBag.ContentHtml)</div>

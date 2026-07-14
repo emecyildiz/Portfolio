@@ -20,7 +20,7 @@ namespace Portfolio.Models
         public string Content { get; set; } = string.Empty;
 
         public string? CoverImageUrl { get; set; }
-        public string? LiveDemoUrl { get; set; }                   // subdomain linki
+        public string? LiveDemoUrl { get; set; }                   // Public demo address
         public string? GithubUrl { get; set; }
 
         // Category-specific JSON schema; see ExtraDataSchemas.cs.

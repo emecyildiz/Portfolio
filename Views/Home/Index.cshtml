@@ -324,10 +324,17 @@
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach (var cert in certs)
                 {
+                    var certificateImageUrl = cert.ImageUrl?.Trim();
+                    var credentialUrl = cert.CredentialUrl?.Trim();
+                    var hasSafeCertificateImageUrl = !string.IsNullOrEmpty(certificateImageUrl)
+                        && ((certificateImageUrl.StartsWith('/') && !certificateImageUrl.StartsWith("//") && Uri.TryCreate(certificateImageUrl, UriKind.Relative, out _))
+                            || (Uri.TryCreate(certificateImageUrl, UriKind.Absolute, out var certificateImageUri) && certificateImageUri.Scheme == Uri.UriSchemeHttps));
+                    var hasSafeCredentialUrl = Uri.TryCreate(credentialUrl, UriKind.Absolute, out var credentialUri)
+                        && credentialUri.Scheme == Uri.UriSchemeHttps;
                     <div class="surface flex items-center gap-4 rounded-xl p-4">
-                        @if (!string.IsNullOrEmpty(cert.ImageUrl))
+                        @if (hasSafeCertificateImageUrl)
                         {
-                            <img src="@cert.ImageUrl" alt="@cert.Title" loading="lazy" class="h-12 w-12 shrink-0 rounded-lg object-contain" />
+                            <img src="@certificateImageUrl" alt="@cert.Title" loading="lazy" class="h-12 w-12 shrink-0 rounded-lg object-contain" />
                         }
                         else
                         {
@@ -336,9 +343,9 @@
                         <div class="min-w-0">
                             <h3 class="truncate text-sm font-medium text-white">@cert.Title</h3>
                             <p class="mt-1 truncate text-xs text-slate-600">@cert.Issuer · @cert.IssuedDate.ToString("MMM yyyy")</p>
-                            @if (!string.IsNullOrEmpty(cert.CredentialUrl))
+                            @if (hasSafeCredentialUrl)
                             {
-                                <a href="@cert.CredentialUrl" target="_blank" rel="noopener noreferrer" class="focus-ring mt-2 inline-block rounded-sm font-mono text-[9px] uppercase tracking-[0.14em] text-amber-300 hover:text-white">Verify ↗</a>
+                                <a href="@credentialUrl" target="_blank" rel="noopener noreferrer" class="focus-ring mt-2 inline-block rounded-sm font-mono text-[9px] uppercase tracking-[0.14em] text-amber-300 hover:text-white">Verify ↗</a>
                             }
                         </div>
                     </div>

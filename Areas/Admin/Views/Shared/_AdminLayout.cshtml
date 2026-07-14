@@ -151,18 +151,49 @@
         const adminSidebar = document.getElementById('adminSidebar');
         const adminSidebarOverlay = document.getElementById('adminSidebarOverlay');
         const adminMenuButton = document.getElementById('adminMenuButton');
+        let adminMenuPreviousFocus = null;
+
+        function trapAdminMenuFocus(event) {
+            const focusableElements = Array.from(adminSidebar.querySelectorAll(
+                'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )).filter(element => element.offsetParent !== null);
+            if (focusableElements.length === 0) return;
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        }
 
         function setAdminMenu(open) {
+            const isMobile = window.innerWidth < 1024;
+            if (open && isMobile) adminMenuPreviousFocus = document.activeElement;
             adminSidebar.classList.toggle('-translate-x-full', !open);
             adminSidebarOverlay.classList.toggle('hidden', !open);
             adminMenuButton.setAttribute('aria-expanded', String(open));
-            document.body.classList.toggle('overflow-hidden', open && window.innerWidth < 1024);
+            document.body.classList.toggle('overflow-hidden', open && isMobile);
+
+            if (open && isMobile) {
+                window.setTimeout(() => document.getElementById('adminMenuClose').focus(), 0);
+            } else if (!open && adminMenuPreviousFocus) {
+                adminMenuPreviousFocus.focus();
+                adminMenuPreviousFocus = null;
+            }
         }
 
         adminMenuButton.addEventListener('click', () => setAdminMenu(true));
         document.getElementById('adminMenuClose').addEventListener('click', () => setAdminMenu(false));
         adminSidebarOverlay.addEventListener('click', () => setAdminMenu(false));
-        document.addEventListener('keydown', event => { if (event.key === 'Escape') setAdminMenu(false); });
+        document.addEventListener('keydown', event => {
+            const menuIsOpen = window.innerWidth < 1024 && !adminSidebar.classList.contains('-translate-x-full');
+            if (menuIsOpen && event.key === 'Escape') setAdminMenu(false);
+            else if (menuIsOpen && event.key === 'Tab') trapAdminMenuFocus(event);
+        });
 
         document.querySelectorAll('.admin-toast').forEach(toast => {
             window.setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; }, 3200);

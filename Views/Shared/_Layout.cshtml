@@ -7,10 +7,21 @@
     <meta name="description" content="@ViewData["Description"]" />
 
     @{
-        var ogImage = ViewBag.OgImage as string;
-        var fullOgImage = !string.IsNullOrEmpty(ogImage)
-        ? (ogImage.StartsWith("http") ? ogImage : $"{Context.Request.Scheme}://{Context.Request.Host}{ogImage}")
-        : $"{Context.Request.Scheme}://{Context.Request.Host}/og-default.png";
+        var requestOrigin = $"{Context.Request.Scheme}://{Context.Request.Host}";
+        var ogImage = (ViewBag.OgImage as string)?.Trim();
+        var fullOgImage = $"{requestOrigin}/og-default.png";
+        if (!string.IsNullOrWhiteSpace(ogImage))
+        {
+            var isSafeInternalImage = ogImage.StartsWith('/') &&
+                                      !ogImage.StartsWith("//") &&
+                                      Uri.TryCreate(ogImage, UriKind.Relative, out _);
+            var isSafeExternalImage = Uri.TryCreate(ogImage, UriKind.Absolute, out var absoluteOgImage) &&
+                                      absoluteOgImage.Scheme == Uri.UriSchemeHttps;
+            if (isSafeInternalImage)
+                fullOgImage = $"{requestOrigin}{ogImage}";
+            else if (isSafeExternalImage)
+                fullOgImage = ogImage;
+        }
     }
     <meta property="og:title" content="@ViewData["Title"] — Portfolio" />
     <meta property="og:description" content="@ViewData["Description"]" />
@@ -293,12 +304,12 @@
         </div>
     </header>
 
-    <div id="searchOverlay" role="dialog" aria-modal="true" aria-label="Portfolio search" aria-hidden="true" class="hidden fixed inset-0 z-[70] items-start justify-center bg-ink/90 px-4 pt-24 backdrop-blur-xl sm:pt-32">
+    <div id="searchOverlay" role="dialog" aria-modal="true" aria-labelledby="searchOverlayTitle" aria-hidden="true" class="hidden fixed inset-0 z-[70] items-start justify-center bg-ink/90 px-4 pt-24 backdrop-blur-xl sm:pt-32">
         <div class="w-full max-w-2xl">
             <div class="mb-4 flex items-end justify-between">
                 <div>
                     <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-signal">Query the archive</p>
-                    <h2 class="mt-1 text-xl font-semibold text-white">Search projects and research</h2>
+                    <h2 id="searchOverlayTitle" class="mt-1 text-xl font-semibold text-white">Search projects and research</h2>
                 </div>
                 <button type="button" onclick="toggleSearch(false)" aria-label="Close search" class="focus-ring rounded-md border border-white/10 px-3 py-2 font-mono text-xs text-slate-400 hover:text-white">ESC</button>
             </div>
@@ -330,13 +341,30 @@
             </div>
             <div class="mt-8 flex flex-col gap-2 border-t border-white/[0.07] pt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-700 sm:flex-row sm:items-center sm:justify-between">
                 <p>~/portfolio</p>
-                <p>© 2026 · All systems documented</p>
+                <p>© @DateTime.UtcNow.Year · All systems documented</p>
             </div>
         </div>
     </footer>
 
     <script>
         let searchPreviousFocus = null;
+
+        function trapFocusWithin(container, event) {
+            const focusableElements = Array.from(container.querySelectorAll(
+                'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )).filter(element => element.offsetParent !== null);
+            if (focusableElements.length === 0) return;
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        }
 
         function toggleSearch(forceOpen) {
             const overlay = document.getElementById('searchOverlay');
@@ -358,11 +386,26 @@
                 window.setTimeout(() => document.getElementById('searchInput').focus(), 0);
             } else if (searchPreviousFocus) {
                 searchPreviousFocus.focus();
+                searchPreviousFocus = null;
             }
         }
 
         document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') toggleSearch(false);
+            const searchOverlay = document.getElementById('searchOverlay');
+            const searchIsOpen = !searchOverlay.classList.contains('hidden');
+            if (searchIsOpen && event.key === 'Escape') {
+                toggleSearch(false);
+            } else if (searchIsOpen && event.key === 'Tab') {
+                trapFocusWithin(searchOverlay, event);
+            } else if (event.key === 'Escape') {
+                const mobileMenu = document.getElementById('mobileMenu');
+                const mobileMenuButton = document.getElementById('mobileMenuBtn');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    mobileMenuButton.focus();
+                }
+            }
         });
 
         document.getElementById('searchOverlay').addEventListener('click', function (event) {

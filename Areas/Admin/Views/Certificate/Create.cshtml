@@ -44,14 +44,14 @@
 
                 <div>
                     <label asp-for="CredentialUrl" class="admin-label">Verification link <span class="font-normal text-slate-600">(optional)</span></label>
-                    <input asp-for="CredentialUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" aria-describedby="credential-url-help" placeholder="https://issuer.example/verify/..." />
+                    <input asp-for="CredentialUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." aria-describedby="credential-url-help" placeholder="https://issuer.example/verify/..." />
                     <p id="credential-url-help" class="admin-hint">Use the issuer's official HTTPS verification page. This becomes a public external link.</p>
                     <span asp-validation-for="CredentialUrl"></span>
                 </div>
 
                 <div>
                     <label asp-for="ImageUrl" class="admin-label">Badge image path <span class="font-normal text-slate-600">(optional)</span></label>
-                    <input asp-for="ImageUrl" class="admin-input font-mono" autocomplete="off" aria-describedby="certificate-image-help" placeholder="/uploads/certificates/badge.webp" />
+                    <input asp-for="ImageUrl" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:/(?!/).+|https://.+)" title="Use a root-relative path or an HTTPS URL." aria-describedby="certificate-image-help" placeholder="/uploads/certificates/badge.webp" />
                     <p id="certificate-image-help" class="admin-hint">Use a trusted uploaded asset or an approved external image URL.</p>
                     <span asp-validation-for="ImageUrl"></span>
                 </div>

@@ -2,6 +2,10 @@
 @{
     ViewData["Title"] = "Settings";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var cvFileUrl = Model.CvFileUrl?.Trim();
+    var hasSafeCvFileUrl = !string.IsNullOrEmpty(cvFileUrl)
+        && ((cvFileUrl.StartsWith('/') && !cvFileUrl.StartsWith("//") && Uri.TryCreate(cvFileUrl, UriKind.Relative, out _))
+            || (Uri.TryCreate(cvFileUrl, UriKind.Absolute, out var cvFileUri) && cvFileUri.Scheme == Uri.UriSchemeHttps));
 }
 
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -51,14 +55,14 @@
         <h3 id="cv-heading" class="mt-2 text-lg font-semibold text-white">CV / Resume</h3>
         <p class="mt-2 text-sm leading-6 text-slate-500">Upload the PDF visitors can download from the portfolio.</p>
 
-        @if (!string.IsNullOrWhiteSpace(Model.CvFileUrl))
+        @if (hasSafeCvFileUrl)
         {
             <div class="mt-5 flex items-center justify-between gap-4 border border-signal/15 bg-signal/[0.04] p-4">
                 <div>
                     <p class="font-mono text-[10px] uppercase tracking-[0.13em] text-signal">Current file</p>
                     <p class="mt-1 text-xs text-slate-500">A CV is available publicly.</p>
                 </div>
-                <a href="@Model.CvFileUrl" target="_blank" rel="noopener noreferrer" class="focus-ring border border-line px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white">View</a>
+                <a href="@cvFileUrl" target="_blank" rel="noopener noreferrer" class="focus-ring border border-line px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white">View</a>
             </div>
         }
 

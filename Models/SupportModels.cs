@@ -118,7 +118,7 @@ namespace Portfolio.Models
         public long Id { get; set; }                              // BIGSERIAL for a high-volume table
 
         public AuditAction Action { get; set; }
-        public string EntityType { get; set; } = string.Empty;   // "Project", "Category" vs.
+        public string EntityType { get; set; } = string.Empty;   // For example, "Project" or "Category"
         public int EntityId { get; set; }
         public string? EntityTitle { get; set; }                  // Title snapshot for deleted records
 

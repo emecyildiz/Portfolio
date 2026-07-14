@@ -49,7 +49,7 @@
                 <h3 id="page-media-heading" class="mt-2 text-lg font-semibold text-white">Cover image</h3>
                 <div class="mt-6">
                     <label asp-for="CoverImageUrl" class="admin-label">Image path <span class="font-normal text-slate-600">(optional)</span></label>
-                    <input asp-for="CoverImageUrl" class="admin-input font-mono" autocomplete="off" aria-describedby="page-image-help" placeholder="/uploads/pages/cover.webp" />
+                    <input asp-for="CoverImageUrl" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:/(?!/).+|https://.+)" title="Use a root-relative path or an HTTPS URL." aria-describedby="page-image-help" placeholder="/uploads/pages/cover.webp" />
                     <p id="page-image-help" class="admin-hint">Use a trusted uploaded asset or an approved external image URL.</p>
                     <span asp-validation-for="CoverImageUrl"></span>
                 </div>
