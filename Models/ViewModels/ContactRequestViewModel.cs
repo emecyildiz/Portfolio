@@ -4,20 +4,20 @@ namespace Portfolio.Models.ViewModels;
 
 public sealed class ContactRequestViewModel
 {
-    [Required(ErrorMessage = "Ad zorunlu.")]
-    [StringLength(100, ErrorMessage = "Ad en fazla 100 karakter olabilir.")]
+    [Required(ErrorMessage = "Name is required.")]
+    [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "E-posta zorunlu.")]
-    [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi gir.")]
-    [StringLength(300, ErrorMessage = "E-posta en fazla 300 karakter olabilir.")]
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Enter a valid email address.")]
+    [StringLength(300, ErrorMessage = "Email cannot exceed 300 characters.")]
     public string Email { get; set; } = string.Empty;
 
-    [StringLength(200, ErrorMessage = "Konu en fazla 200 karakter olabilir.")]
+    [StringLength(200, ErrorMessage = "Subject cannot exceed 200 characters.")]
     public string? Subject { get; set; }
 
-    [Required(ErrorMessage = "Mesaj zorunlu.")]
-    [StringLength(5000, ErrorMessage = "Mesaj en fazla 5000 karakter olabilir.")]
+    [Required(ErrorMessage = "Message is required.")]
+    [StringLength(5000, ErrorMessage = "Message cannot exceed 5000 characters.")]
     public string Message { get; set; } = string.Empty;
 
     public int? ServiceId { get; set; }

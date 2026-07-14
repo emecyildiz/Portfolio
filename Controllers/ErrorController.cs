@@ -10,7 +10,7 @@ public class ErrorController : Controller
         if (code == 404)
             return View("~/Views/Shared/Error.cshtml");
 
-        // Diğer hata kodları için de aynı sayfayı kullanabiliriz, mesaj değişebilir
+        // Reuse the shared error page for other status codes.
         return View("~/Views/Shared/Error.cshtml");
     }
 }

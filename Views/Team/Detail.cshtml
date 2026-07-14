@@ -35,18 +35,18 @@
             }
             @if (!string.IsNullOrEmpty(Model.GithubUrl))
             {
-                <a href="@Model.GithubUrl" target="_blank"
+                <a href="@Model.GithubUrl" target="_blank" rel="noopener noreferrer"
                    class="text-blue-400 hover:text-blue-300 transition">GitHub →</a>
             }
             @if (!string.IsNullOrEmpty(Model.LiveDemoUrl))
             {
-                <a href="@Model.LiveDemoUrl" target="_blank"
+                <a href="@Model.LiveDemoUrl" target="_blank" rel="noopener noreferrer"
                    class="text-green-400 hover:text-green-300 transition">Demo →</a>
             }
             @if (!string.IsNullOrEmpty(Model.EventUrl))
             {
-                <a href="@Model.EventUrl" target="_blank"
-                   class="text-amber-400 hover:text-amber-300 transition">Etkinlik →</a>
+                <a href="@Model.EventUrl" target="_blank" rel="noopener noreferrer"
+                   class="text-amber-400 hover:text-amber-300 transition">Event →</a>
             }
         </div>
     </div>
@@ -57,24 +57,24 @@
              class="w-full rounded-xl mb-10 border border-gray-800" />
     }
 
-    <!-- Proje bilgileri -->
+    <!-- Project information -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10">
-        <p class="text-xs text-gray-600 font-mono mb-4">// proje bilgileri</p>
+        <p class="text-xs text-gray-600 font-mono mb-4">// project information</p>
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
-                <p class="text-xs text-gray-600 mb-1">Benim Rolüm</p>
+                <p class="text-xs text-gray-600 mb-1">My Role</p>
                 <p class="text-gray-300 text-sm">@Model.MyRole</p>
             </div>
             <div>
-                <p class="text-xs text-gray-600 mb-1">Ekip Büyüklüğü</p>
-                <p class="text-gray-300 text-sm">@members.Count kişi</p>
+                <p class="text-xs text-gray-600 mb-1">Team Size</p>
+                <p class="text-gray-300 text-sm">@members.Count @(members.Count == 1 ? "member" : "members")</p>
             </div>
         </div>
 
         @if (members.Any())
         {
             <div class="pt-4 border-t border-gray-800">
-                <p class="text-xs text-gray-600 mb-3">Ekip Üyeleri</p>
+                <p class="text-xs text-gray-600 mb-3">Team Members</p>
                 <div class="flex flex-wrap gap-3">
                     @foreach (var member in members)
                     {
@@ -84,12 +84,12 @@
                             <div class="flex gap-2 mt-1">
                                 @if (!string.IsNullOrEmpty(member.GithubUrl))
                                 {
-                                    <a href="@member.GithubUrl" target="_blank"
+                                    <a href="@member.GithubUrl" target="_blank" rel="noopener noreferrer"
                                        class="text-xs text-blue-400 hover:text-blue-300 transition">GitHub</a>
                                 }
                                 @if (!string.IsNullOrEmpty(member.LinkedinUrl))
                                 {
-                                    <a href="@member.LinkedinUrl" target="_blank"
+                                    <a href="@member.LinkedinUrl" target="_blank" rel="noopener noreferrer"
                                        class="text-xs text-blue-400 hover:text-blue-300 transition">LinkedIn</a>
                                 }
                             </div>
@@ -113,7 +113,7 @@
     @if (images.Any())
     {
         <div class="mt-12">
-            <h3 class="text-sm font-mono text-gray-600 mb-4">// görseller</h3>
+            <h3 class="text-sm font-mono text-gray-600 mb-4">// images</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                 @foreach (var img in images)
                 {

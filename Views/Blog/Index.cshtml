@@ -1,16 +1,16 @@
 ﻿@model List<Portfolio.Models.BlogPost>
 @{
     ViewData["Title"] = "Blog";
-    ViewData["Description"] = "Günlük çalışmalar, öğrenilen konular ve teknik yazılar";
+    ViewData["Description"] = "Daily work, lessons learned, and technical articles";
 }
 
 <div class="max-w-4xl mx-auto px-6 py-16">
     <div class="mb-12">
         <p class="font-mono text-purple-400 text-sm mb-2">// blog</p>
         <h1 class="text-4xl font-bold text-white mb-4">Blog</h1>
-        <p class="text-gray-400">Günlük çalışmalar, öğrenilen konular ve teknik notlar.</p>
+        <p class="text-gray-400">Daily work, lessons learned, and technical notes.</p>
     </div>
-    <a href="/blog/rss.xml" target="_blank"
+    <a href="/blog/rss.xml" target="_blank" rel="noopener noreferrer"
        class="text-xs border border-gray-700 hover:border-orange-600 text-gray-400 hover:text-orange-400 px-3 py-1.5 rounded-lg transition">
         RSS
     </a>
@@ -20,7 +20,7 @@
     @if (!Model.Any())
     {
         <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// henüz yazı yok</p>
+            <p class="font-mono">// no posts published yet</p>
         </div>
     }
     else
@@ -38,7 +38,7 @@
                         }
                         <div class="flex-1">
                             <p class="text-xs text-gray-600 font-mono mb-2">
-                                @(b.PublishedAt?.ToString("dd MMM yyyy") ?? "") · @b.ReadingTimeMinutes dk
+                                @(b.PublishedAt?.ToString("dd MMM yyyy") ?? "") · @b.ReadingTimeMinutes min read
                             </p>
                             <h2 class="text-white font-semibold text-xl mb-2 group-hover:text-purple-300 transition">
                                 @b.Title

@@ -1,23 +1,23 @@
 ﻿@model List<Portfolio.Models.Project>
 @{
-    ViewData["Title"] = "Elektronik Projeleri";
-    ViewData["Description"] = "Mikrodenetleyici projeleri, devre tasarımları ve elektronik deneyleri";
+    ViewData["Title"] = "Electronics Projects";
+    ViewData["Description"] = "Microcontroller projects, circuit designs, and electronics experiments";
 }
 
 <div class="max-w-6xl mx-auto px-6 py-16">
     <div class="mb-12">
         <p class="font-mono text-blue-400 text-sm mb-2">// electronics</p>
-        <h1 class="text-4xl font-bold text-white mb-4">Elektronik Projeleri</h1>
+        <h1 class="text-4xl font-bold text-white mb-4">Electronics Projects</h1>
         <p class="text-gray-400 max-w-2xl">
-            ESP32, Arduino ve çeşitli mikrodenetleyicilerle yaptığım projeler.
-            Cihaz analizleri, devre tasarımları ve gömülü sistem çalışmaları.
+            Projects built with ESP32, Arduino, and other microcontrollers.
+            Device analysis, circuit design, and embedded systems work.
         </p>
     </div>
 
     @if (!Model.Any())
     {
         <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// henüz proje yok</p>
+            <p class="font-mono">// no projects published yet</p>
         </div>
     }
     else
@@ -63,7 +63,7 @@
                             </span>
                             @if (p.IsFeatured)
                             {
-                                <span class="text-xs text-amber-400">⭐ Öne Çıkan</span>
+                                <span class="text-xs text-amber-400">⭐ Featured</span>
                             }
                         </div>
                     </div>

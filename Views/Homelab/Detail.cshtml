@@ -28,8 +28,8 @@
 
         <div class="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-600">
             <span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "")</span>
-            <span>@Model.ReadingTimeMinutes dk okuma</span>
-            <span>@Model.ViewCount görüntülenme</span>
+            <span>@Model.ReadingTimeMinutes min read</span>
+            <span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span>
         </div>
     </div>
 
@@ -39,16 +39,16 @@
              class="w-full rounded-xl mb-10 border border-gray-800" />
     }
 
-    <!-- Donanım / Yazılım kartı -->
+    <!-- Hardware and software card -->
     @if (hardware.Any() || software.Any())
     {
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10">
-            <p class="text-xs text-gray-600 font-mono mb-4">// kurulum</p>
+            <p class="text-xs text-gray-600 font-mono mb-4">// setup</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 @if (hardware.Any())
                 {
                     <div>
-                        <p class="text-xs text-gray-600 mb-3">Donanım</p>
+                        <p class="text-xs text-gray-600 mb-3">Hardware</p>
                         <div class="space-y-1">
                             @foreach (var hw in hardware)
                             {
@@ -63,7 +63,7 @@
                 @if (software.Any())
                 {
                     <div>
-                        <p class="text-xs text-gray-600 mb-3">Yazılım</p>
+                        <p class="text-xs text-gray-600 mb-3">Software</p>
                         <div class="space-y-1">
                             @foreach (var sw in software)
                             {
@@ -79,33 +79,33 @@
         </div>
     }
 
-    <!-- Ağ diyagramı -->
+    <!-- Network diagram -->
     @if (!string.IsNullOrEmpty(Model.NetworkDiagramUrl))
     {
         <div class="mb-10">
-            <p class="text-xs text-gray-600 font-mono mb-3">// ağ topolojisi</p>
-            <img src="@Model.NetworkDiagramUrl" alt="Ağ Topolojisi"
+            <p class="text-xs text-gray-600 font-mono mb-3">// network topology</p>
+            <img src="@Model.NetworkDiagramUrl" alt="Network topology"
                  class="w-full rounded-xl border border-gray-800" />
         </div>
     }
-    <!-- İnteraktif Ağ Haritası -->
+    <!-- Interactive network map -->
     @if (!string.IsNullOrEmpty(topologyJson))
     {
         <div class="mb-10">
             <div class="flex items-center justify-between mb-3">
-                <p class="text-xs text-gray-600 font-mono">// interaktif ağ haritası</p>
-                <p class="text-xs text-gray-700">Cihaza tıkla, detayları gör</p>
+                <p class="text-xs text-gray-600 font-mono">// interactive network map</p>
+                <p class="text-xs text-gray-700">Select a device to view its details</p>
             </div>
             <div id="network-map" class="w-full h-[500px] bg-gray-950 border border-gray-800 rounded-xl"></div>
         </div>
 
-        <!-- Cihaz Detay Paneli -->
+        <!-- Device details panel -->
         <div id="deviceDetailPanel" class="hidden fixed inset-0 z-50">
             <div id="deviceDetailOverlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
             <div class="absolute right-0 top-0 h-full w-full max-w-md bg-gray-900 border-l border-gray-800 overflow-y-auto">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-6">
-                        <p class="font-mono text-xs text-gray-600">// cihaz detayı</p>
+                        <p class="font-mono text-xs text-gray-600">// device details</p>
                         <button onclick="closeDeviceDetail()" class="text-gray-500 hover:text-white transition">✕</button>
                     </div>
                     <div id="deviceDetailContent"></div>
@@ -134,7 +134,7 @@
                 }
             }
 
-            // Cihaz tipine göre renk paleti
+            // Color palette by device type
             const typeColors = {
                 router: '#3B82F6', switch: '#8B5CF6', firewall: '#EF4444',
                 server: '#10B981', pc: '#6B7280', laptop: '#6B7280',
@@ -150,7 +150,7 @@
                 other: { dashes: false, color: '#F59E0B' }
             };
 
-            // Eski kayıtlarda konum yoksa geriye dönük uyumlu grid yerleşimi kullan.
+            // Use a backward-compatible grid layout when older records have no coordinates.
             const gridPositions = (topologyData.nodes || []).map((n, i) => ({
                 ...n,
                 x: Number.isFinite(n.x) ? n.x : (i % 4) * 150,
@@ -198,20 +198,20 @@
             const data = { nodes, edges };
                         const options = {
                 physics: {
-                    enabled: false   // Fizik motorunu kapat — cihazlar sabit dursun, sen konumlandır
+                    enabled: false   // Keep devices fixed by disabling the physics engine.
                 },
                 interaction: {
                     hover: true,
                     tooltipDelay: 100,
-                    dragNodes: true,      // Cihazları sürükleyebil
-                    dragView: true,       // Boş alanı sürükleyip haritayı kaydırabil
-                    zoomView: true         // Zoom yapabil
+                    dragNodes: true,      // Allow devices to be repositioned.
+                    dragView: true,       // Allow panning by dragging empty space.
+                    zoomView: true        // Allow zooming.
                 },
                 layout: {
                     improvedLayout: true
                 },
                 edges: {
-                    smooth: false          // Düz çizgiler — makarna görünümü kalksın
+                    smooth: false         // Use straight connection lines.
                 }
             };
 
@@ -263,28 +263,28 @@
                     <div class="space-y-3 border-t border-gray-800 pt-4">
                         ${device.ipAddress ? `
                             <div>
-                                <p class="text-xs text-gray-600 mb-1">IP Adresi</p>
+                                <p class="text-xs text-gray-600 mb-1">IP Address</p>
                                 <p class="font-mono text-sm text-gray-300">${escapeHtml(device.ipAddress)}</p>
                             </div>
                         ` : ''}
 
                         ${hardware ? `
                             <div>
-                                <p class="text-xs text-gray-600 mb-1">Donanım</p>
+                                <p class="text-xs text-gray-600 mb-1">Hardware</p>
                                 <p class="text-sm text-gray-300">${escapeHtml(hardware)}</p>
                             </div>
                         ` : ''}
 
                         ${device.homelabRole ? `
                             <div>
-                                <p class="text-xs text-gray-600 mb-1">Bu Ağdaki Rolü</p>
+                                <p class="text-xs text-gray-600 mb-1">Role on This Network</p>
                                 <p class="text-sm text-gray-300">${escapeHtml(device.homelabRole)}</p>
                             </div>
                         ` : ''}
 
                         ${device.homelabNotes ? `
                             <div>
-                                <p class="text-xs text-gray-600 mb-1">Notlar</p>
+                                <p class="text-xs text-gray-600 mb-1">Notes</p>
                                 <p class="text-sm text-gray-400">${escapeHtml(device.homelabNotes)}</p>
                             </div>
                         ` : ''}
@@ -292,7 +292,7 @@
 
                     ${projectLink ? `
                         <a href="${escapeHtml(projectLink)}" class="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
-                            Yapım detaylarını gör →
+                            View build details →
                         </a>
                     ` : ''}
                 `;
@@ -321,7 +321,7 @@
     @if (images.Any())
     {
         <div class="mt-12">
-            <h3 class="text-sm font-mono text-gray-600 mb-4">// görseller</h3>
+            <h3 class="text-sm font-mono text-gray-600 mb-4">// images</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                 @foreach (var img in images)
                 {
@@ -341,7 +341,7 @@
     @if (related.Any())
     {
         <div class="mt-16 pt-8 border-t border-gray-800">
-            <h3 class="text-sm font-mono text-gray-600 mb-6">// ilgili yazılar</h3>
+            <h3 class="text-sm font-mono text-gray-600 mb-6">// related posts</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 @foreach (var r in related)
                 {

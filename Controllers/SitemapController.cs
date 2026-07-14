@@ -34,7 +34,7 @@ public class SitemapController : Controller
             ($"{baseUrl}/activity", DateTime.UtcNow, "0.5"),
         };
 
-        // Sadece public durumdaki içerikler eklenir — global query filter zaten bunu sağlıyor
+        // Global query filters ensure that only public content is included.
         var security = await _db.SecurityResearches.ToListAsync();
         urls.AddRange(security.Select(s => ($"{baseUrl}/security/{s.Slug}", s.UpdatedAt, "0.6")));
 

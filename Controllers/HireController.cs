@@ -34,20 +34,20 @@ public class HireController : BaseController
     {
         if (!string.IsNullOrEmpty(request.Website))
         {
-            TempData["Success"] = "Talebin alındı!";
+            TempData["Success"] = "Your request has been received!";
             return RedirectToAction("Index", "Hire", new { area = "" });
         }
 
         if (!ModelState.IsValid)
         {
-            TempData["Error"] = "Form alanlarını ve e-posta adresini kontrol et.";
+            TempData["Error"] = "Please check the form fields and email address.";
             return RedirectToAction("Index", "Hire", new { area = "" });
         }
 
         if (request.ServiceId.HasValue && !await _db.Services.AnyAsync(s =>
                 s.Id == request.ServiceId.Value && s.Status == VisibilityStatus.Public))
         {
-            TempData["Error"] = "Seçilen hizmet geçerli değil.";
+            TempData["Error"] = "The selected service is not valid.";
             return RedirectToAction("Index", "Hire", new { area = "" });
         }
 
@@ -69,7 +69,7 @@ public class HireController : BaseController
         _db.ContactMessages.Add(message);
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = "Talebin alındı!";
+        TempData["Success"] = "Your request has been received!";
         TempData["TicketNumber"] = message.TicketNumber.ToString();
         return RedirectToAction("Index", "Hire", new { area = "" });
     }
@@ -82,7 +82,7 @@ public class HireController : BaseController
     {
         if (!Guid.TryParse(ticketNumber, out var guid))
         {
-            TempData["TrackError"] = "Geçersiz bilet numarası formatı.";
+            TempData["TrackError"] = "The ticket number format is invalid.";
             return RedirectToAction("Index", "Hire", new { area = "" });
         }
 
@@ -91,7 +91,7 @@ public class HireController : BaseController
 
         if (message == null)
         {
-            TempData["TrackError"] = "Bu bilet numarasına ait talep bulunamadı.";
+            TempData["TrackError"] = "No request was found for this ticket number.";
             return RedirectToAction("Index", "Hire", new { area = "" });
         }
 

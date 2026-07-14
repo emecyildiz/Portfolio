@@ -1,7 +1,7 @@
 ﻿@model List<Portfolio.Models.HomelabPost>
 @{
     ViewData["Title"] = "Homelab";
-    ViewData["Description"] = "Ağ yapılandırması, sistem yönetimi ve güvenlik testleri";
+    ViewData["Description"] = "Network configuration, systems administration, and security testing";
     var currentTopic = ViewBag.CurrentTopic as string;
 }
 
@@ -10,16 +10,16 @@
         <p class="font-mono text-teal-400 text-sm mb-2">// homelab</p>
         <h1 class="text-4xl font-bold text-white mb-4">Homelab</h1>
         <p class="text-gray-400 max-w-2xl">
-            Ev ağımda kurduğum altyapı, güvenlik yapılandırmaları ve sistem yönetimi çalışmaları.
+            Infrastructure, security configurations, and systems administration work from my home lab.
         </p>
     </div>
 
-    <!-- Filtreler -->
+    <!-- Filters -->
     <div class="flex flex-wrap gap-2 mb-10">
         <a href="/homelab"
            class="text-xs px-3 py-1.5 rounded-full border transition
                   @(string.IsNullOrEmpty(currentTopic) ? "border-teal-600 text-teal-400 bg-teal-900/20" : "border-gray-700 text-gray-400 hover:border-gray-500")">
-            Tümü
+            All
         </a>
         @foreach (var topic in Enum.GetValues<Portfolio.Models.Enums.HomelabTopic>())
         {
@@ -34,7 +34,7 @@
     @if (!Model.Any())
     {
         <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// henüz yazı yok</p>
+            <p class="font-mono">// no homelab posts published yet</p>
         </div>
     }
     else
@@ -49,13 +49,13 @@
                class="block bg-gradient-to-r from-blue-950/50 to-purple-950/50 border border-blue-800/50 hover:border-blue-600 rounded-2xl p-8 mb-10 transition group">
                 <div class="flex items-center gap-2 mb-3">
                     <span class="text-lg">🗺</span>
-                    <span class="font-mono text-xs text-blue-400 uppercase tracking-wider">Ana Lab — Tüm Sistem Haritası</span>
+                    <span class="font-mono text-xs text-blue-400 uppercase tracking-wider">Main Lab — Full System Map</span>
                 </div>
                 <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-blue-300 transition">
                     @mainLab.Title
                 </h2>
                 <p class="text-gray-400 text-sm">@mainLab.Summary</p>
-                <p class="text-blue-400 text-sm mt-4">İnteraktif haritayı gör →</p>
+                <p class="text-blue-400 text-sm mt-4">View the interactive map →</p>
             </a>
         }
         <div class="space-y-4">
@@ -80,8 +80,8 @@
 
                             <div class="flex items-center gap-4 mt-4 text-xs text-gray-600">
                                 <span>@(h.PublishedAt?.ToString("dd MMM yyyy") ?? "")</span>
-                                <span>@h.ReadingTimeMinutes dk okuma</span>
-                                <span>@h.ViewCount görüntülenme</span>
+                                <span>@h.ReadingTimeMinutes min read</span>
+                                <span>@h.ViewCount @(h.ViewCount == 1 ? "view" : "views")</span>
                             </div>
                         </div>
                     </div>

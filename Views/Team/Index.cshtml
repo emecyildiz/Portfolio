@@ -1,22 +1,22 @@
 ﻿@model List<Portfolio.Models.TeamProject>
 @{
-    ViewData["Title"] = "Ekip Projeleri";
-    ViewData["Description"] = "Hackathonlar ve ekip çalışmaları";
+    ViewData["Title"] = "Team Projects";
+    ViewData["Description"] = "Hackathons and collaborative projects";
 }
 
 <div class="max-w-6xl mx-auto px-6 py-16">
     <div class="mb-12">
         <p class="font-mono text-amber-400 text-sm mb-2">// team projects</p>
-        <h1 class="text-4xl font-bold text-white mb-4">Ekip Projeleri</h1>
+        <h1 class="text-4xl font-bold text-white mb-4">Team Projects</h1>
         <p class="text-gray-400 max-w-2xl">
-            Hackathonlar ve ekip çalışmalarında geliştirdiğim projeler.
+            Projects developed through hackathons and collaborative work.
         </p>
     </div>
 
     @if (!Model.Any())
     {
         <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// henüz proje yok</p>
+            <p class="font-mono">// no team projects published yet</p>
         </div>
     }
     else

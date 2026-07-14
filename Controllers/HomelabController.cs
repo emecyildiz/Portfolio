@@ -75,7 +75,7 @@ public class HomelabController : BaseController
 
         ViewBag.LinkedProjectsJson = "[]";
 
-        // Topolojiyi tip, boyut ve URL kurallarıyla doğrulayıp script bağlamı için yeniden serialize et.
+        // Validate the topology against type, size, and URL rules before serializing it for the script context.
         if (NetworkTopologyJsonService.TryNormalize(
                 post.NetworkTopology, out var topology, out var normalizedTopology) &&
             topology != null && normalizedTopology != null)

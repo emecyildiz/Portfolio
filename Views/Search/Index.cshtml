@@ -1,21 +1,21 @@
 ﻿@model List<Portfolio.Models.ViewModels.SearchResultItem>
 @{
-    ViewData["Title"] = "Arama";
+    ViewData["Title"] = "Search";
     var query = ViewBag.Query as string;
 }
 
 <div class="max-w-3xl mx-auto px-6 py-16">
 
-    <!-- Arama kutusu -->
+    <!-- Search box -->
     <div class="mb-12">
         <p class="font-mono text-blue-400 text-sm mb-4">// search</p>
         <form method="get" action="/search" class="flex gap-2">
             <input type="text" name="q" value="@query" autofocus
-                   placeholder="Ne arıyorsun?"
+                   placeholder="What are you looking for?"
                    class="flex-1 bg-gray-900 border border-gray-800 rounded-lg px-5 py-3 text-white text-base focus:outline-none focus:border-blue-500 transition" />
             <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition">
-                Ara
+                Search
             </button>
         </form>
     </div>
@@ -23,19 +23,19 @@
     @if (string.IsNullOrWhiteSpace(query))
     {
         <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// aramak için yukarıya bir şeyler yaz</p>
+            <p class="font-mono">// enter a search term above</p>
         </div>
     }
     else if (!Model.Any())
     {
         <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// "@query" için sonuç bulunamadı</p>
+            <p class="font-mono">// no results found for "@query"</p>
         </div>
     }
     else
     {
         <p class="text-sm text-gray-500 mb-6">
-            "<span class="text-white">@query</span>" için @Model.Count sonuç bulundu
+            @Model.Count @(Model.Count == 1 ? "result" : "results") found for "<span class="text-white">@query</span>"
         </p>
 
         <div class="space-y-3">

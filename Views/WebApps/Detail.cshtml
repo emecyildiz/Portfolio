@@ -24,20 +24,20 @@
 
         <div class="flex flex-wrap items-center gap-4 mt-6 text-sm text-gray-600">
             <span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "")</span>
-            <span>@Model.ReadingTimeMinutes dk okuma</span>
+            <span>@Model.ReadingTimeMinutes min read</span>
             @if (!string.IsNullOrEmpty(Model.GithubUrl))
             {
-                <a href="@Model.GithubUrl" target="_blank"
+                <a href="@Model.GithubUrl" target="_blank" rel="noopener noreferrer"
                    class="text-blue-400 hover:text-blue-300 transition">GitHub →</a>
             }
             @if (!string.IsNullOrEmpty(Model.LiveDemoUrl))
             {
-                <a href="@Model.LiveDemoUrl" target="_blank"
-                   class="text-green-400 hover:text-green-300 transition">Canlı Demo →</a>
+                <a href="@Model.LiveDemoUrl" target="_blank" rel="noopener noreferrer"
+                   class="text-green-400 hover:text-green-300 transition">Live Demo →</a>
             }
             @if (!string.IsNullOrEmpty(extra.Subdomain))
             {
-                <a href="https://@extra.Subdomain" target="_blank"
+                <a href="https://@extra.Subdomain" target="_blank" rel="noopener noreferrer"
                    class="text-purple-400 hover:text-purple-300 transition">@extra.Subdomain →</a>
             }
         </div>
@@ -49,29 +49,29 @@
              class="w-full rounded-xl mb-10 border border-gray-800" />
     }
 
-    <!-- Proje bilgileri -->
+    <!-- Project details -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10">
-        <p class="text-xs text-gray-600 font-mono mb-4">// proje detayları</p>
+        <p class="text-xs text-gray-600 font-mono mb-4">// project details</p>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             @if (!string.IsNullOrEmpty(extra.MyRole))
             {
                 <div>
-                    <p class="text-xs text-gray-600 mb-1">Rolüm</p>
+                    <p class="text-xs text-gray-600 mb-1">My Role</p>
                     <p class="text-gray-300 text-sm">@extra.MyRole</p>
                 </div>
             }
             @if (extra.TeamSize.HasValue)
             {
                 <div>
-                    <p class="text-xs text-gray-600 mb-1">Ekip</p>
-                    <p class="text-gray-300 text-sm">@extra.TeamSize kişi</p>
+                    <p class="text-xs text-gray-600 mb-1">Team</p>
+                    <p class="text-gray-300 text-sm">@extra.TeamSize @(extra.TeamSize == 1 ? "member" : "members")</p>
                 </div>
             }
             @if (extra.IsSchoolProject == true)
             {
                 <div>
-                    <p class="text-xs text-gray-600 mb-1">Tür</p>
-                    <p class="text-gray-300 text-sm">Okul Projesi</p>
+                    <p class="text-xs text-gray-600 mb-1">Type</p>
+                    <p class="text-gray-300 text-sm">Academic Project</p>
                 </div>
             }
         </div>
@@ -103,7 +103,7 @@
     @if (images.Any())
     {
         <div class="mt-12">
-            <h3 class="text-sm font-mono text-gray-600 mb-4">// görseller</h3>
+            <h3 class="text-sm font-mono text-gray-600 mb-4">// images</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                 @foreach (var img in images)
                 {
@@ -117,7 +117,7 @@
     @if (related.Any())
     {
         <div class="mt-16 pt-8 border-t border-gray-800">
-            <h3 class="text-sm font-mono text-gray-600 mb-6">// diğer uygulamalar</h3>
+            <h3 class="text-sm font-mono text-gray-600 mb-6">// related applications</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 @foreach (var r in related)
                 {

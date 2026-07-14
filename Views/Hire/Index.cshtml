@@ -1,6 +1,6 @@
 ﻿@{
-    ViewData["Title"] = "İşe Al";
-    ViewData["Description"] = "Siber güvenlik, ağ yapılandırması ve elektronik proje danışmanlığı";
+    ViewData["Title"] = "Hire Me";
+    ViewData["Description"] = "Cybersecurity, network configuration, and electronics project consulting";
     var services = ViewBag.Services as List<Portfolio.Models.Service> ?? new();
 }
 
@@ -12,28 +12,28 @@
             <p class="font-mono text-blue-400 text-sm">// hire me</p>
             <button onclick="openTrackModal()"
                     class="text-xs border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white px-3 py-1 rounded-full transition">
-                Talep Sorgula
+                Track Request
             </button>
         </div>
         <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
-            Birlikte çalışalım
+            Let's work together
         </h1>
         <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-6">
-            Siber güvenlik danışmanlığı, ağ güvenliği ve elektronik proje geliştirme konularında
-            profesyonel destek sunuyorum.
+            I provide professional support in cybersecurity consulting, network security,
+            and electronics project development.
         </p>
 
         @if (ViewBag.CvUrl != null)
         {
             <a href="@ViewBag.CvUrl" download
                class="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white text-sm px-5 py-2.5 rounded-lg transition">
-                📄 CV İndir
+                📄 Download CV
             </a>
         }
     </div>
 
 
-    <!-- Hizmetler -->
+    <!-- Services -->
     @if (services.Any())
     {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
@@ -50,18 +50,18 @@
                     <p class="text-gray-500 text-sm leading-relaxed mb-4">@service.Description</p>
                     <button onclick="selectService(@service.Id, '@service.Title')"
                             class="text-sm text-blue-400 hover:text-blue-300 transition">
-                        Bu hizmet için başvur →
+                        Request this service →
                     </button>
                 </div>
             }
         </div>
     }
 
-    <!-- İletişim formu -->
+    <!-- Contact form -->
     <div class="max-w-2xl mx-auto">
         <div class="text-center mb-8">
             <p class="font-mono text-gray-600 text-sm mb-2">// contact</p>
-            <h2 class="text-2xl font-bold text-white">İletişime Geç</h2>
+            <h2 class="text-2xl font-bold text-white">Get in Touch</h2>
         </div>
 
         @if (TempData["Success"] != null)
@@ -85,33 +85,33 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">Ad Soyad</label>
+                    <label class="block text-sm text-gray-400 mb-1">Full Name</label>
                     <input name="Name" type="text" required maxlength="100"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
-                           placeholder="Adın Soyadın" />
+                           placeholder="Your full name" />
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">E-posta</label>
+                    <label class="block text-sm text-gray-400 mb-1">Email</label>
                     <input name="Email" type="email" required maxlength="300"
                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
-                           placeholder="ornek@email.com" />
+                           placeholder="you@example.com" />
                 </div>
             </div>
 
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Konu</label>
+                <label class="block text-sm text-gray-400 mb-1">Subject</label>
                 <input name="Subject" type="text" maxlength="200"
                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition"
-                       placeholder="Ne hakkında konuşmak istiyorsun?" />
+                       placeholder="What would you like to discuss?" />
             </div>
 
             @if (services.Any())
             {
                 <div>
-                    <label class="block text-sm text-gray-400 mb-1">İlgilendiğin Hizmet</label>
+                    <label class="block text-sm text-gray-400 mb-1">Service of Interest</label>
                     <select name="ServiceId" id="serviceSelect"
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition">
-                        <option value="">Seçiniz (opsiyonel)</option>
+                        <option value="">Select a service (optional)</option>
                         @foreach (var s in services)
                         {
                             <option value="@s.Id">@s.Title</option>
@@ -121,19 +121,19 @@
             }
 
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Mesaj</label>
+                <label class="block text-sm text-gray-400 mb-1">Message</label>
                 <textarea name="Message" rows="5" required maxlength="5000"
                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition resize-none"
-                          placeholder="Projen veya ihtiyacın hakkında kısaca anlat..."></textarea>
+                          placeholder="Tell me briefly about your project or what you need..."></textarea>
             </div>
 
             <button type="submit"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition">
-                Gönder
+                Send Message
             </button>
         </form>
     </div>
-    <!-- Talep Sorgula Modal -->
+    <!-- Request tracking modal -->
     <div id="trackModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full relative">
             <button onclick="closeTrackModal()"
@@ -143,18 +143,18 @@
 
             <div class="text-center mb-6">
                 <p class="font-mono text-gray-600 text-sm mb-2">// track</p>
-                <h3 class="text-lg font-bold text-white">Talep Sorgula</h3>
+                <h3 class="text-lg font-bold text-white">Track Request</h3>
             </div>
 
             @if (TempData["Success"] != null && TempData["TicketNumber"] != null)
             {
                 <div class="bg-green-900/30 border border-green-800 rounded-xl p-4 mb-6 text-center">
-                    <p class="text-green-400 text-sm mb-2">✓ Talebin alındı!</p>
-                    <p class="text-xs text-gray-500 mb-2">Bilet numaran:</p>
+                    <p class="text-green-400 text-sm mb-2">✓ Your request has been received!</p>
+                    <p class="text-xs text-gray-500 mb-2">Your ticket number:</p>
                     <p class="font-mono text-white text-sm bg-gray-800 rounded-lg px-3 py-2 select-all">
                         @TempData["TicketNumber"]
                     </p>
-                    <p class="text-xs text-gray-600 mt-2">Bu numarayı sakla, talebini sorgulamak için kullanacaksın.</p>
+                    <p class="text-xs text-gray-600 mt-2">Keep this number; you will need it to track your request.</p>
                 </div>
             }
 
@@ -170,12 +170,12 @@
                 var tracked = ViewBag.TrackedMessage as Portfolio.Models.ContactMessage;
                 var statusText = tracked!.Status switch
                 {
-                    Portfolio.Models.Enums.ContactStatus.New => "Alındı, henüz incelenmedi",
-                    Portfolio.Models.Enums.ContactStatus.Read => "İncelendi",
-                    Portfolio.Models.Enums.ContactStatus.Replied => "Yanıtlandı — e-postanı kontrol et",
-                    Portfolio.Models.Enums.ContactStatus.Archived => "Arşivlendi",
-                    Portfolio.Models.Enums.ContactStatus.Spam => "İşlem yapılmadı",
-                    _ => "Bilinmiyor"
+                    Portfolio.Models.Enums.ContactStatus.New => "Received, awaiting review",
+                    Portfolio.Models.Enums.ContactStatus.Read => "Under review",
+                    Portfolio.Models.Enums.ContactStatus.Replied => "Replied — check your email",
+                    Portfolio.Models.Enums.ContactStatus.Archived => "Archived",
+                    Portfolio.Models.Enums.ContactStatus.Spam => "No action taken",
+                    _ => "Unknown"
                 };
                 var statusColor = tracked.Status switch
                 {
@@ -185,18 +185,18 @@
                 };
 
                 <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6">
-                    <p class="text-xs text-gray-600 mb-2">@tracked.CreatedAt.ToString("dd MMM yyyy HH:mm") tarihli talep</p>
+                    <p class="text-xs text-gray-600 mb-2">Request submitted on @tracked.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
                     <span class="text-sm px-3 py-1 rounded-full @statusColor">@statusText</span>
                 </div>
             }
 
             <form method="post" asp-controller="Hire" asp-action="TrackTicket" asp-route-area="" class="flex gap-2">
                 <input name="ticketNumber" type="text" required maxlength="36"
-                       placeholder="Bilet numaranı yapıştır"
+                       placeholder="Paste your ticket number"
                        class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-blue-500 transition" />
                 <button type="submit"
                         class="bg-gray-800 hover:bg-gray-700 text-white text-sm px-5 py-2.5 rounded-lg transition">
-                    Sorgula
+                    Track
                 </button>
             </form>
         </div>
@@ -205,7 +205,7 @@
 <script>
     function selectService(id, title) {
         document.getElementById('serviceSelect').value = id;
-        document.querySelector('input[name="Subject"]').value = title + ' hakkında';
+        document.querySelector('input[name="Subject"]').value = 'Regarding ' + title;
         document.querySelector('form[action*="contact"]').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -217,7 +217,7 @@
         document.getElementById('trackModal').classList.add('hidden');
     }
 
-    // Sunucudan sonuç geldiyse (TempData) modal'ı otomatik aç
+    // Open the modal automatically when the server returns a result through TempData.
     @if (TempData["Success"] != null || TempData["TrackError"] != null || ViewBag.TrackedMessage != null)
     {
             <text>
@@ -227,7 +227,7 @@
             </text>
     }
 
-    // Modal dışına tıklayınca kapat
+    // Close the modal when the user clicks outside it.
     document.getElementById('trackModal').addEventListener('click', function(e) {
         if (e.target === this) closeTrackModal();
     });

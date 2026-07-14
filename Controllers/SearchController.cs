@@ -21,15 +21,15 @@ public class SearchController : BaseController
         var term = q.Trim();
         var results = new List<SearchResultItem>();
 
-        // Güvenlik araştırmaları
+        // Security research
         var security = await _db.SecurityResearches
-            .Where(s => EF.Functions.ToTsVector("turkish", s.Title + " " + s.Summary)
-                        .Matches(EF.Functions.PlainToTsQuery("turkish", term)))
+            .Where(s => EF.Functions.ToTsVector("english", s.Title + " " + s.Summary)
+                        .Matches(EF.Functions.PlainToTsQuery("english", term)))
             .Select(s => new
             {
                 Item = s,
-                Rank = EF.Functions.ToTsVector("turkish", s.Title + " " + s.Summary)
-                       .RankCoverDensity(EF.Functions.PlainToTsQuery("turkish", term))
+                Rank = EF.Functions.ToTsVector("english", s.Title + " " + s.Summary)
+                       .RankCoverDensity(EF.Functions.PlainToTsQuery("english", term))
             })
             .OrderByDescending(x => x.Rank)
             .Take(15)
@@ -38,22 +38,22 @@ public class SearchController : BaseController
                 Title = x.Item.Title,
                 Summary = x.Item.Summary,
                 Url = $"/security/{x.Item.Slug}",
-                TypeLabel = "Güvenlik Araştırması",
+                TypeLabel = "Security Research",
                 ColorClass = "text-red-400 bg-red-900/20 border-red-900/50",
                 Date = x.Item.PublishedAt
             })
             .ToListAsync();
 
-        // Projeler
+        // Projects
         var projects = await _db.Projects
             .Include(p => p.Category)
-            .Where(p => EF.Functions.ToTsVector("turkish", p.Title + " " + p.Summary)
-                        .Matches(EF.Functions.PlainToTsQuery("turkish", term)))
+            .Where(p => EF.Functions.ToTsVector("english", p.Title + " " + p.Summary)
+                        .Matches(EF.Functions.PlainToTsQuery("english", term)))
             .Select(p => new
             {
                 Item = p,
-                Rank = EF.Functions.ToTsVector("turkish", p.Title + " " + p.Summary)
-                       .RankCoverDensity(EF.Functions.PlainToTsQuery("turkish", term))
+                Rank = EF.Functions.ToTsVector("english", p.Title + " " + p.Summary)
+                       .RankCoverDensity(EF.Functions.PlainToTsQuery("english", term))
             })
             .OrderByDescending(x => x.Rank)
             .Take(15)
@@ -62,7 +62,7 @@ public class SearchController : BaseController
                 Title = x.Item.Title,
                 Summary = x.Item.Summary,
                 Url = $"/{x.Item.Category.Slug}/{x.Item.Slug}",
-                TypeLabel = x.Item.Category.Slug == "electronics" ? "Elektronik Projesi" : "Web Uygulaması",
+                TypeLabel = x.Item.Category.Slug == "electronics" ? "Electronics Project" : "Web Application",
                 ColorClass = x.Item.Category.Slug == "electronics"
                     ? "text-blue-400 bg-blue-900/20 border-blue-900/50"
                     : "text-purple-400 bg-purple-900/20 border-purple-900/50",
@@ -72,13 +72,13 @@ public class SearchController : BaseController
 
         // Homelab
         var homelab = await _db.HomelabPosts
-            .Where(h => EF.Functions.ToTsVector("turkish", h.Title + " " + h.Summary)
-                        .Matches(EF.Functions.PlainToTsQuery("turkish", term)))
+            .Where(h => EF.Functions.ToTsVector("english", h.Title + " " + h.Summary)
+                        .Matches(EF.Functions.PlainToTsQuery("english", term)))
             .Select(h => new
             {
                 Item = h,
-                Rank = EF.Functions.ToTsVector("turkish", h.Title + " " + h.Summary)
-                       .RankCoverDensity(EF.Functions.PlainToTsQuery("turkish", term))
+                Rank = EF.Functions.ToTsVector("english", h.Title + " " + h.Summary)
+                       .RankCoverDensity(EF.Functions.PlainToTsQuery("english", term))
             })
             .OrderByDescending(x => x.Rank)
             .Take(15)
@@ -95,13 +95,13 @@ public class SearchController : BaseController
 
         // Blog
         var blog = await _db.BlogPosts
-            .Where(b => EF.Functions.ToTsVector("turkish", b.Title + " " + b.Summary)
-                        .Matches(EF.Functions.PlainToTsQuery("turkish", term)))
+            .Where(b => EF.Functions.ToTsVector("english", b.Title + " " + b.Summary)
+                        .Matches(EF.Functions.PlainToTsQuery("english", term)))
             .Select(b => new
             {
                 Item = b,
-                Rank = EF.Functions.ToTsVector("turkish", b.Title + " " + b.Summary)
-                       .RankCoverDensity(EF.Functions.PlainToTsQuery("turkish", term))
+                Rank = EF.Functions.ToTsVector("english", b.Title + " " + b.Summary)
+                       .RankCoverDensity(EF.Functions.PlainToTsQuery("english", term))
             })
             .OrderByDescending(x => x.Rank)
             .Take(15)
@@ -116,15 +116,15 @@ public class SearchController : BaseController
             })
             .ToListAsync();
 
-        // Ekip projeleri
+        // Team projects
         var team = await _db.TeamProjects
-            .Where(t => EF.Functions.ToTsVector("turkish", t.Title + " " + t.Summary)
-                        .Matches(EF.Functions.PlainToTsQuery("turkish", term)))
+            .Where(t => EF.Functions.ToTsVector("english", t.Title + " " + t.Summary)
+                        .Matches(EF.Functions.PlainToTsQuery("english", term)))
             .Select(t => new
             {
                 Item = t,
-                Rank = EF.Functions.ToTsVector("turkish", t.Title + " " + t.Summary)
-                       .RankCoverDensity(EF.Functions.PlainToTsQuery("turkish", term))
+                Rank = EF.Functions.ToTsVector("english", t.Title + " " + t.Summary)
+                       .RankCoverDensity(EF.Functions.PlainToTsQuery("english", term))
             })
             .OrderByDescending(x => x.Rank)
             .Take(15)
@@ -133,21 +133,21 @@ public class SearchController : BaseController
                 Title = x.Item.Title,
                 Summary = x.Item.Summary,
                 Url = $"/team/{x.Item.Slug}",
-                TypeLabel = "Ekip Projesi",
+                TypeLabel = "Team Project",
                 ColorClass = "text-amber-400 bg-amber-900/20 border-amber-900/50",
                 Date = x.Item.PublishedAt
             })
             .ToListAsync();
 
-        // Sayfalar
+        // Pages
         var pages = await _db.Pages
-            .Where(p => EF.Functions.ToTsVector("turkish", p.Title + " " + p.Content)
-                        .Matches(EF.Functions.PlainToTsQuery("turkish", term)))
+            .Where(p => EF.Functions.ToTsVector("english", p.Title + " " + p.Content)
+                        .Matches(EF.Functions.PlainToTsQuery("english", term)))
             .Select(p => new
             {
                 Item = p,
-                Rank = EF.Functions.ToTsVector("turkish", p.Title + " " + p.Content)
-                       .RankCoverDensity(EF.Functions.PlainToTsQuery("turkish", term))
+                Rank = EF.Functions.ToTsVector("english", p.Title + " " + p.Content)
+                       .RankCoverDensity(EF.Functions.PlainToTsQuery("english", term))
             })
             .OrderByDescending(x => x.Rank)
             .Take(10)
@@ -156,7 +156,7 @@ public class SearchController : BaseController
                 Title = x.Item.Title,
                 Summary = "",
                 Url = $"/pages/{x.Item.Slug}",
-                TypeLabel = "Sayfa",
+                TypeLabel = "Page",
                 ColorClass = "text-gray-400 bg-gray-800 border-gray-700",
                 Date = x.Item.CreatedAt
             })

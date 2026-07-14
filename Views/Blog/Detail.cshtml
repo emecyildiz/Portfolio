@@ -21,8 +21,8 @@
 
         <div class="flex items-center gap-4 mt-6 text-sm text-gray-600">
             <span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "")</span>
-            <span>@Model.ReadingTimeMinutes dk okuma</span>
-            <span>@Model.ViewCount görüntülenme</span>
+            <span>@Model.ReadingTimeMinutes min read</span>
+            <span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span>
         </div>
     </div>
 
@@ -45,7 +45,7 @@
     @if (related.Any())
     {
         <div class="mt-16 pt-8 border-t border-gray-800">
-            <h3 class="text-sm font-mono text-gray-600 mb-6">// diğer yazılar</h3>
+            <h3 class="text-sm font-mono text-gray-600 mb-6">// related posts</h3>
             <div class="space-y-4">
                 @foreach (var r in related)
                 {
