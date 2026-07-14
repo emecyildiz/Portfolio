@@ -150,11 +150,11 @@
                 other: { dashes: false, color: '#F59E0B' }
             };
 
-                        // İlk yerleşim için basit grid pozisyonu ata (fizik kapalı olduğu için gerekli)
+            // Eski kayıtlarda konum yoksa geriye dönük uyumlu grid yerleşimi kullan.
             const gridPositions = (topologyData.nodes || []).map((n, i) => ({
                 ...n,
-                x: (i % 4) * 150,
-                y: Math.floor(i / 4) * 150
+                x: Number.isFinite(n.x) ? n.x : (i % 4) * 150,
+                y: Number.isFinite(n.y) ? n.y : Math.floor(i / 4) * 150
             }));
 
             const nodes = new vis.DataSet(

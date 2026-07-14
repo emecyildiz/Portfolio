@@ -14,6 +14,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
 <form method="post" id="mainForm" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
@@ -98,6 +99,22 @@
                             </button>
                         </div>
                         <div id="connections-container" class="space-y-2"></div>
+                    </div>
+
+                    <div class="border-t border-gray-800 pt-4 mt-6">
+                        <div class="flex items-center justify-between gap-4 mb-3">
+                            <div>
+                                <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Harita Yerleşimi</h4>
+                                <p class="text-xs text-gray-600 mt-1">Cihazları sürükleyerek public haritada kullanılacak konumları ayarla.</p>
+                            </div>
+                            <button type="button" onclick="resetTopologyLayout()"
+                                    class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition">
+                                Izgaraya Sıfırla
+                            </button>
+                        </div>
+                        <div id="network-layout-editor"
+                             class="h-96 bg-gray-950 border border-gray-800 rounded-lg overflow-hidden"></div>
+                        <p id="network-layout-status" class="text-xs text-gray-600 mt-2"></p>
                     </div>
                 </div>
             </div>
@@ -198,6 +215,15 @@
     let connections = [];
     let electronicsProjects = [];
     let iconLibrary = [];
+    let layoutNetwork = null;
+    let layoutNodes = null;
+    let layoutEdges = null;
+    const layoutTypeColors = {
+        router: '#3B82F6', switch: '#8B5CF6', firewall: '#EF4444',
+        server: '#10B981', pc: '#6B7280', laptop: '#6B7280',
+        microcontroller: '#F59E0B', mobile: '#6B7280', custom: '#EC4899',
+        sensor: '#F59E0B', audio: '#14B8A6', antenna: '#06B6D4'
+    };
     const endpoints = {
         electronicsProjects: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("GetElectronicsProjects", "Homelab", new { area = "Admin" }))),
         iconLibrary: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("GetIconLibrary", "Homelab", new { area = "Admin" }))),
@@ -251,7 +277,109 @@
 
         renderDevices();
         renderConnections();
+        renderTopologyLayout();
     });
+
+    function ensureDevicePositions() {
+        devices.forEach((device, index) => {
+            if (!Number.isFinite(device.x)) device.x = (index % 4) * 170;
+            if (!Number.isFinite(device.y)) device.y = Math.floor(index / 4) * 150;
+        });
+    }
+
+    function captureLayoutPositions(nodeIds = devices.map(device => device.id)) {
+        if (!layoutNetwork || !layoutNodes || nodeIds.length === 0) return;
+
+        const existingNodeIds = new Set(layoutNodes.getIds());
+        const capturedNodeIds = nodeIds.filter(nodeId => existingNodeIds.has(nodeId));
+        if (capturedNodeIds.length === 0) return;
+
+        const positions = layoutNetwork.getPositions(capturedNodeIds);
+        devices.forEach(device => {
+            const position = positions[device.id];
+            if (position && Number.isFinite(position.x) && Number.isFinite(position.y)) {
+                device.x = position.x;
+                device.y = position.y;
+            }
+        });
+    }
+
+    function layoutNodeData(device) {
+        const imageUrl = safeWebUrl(device.iconUrl);
+        return {
+            id: device.id,
+            label: device.label || `Cihaz ${device.id}`,
+            shape: imageUrl ? 'image' : 'dot',
+            image: imageUrl || undefined,
+            color: imageUrl ? undefined : (layoutTypeColors[device.deviceType] || '#6B7280'),
+            size: 24,
+            font: { color: '#D1D5DB', size: 13, face: 'Inter' },
+            borderWidth: 2,
+            shapeProperties: { useImageSize: false },
+            x: device.x,
+            y: device.y
+        };
+    }
+
+    function renderTopologyLayout() {
+        const container = document.getElementById('network-layout-editor');
+        const status = document.getElementById('network-layout-status');
+        if (!container || !status) return;
+
+        captureLayoutPositions();
+        ensureDevicePositions();
+
+        if (layoutNetwork) {
+            layoutNetwork.destroy();
+            layoutNetwork = null;
+        }
+
+        if (typeof vis === 'undefined') {
+            status.textContent = 'Harita kütüphanesi yüklenemedi. Diğer alanları yine kaydedebilirsin.';
+            return;
+        }
+
+        layoutNodes = new vis.DataSet(devices.map(layoutNodeData));
+        layoutEdges = new vis.DataSet(connections.map((connection, index) => ({
+            id: index,
+            from: connection.from,
+            to: connection.to,
+            label: connection.label || '',
+            color: { color: '#4B5563' },
+            font: { color: '#6B7280', size: 10, strokeWidth: 0 },
+            smooth: false
+        })));
+
+        layoutNetwork = new vis.Network(container, { nodes: layoutNodes, edges: layoutEdges }, {
+            physics: { enabled: false },
+            interaction: {
+                hover: true,
+                dragNodes: true,
+                dragView: true,
+                zoomView: true
+            },
+            edges: { smooth: false }
+        });
+
+        layoutNetwork.on('dragEnd', params => {
+            captureLayoutPositions(params.nodes || []);
+            status.textContent = 'Yerleşim değişti. Kalıcı olması için Güncelle düğmesine bas.';
+        });
+
+        status.textContent = devices.length === 0
+            ? 'Önce en az bir cihaz ekle.'
+            : 'Cihaz konumları form gönderildiğinde topolojiyle birlikte kaydedilir.';
+    }
+
+    function resetTopologyLayout() {
+        devices.forEach((device, index) => {
+            device.x = (index % 4) * 170;
+            device.y = Math.floor(index / 4) * 150;
+        });
+        renderTopologyLayout();
+        document.getElementById('network-layout-status').textContent =
+            'Yerleşim ızgaraya sıfırlandı. Kalıcı olması için Güncelle düğmesine bas.';
+    }
 
     // ============ CİHAZ YÖNETİMİ ============
     function addDevice() {
@@ -268,9 +396,12 @@
             ipAddress: '',
             homelabRole: '',
             homelabNotes: '',
+            x: (devices.length % 4) * 170,
+            y: Math.floor(devices.length / 4) * 150,
             _expanded: true
         });
         renderDevices();
+        renderTopologyLayout();
     }
 
     function removeDevice(id) {
@@ -279,11 +410,17 @@
         connections = connections.filter(c => c.from !== id && c.to !== id);
         renderDevices();
         renderConnections();
+        renderTopologyLayout();
     }
 
     function updateDevice(id, field, value) {
         const device = devices.find(d => d.id === id);
-        if (device) device[field] = value;
+        if (device) {
+            device[field] = value;
+            if (layoutNodes && ['label', 'iconUrl', 'deviceType'].includes(field)) {
+                layoutNodes.update(layoutNodeData(device));
+            }
+        }
     }
 
     async function uploadDeviceIcon(id, inputEl) {
@@ -452,15 +589,18 @@
             label: ''
         });
         renderConnections();
+        renderTopologyLayout();
     }
 
     function removeConnection(index) {
         connections.splice(index, 1);
         renderConnections();
+        renderTopologyLayout();
     }
 
     function updateConnection(index, field, value) {
         connections[index][field] = field === 'from' || field === 'to' ? parseInt(value) : value;
+        renderTopologyLayout();
     }
 
     function renderConnections() {
@@ -499,6 +639,7 @@
 
         // ============ KAYDETME ============
     document.getElementById('mainForm')?.addEventListener('submit', function() {
+        captureLayoutPositions();
         const cleanDevices = devices.map(({ _expanded, ...rest }) => rest);
         const topology = { nodes: cleanDevices, edges: connections };
         document.getElementById('networkTopologyJson').value = JSON.stringify(topology);

@@ -8,6 +8,7 @@ public static class NetworkTopologyJsonService
     private const int MaxJsonLength = 500_000;
     private const int MaxNodes = 200;
     private const int MaxEdges = 500;
+    private const double MaxCoordinateMagnitude = 100_000;
 
     private static readonly HashSet<string> AllowedDeviceTypes =
         ["router", "switch", "firewall", "server", "pc", "laptop", "microcontroller",
@@ -79,6 +80,8 @@ public static class NetworkTopologyJsonService
                 !HasMaxLength(node.HomelabNotes, 5_000) ||
                 !HasMaxLength(node.StandaloneHardware, 2_000) ||
                 !HasMaxLength(node.LinkedProjectSlug, 200) ||
+                !IsValidCoordinate(node.X) ||
+                !IsValidCoordinate(node.Y) ||
                 !SafeUrlPolicy.IsSafeWebResourceUrl(node.IconUrl) ||
                 !SafeUrlPolicy.IsSafeWebResourceUrl(node.StandaloneImageUrl))
             {
@@ -96,4 +99,8 @@ public static class NetworkTopologyJsonService
 
     private static bool HasMaxLength(string? value, int maxLength) =>
         value == null || value.Length <= maxLength;
+
+    private static bool IsValidCoordinate(double? value) =>
+        !value.HasValue ||
+        (double.IsFinite(value.Value) && Math.Abs(value.Value) <= MaxCoordinateMagnitude);
 }

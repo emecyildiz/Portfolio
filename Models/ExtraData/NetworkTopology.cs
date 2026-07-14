@@ -16,6 +16,8 @@ public class NetworkNode
     public string Label { get; set; } = string.Empty;
     public string IconUrl { get; set; } = string.Empty;         // Küçük ikon — haritada görünen
     public string DeviceType { get; set; } = "custom";          // router, switch, firewall, server, client, custom, sensor, audio
+    public double? X { get; set; }
+    public double? Y { get; set; }
 
     // Bir Electronics projesine bağlıysa buradan fotoğraf/malzeme otomatik çekilir
     public string? LinkedProjectSlug { get; set; }
