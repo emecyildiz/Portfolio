@@ -58,6 +58,7 @@ public class HomelabController : AdminBaseController
         model.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         model.CreatedAt = DateTime.UtcNow;
         model.UpdatedAt = DateTime.UtcNow;
+        model.PublishedAt = model.Status == VisibilityStatus.Public ? DateTime.UtcNow : null;
 
         if (!string.IsNullOrEmpty(HardwareUsed))
         {
@@ -130,6 +131,9 @@ public class HomelabController : AdminBaseController
         existing.Topic = model.Topic;
         existing.NetworkDiagramUrl = model.NetworkDiagramUrl;
         existing.Status = model.Status;
+        if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
+            existing.PublishedAt = DateTime.UtcNow;
+
         existing.IsFeatured = model.IsFeatured;
         existing.IsMainLab = model.IsMainLab;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);

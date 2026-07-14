@@ -55,6 +55,10 @@ public class SecurityController : AdminBaseController
         model.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         model.CreatedAt = DateTime.UtcNow;
         model.UpdatedAt = DateTime.UtcNow;
+        model.PublishedAt = model.Status == VisibilityStatus.Public &&
+                            model.DisclosureStatus == DisclosureStatus.PubliclyDisclosed
+            ? DateTime.UtcNow
+            : null;
 
         // Araçları JSON listesine çevir
         if (!string.IsNullOrEmpty(ToolsUsed))
@@ -132,6 +136,13 @@ public class SecurityController : AdminBaseController
         existing.DisclosureStatus = model.DisclosureStatus;
         existing.GithubUrl = model.GithubUrl;
         existing.Status = model.Status;
+        if (existing.Status == VisibilityStatus.Public &&
+            existing.DisclosureStatus == DisclosureStatus.PubliclyDisclosed &&
+            existing.PublishedAt == null)
+        {
+            existing.PublishedAt = DateTime.UtcNow;
+        }
+
         existing.IsFeatured = model.IsFeatured;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
@@ -197,8 +208,12 @@ public class SecurityController : AdminBaseController
             ? VisibilityStatus.Draft
             : VisibilityStatus.Public;
 
-        if (research.Status == VisibilityStatus.Public && research.PublishedAt == null)
+        if (research.Status == VisibilityStatus.Public &&
+            research.DisclosureStatus == DisclosureStatus.PubliclyDisclosed &&
+            research.PublishedAt == null)
+        {
             research.PublishedAt = DateTime.UtcNow;
+        }
 
         research.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();

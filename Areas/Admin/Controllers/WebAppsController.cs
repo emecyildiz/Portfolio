@@ -59,6 +59,7 @@ public class WebAppsController : AdminBaseController
         model.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         model.CreatedAt = DateTime.UtcNow;
         model.UpdatedAt = DateTime.UtcNow;
+        model.PublishedAt = model.Status == VisibilityStatus.Public ? DateTime.UtcNow : null;
 
         var techStack = TechStack?
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -132,6 +133,9 @@ public class WebAppsController : AdminBaseController
         existing.LiveDemoUrl = model.LiveDemoUrl;
         existing.GithubUrl = model.GithubUrl;
         existing.Status = model.Status;
+        if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
+            existing.PublishedAt = DateTime.UtcNow;
+
         existing.IsFeatured = model.IsFeatured;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;

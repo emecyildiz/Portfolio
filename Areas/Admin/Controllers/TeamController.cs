@@ -62,6 +62,7 @@ public class TeamController : AdminBaseController
             model.Slug = await _slugService.GenerateUniqueAsync(model.Title, "TeamProjects");
             model.CreatedAt = DateTime.UtcNow;
             model.UpdatedAt = DateTime.UtcNow;
+            model.PublishedAt = model.Status == VisibilityStatus.Public ? DateTime.UtcNow : null;
 
             if (!string.IsNullOrEmpty(TeamMembersJson))
                 model.TeamMembers = TeamMembersJson;
@@ -135,6 +136,9 @@ public class TeamController : AdminBaseController
         existing.GithubUrl  = model.GithubUrl;
         existing.LiveDemoUrl = model.LiveDemoUrl;
         existing.Status     = model.Status;
+        if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
+            existing.PublishedAt = DateTime.UtcNow;
+
         existing.IsFeatured = model.IsFeatured;
         existing.UpdatedAt  = DateTime.UtcNow;
 

@@ -53,6 +53,7 @@ public class BlogController : AdminBaseController
         model.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         model.CreatedAt = DateTime.UtcNow;
         model.UpdatedAt = DateTime.UtcNow;
+        model.PublishedAt = model.Status == VisibilityStatus.Public ? DateTime.UtcNow : null;
 
         _db.BlogPosts.Add(model);
         await _db.SaveChangesAsync();
@@ -101,6 +102,9 @@ public class BlogController : AdminBaseController
         existing.Summary = model.Summary;
         existing.Content = model.Content;
         existing.Status = model.Status;
+        if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
+            existing.PublishedAt = DateTime.UtcNow;
+
         existing.IsFeatured = model.IsFeatured;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;

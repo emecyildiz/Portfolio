@@ -63,6 +63,7 @@ public class ElectronicsController : AdminBaseController
         model.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         model.CreatedAt = DateTime.UtcNow;
         model.UpdatedAt = DateTime.UtcNow;
+        model.PublishedAt = model.Status == VisibilityStatus.Public ? DateTime.UtcNow : null;
 
         // Bileşenleri virgülle ayrılmış string'den listeye çevir
         var components = Components?
@@ -147,6 +148,9 @@ public class ElectronicsController : AdminBaseController
         existing.LiveDemoUrl = model.LiveDemoUrl;
         existing.GithubUrl = model.GithubUrl;
         existing.Status = model.Status;
+        if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
+            existing.PublishedAt = DateTime.UtcNow;
+
         existing.IsFeatured = model.IsFeatured;
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
