@@ -56,8 +56,7 @@ public class BlogController : BaseController
 
         await _viewCount.IncrementAsync("BlogPosts", post.Id);
 
-        ViewBag.ContentHtml = Markdown.ToHtml(post.Content ?? "",
-            new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+        ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(post.Content);
 
         ViewBag.OgImage = post.CoverImageUrl;
 

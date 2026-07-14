@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
+using Portfolio.Services;
 
 namespace Portfolio.Controllers;
 
@@ -14,8 +15,7 @@ public class PageController : BaseController
         var page = await _db.Pages.FirstOrDefaultAsync(p => p.Slug == slug);
         if (page == null) return NotFound();
 
-        ViewBag.ContentHtml = Markdown.ToHtml(page.Content ?? "",
-            new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+        ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(page.Content);
 
         return View(page);
     }

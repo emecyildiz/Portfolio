@@ -6,6 +6,7 @@
     var software = ViewBag.Software as List<string> ?? new();
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
     var related = ViewBag.Related as List<Portfolio.Models.HomelabPost> ?? new();
+    var topologyJson = ViewBag.NetworkTopologyJson as string;
 }
 
 <div class="max-w-4xl mx-auto px-6 py-16">
@@ -88,7 +89,7 @@
         </div>
     }
     <!-- İnteraktif Ağ Haritası -->
-    @if (!string.IsNullOrEmpty(Model.NetworkTopology))
+    @if (!string.IsNullOrEmpty(topologyJson))
     {
         <div class="mb-10">
             <div class="flex items-center justify-between mb-3">
@@ -114,8 +115,24 @@
 
         <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
         <script>
-            const topologyData = @Html.Raw(Model.NetworkTopology);
+            const topologyData = @Html.Raw(topologyJson);
             const linkedProjects = @Html.Raw(ViewBag.LinkedProjectsJson ?? "[]");
+
+            const htmlEscapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+            function escapeHtml(value) {
+                return String(value ?? '').replace(/[&<>"']/g, character => htmlEscapeMap[character]);
+            }
+
+            function safeWebUrl(value) {
+                if (!value) return '';
+
+                try {
+                    const url = new URL(String(value), window.location.origin);
+                    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+                } catch {
+                    return '';
+                }
+            }
 
             // Cihaz tipine göre renk paleti
             const typeColors = {
@@ -141,20 +158,23 @@
             }));
 
             const nodes = new vis.DataSet(
-                gridPositions.map(n => ({
-                    id: n.id,
-                    label: n.label,
-                    shape: n.iconUrl ? 'image' : 'dot',
-                    image: n.iconUrl || undefined,
-                    color: n.iconUrl ? undefined : (typeColors[n.deviceType] || '#6B7280'),
-                    size: 24,
-                    font: { color: '#D1D5DB', size: 13, face: 'Inter' },
-                    title: n.shortInfo || n.label,
-                    borderWidth: 2,
-                    shapeProperties: { useImageSize: false },
-                    x: n.x,
-                    y: n.y
-                }))
+                gridPositions.map(n => {
+                    const imageUrl = safeWebUrl(n.iconUrl);
+                    return {
+                        id: n.id,
+                        label: n.label,
+                        shape: imageUrl ? 'image' : 'dot',
+                        image: imageUrl || undefined,
+                        color: imageUrl ? undefined : (typeColors[n.deviceType] || '#6B7280'),
+                        size: 24,
+                        font: { color: '#D1D5DB', size: 13, face: 'Inter' },
+                        title: escapeHtml(n.shortInfo || n.label),
+                        borderWidth: 2,
+                        shapeProperties: { useImageSize: false },
+                        x: n.x,
+                        y: n.y
+                    };
+                })
             );
 
             const edges = new vis.DataSet(
@@ -214,7 +234,7 @@
                     const linked = linkedProjects.find(p => p.slug === device.linkedProjectSlug);
                     if (linked) {
                         imageUrl = linked.coverImageUrl;
-                        projectLink = `/electronics/${linked.slug}`;
+                        projectLink = `/electronics/${encodeURIComponent(linked.slug)}`;
 
                         try {
                             const extra = JSON.parse(linked.extraData || '{}');
@@ -228,49 +248,50 @@
                 }
 
                 const content = document.getElementById('deviceDetailContent');
+                const safeImageUrl = safeWebUrl(imageUrl);
                 content.innerHTML = `
-                    ${imageUrl ? `<img src="${imageUrl}" class="w-full rounded-xl mb-4 border border-gray-800" />` : ''}
+                    ${safeImageUrl ? `<img src="${escapeHtml(safeImageUrl)}" class="w-full rounded-xl mb-4 border border-gray-800" />` : ''}
 
-                    <h2 class="text-xl font-bold text-white mb-1">${device.label}</h2>
+                    <h2 class="text-xl font-bold text-white mb-1">${escapeHtml(device.label)}</h2>
                     <span class="inline-block text-xs px-2 py-0.5 rounded font-mono mb-4"
                           style="background: ${typeColors[device.deviceType] || '#6B7280'}22; color: ${typeColors[device.deviceType] || '#6B7280'}">
-                        ${device.deviceType}
+                        ${escapeHtml(device.deviceType)}
                     </span>
 
-                    ${device.shortInfo ? `<p class="text-gray-400 text-sm mb-4">${device.shortInfo}</p>` : ''}
+                    ${device.shortInfo ? `<p class="text-gray-400 text-sm mb-4">${escapeHtml(device.shortInfo)}</p>` : ''}
 
                     <div class="space-y-3 border-t border-gray-800 pt-4">
                         ${device.ipAddress ? `
                             <div>
                                 <p class="text-xs text-gray-600 mb-1">IP Adresi</p>
-                                <p class="font-mono text-sm text-gray-300">${device.ipAddress}</p>
+                                <p class="font-mono text-sm text-gray-300">${escapeHtml(device.ipAddress)}</p>
                             </div>
                         ` : ''}
 
                         ${hardware ? `
                             <div>
                                 <p class="text-xs text-gray-600 mb-1">Donanım</p>
-                                <p class="text-sm text-gray-300">${hardware}</p>
+                                <p class="text-sm text-gray-300">${escapeHtml(hardware)}</p>
                             </div>
                         ` : ''}
 
                         ${device.homelabRole ? `
                             <div>
                                 <p class="text-xs text-gray-600 mb-1">Bu Ağdaki Rolü</p>
-                                <p class="text-sm text-gray-300">${device.homelabRole}</p>
+                                <p class="text-sm text-gray-300">${escapeHtml(device.homelabRole)}</p>
                             </div>
                         ` : ''}
 
                         ${device.homelabNotes ? `
                             <div>
                                 <p class="text-xs text-gray-600 mb-1">Notlar</p>
-                                <p class="text-sm text-gray-400">${device.homelabNotes}</p>
+                                <p class="text-sm text-gray-400">${escapeHtml(device.homelabNotes)}</p>
                             </div>
                         ` : ''}
                     </div>
 
                     ${projectLink ? `
-                        <a href="${projectLink}" class="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
+                        <a href="${escapeHtml(projectLink)}" class="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
                             Yapım detaylarını gör →
                         </a>
                     ` : ''}

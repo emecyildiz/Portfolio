@@ -204,6 +204,22 @@
         uploadIcon: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("UploadIcon", "Homelab", new { area = "Admin" })))
     };
 
+    const htmlEscapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => htmlEscapeMap[character]);
+    }
+
+    function safeWebUrl(value) {
+        if (!value) return '';
+
+        try {
+            const url = new URL(String(value), window.location.origin);
+            return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+        } catch {
+            return '';
+        }
+    }
+
     function selectLibraryIcon(deviceId, url) {
         if (url) {
             updateDevice(deviceId, 'iconUrl', url);
@@ -227,7 +243,7 @@
             console.error('İkon kütüphanesi alınamadı', e);
         }
 
-        const existingJson = @Html.Raw(string.IsNullOrEmpty(Model.NetworkTopology) ? "null" : Model.NetworkTopology);
+        const existingJson = @Html.Raw(ViewBag.NetworkTopologyJson ?? "null");
         if (existingJson) {
             devices = existingJson.nodes || [];
             connections = existingJson.edges || [];
@@ -303,16 +319,17 @@
         const container = document.getElementById('devices-container');
         container.innerHTML = devices.map(d => {
             const isExpanded = d._expanded === true; // varsayılan açık
+            const iconUrl = safeWebUrl(d.iconUrl);
             return `
             <div class="bg-gray-800 rounded-lg p-4 space-y-3">
                 <div class="flex items-center justify-between cursor-pointer" onclick="toggleDeviceExpand(${d.id})">
                     <div class="flex items-center gap-3">
-                        ${d.iconUrl
-                            ? `<img src="${d.iconUrl}" class="w-8 h-8 object-contain bg-gray-700 rounded p-1" />`
+                        ${iconUrl
+                            ? `<img src="${escapeHtml(iconUrl)}" class="w-8 h-8 object-contain bg-gray-700 rounded p-1" />`
                             : `<div class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center text-gray-500 text-xs">?</div>`
                         }
-                        <span class="text-sm text-gray-300 font-medium">${d.label || 'İsimsiz Cihaz'}</span>
-                        <span class="text-xs text-gray-600">${d.deviceType}</span>
+                        <span class="text-sm text-gray-300 font-medium">${escapeHtml(d.label || 'İsimsiz Cihaz')}</span>
+                        <span class="text-xs text-gray-600">${escapeHtml(d.deviceType)}</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <button type="button" onclick="event.stopPropagation(); removeDevice(${d.id})"
@@ -327,7 +344,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs text-gray-500 mb-1">Cihaz Adı</label>
-                        <input value="${d.label}" oninput="updateDevice(${d.id}, 'label', this.value)"
+                        <input value="${escapeHtml(d.label)}" oninput="updateDevice(${d.id}, 'label', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                     <div>
@@ -348,7 +365,7 @@
                                 class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
                                 <option value="">-- Seç --</option>
                                 ${iconLibrary.map(icon =>
-                    `               <option value="${icon.url}" ${d.iconUrl === icon.url ? 'selected' : ''}>${icon.name}</option>`
+                    `               <option value="${escapeHtml(safeWebUrl(icon.url))}" ${d.iconUrl === icon.url ? 'selected' : ''}>${escapeHtml(icon.name)}</option>`
                                 ).join('')}
                             </select>
                         </div>
@@ -366,7 +383,7 @@
                             class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">
                         <option value="">Bağlantısız — manuel bilgi gir</option>
                         ${electronicsProjects.map(p =>
-                            `<option value="${p.slug}" ${d.linkedProjectSlug === p.slug ? 'selected' : ''}>${p.title}</option>`
+                            `<option value="${escapeHtml(p.slug)}" ${d.linkedProjectSlug === p.slug ? 'selected' : ''}>${escapeHtml(p.title)}</option>`
                         ).join('')}
                     </select>
                 </div>
@@ -375,12 +392,12 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs text-gray-500 mb-1">Fotoğraf URL (manuel)</label>
-                        <input value="${d.standaloneImageUrl || ''}" oninput="updateDevice(${d.id}, 'standaloneImageUrl', this.value)"
+                        <input value="${escapeHtml(d.standaloneImageUrl || '')}" oninput="updateDevice(${d.id}, 'standaloneImageUrl', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                     <div>
                         <label class="block text-xs text-gray-500 mb-1">Donanım Bilgisi (manuel)</label>
-                        <input value="${d.standaloneHardware || ''}" oninput="updateDevice(${d.id}, 'standaloneHardware', this.value)"
+                        <input value="${escapeHtml(d.standaloneHardware || '')}" oninput="updateDevice(${d.id}, 'standaloneHardware', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                 </div>
@@ -389,19 +406,19 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs text-gray-500 mb-1">Kısa Bilgi (hover'da görünür)</label>
-                        <input value="${d.shortInfo || ''}" oninput="updateDevice(${d.id}, 'shortInfo', this.value)"
+                        <input value="${escapeHtml(d.shortInfo || '')}" oninput="updateDevice(${d.id}, 'shortInfo', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                     <div>
                         <label class="block text-xs text-gray-500 mb-1">IP Adresi (opsiyonel)</label>
-                        <input value="${d.ipAddress || ''}" oninput="updateDevice(${d.id}, 'ipAddress', this.value)"
+                        <input value="${escapeHtml(d.ipAddress || '')}" oninput="updateDevice(${d.id}, 'ipAddress', this.value)"
                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Homelab'taki Rolü</label>
-                    <input value="${d.homelabRole || ''}" oninput="updateDevice(${d.id}, 'homelabRole', this.value)"
+                    <input value="${escapeHtml(d.homelabRole || '')}" oninput="updateDevice(${d.id}, 'homelabRole', this.value)"
                            placeholder="Bu ağda ne işe yarıyor?"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
@@ -409,7 +426,7 @@
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Ekstra Notlar</label>
                     <textarea oninput="updateDevice(${d.id}, 'homelabNotes', this.value)" rows="2"
-                              class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">${d.homelabNotes || ''}</textarea>
+                              class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500">${escapeHtml(d.homelabNotes || '')}</textarea>
                 </div>
                 ` : ''}
             </div>
@@ -458,12 +475,12 @@
             <div class="bg-gray-800 rounded-lg p-3 flex items-center gap-2">
                 <select onchange="updateConnection(${i}, 'from', this.value)"
                         class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
-                    ${devices.map(d => `<option value="${d.id}" ${c.from === d.id ? 'selected' : ''}>${d.label || 'İsimsiz'}</option>`).join('')}
+                    ${devices.map(d => `<option value="${d.id}" ${c.from === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'İsimsiz')}</option>`).join('')}
                 </select>
                 <span class="text-gray-600 text-xs">→</span>
                 <select onchange="updateConnection(${i}, 'to', this.value)"
                         class="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
-                    ${devices.map(d => `<option value="${d.id}" ${c.to === d.id ? 'selected' : ''}>${d.label || 'İsimsiz'}</option>`).join('')}
+                    ${devices.map(d => `<option value="${d.id}" ${c.to === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'İsimsiz')}</option>`).join('')}
                 </select>
                 <select onchange="updateConnection(${i}, 'connectionType', this.value)"
                         class="bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
@@ -471,7 +488,7 @@
                         `<option value="${t}" ${c.connectionType === t ? 'selected' : ''}>${t}</option>`
                     ).join('')}
                 </select>
-                <input value="${c.label || ''}" oninput="updateConnection(${i}, 'label', this.value)"
+                <input value="${escapeHtml(c.label || '')}" oninput="updateConnection(${i}, 'label', this.value)"
                        placeholder="Etiket (opsiyonel)"
                        class="w-24 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500" />
                 <button type="button" onclick="removeConnection(${i})"

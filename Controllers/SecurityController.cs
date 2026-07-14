@@ -68,8 +68,7 @@ public class SecurityController : BaseController
         await _viewCount.IncrementAsync("SecurityResearches", research.Id);
 
         // Markdown'ı HTML'e çevir
-        ViewBag.ContentHtml = Markdown.ToHtml(research.Content ?? "",
-            new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+        ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(research.Content);
 
         // İlgili araştırmalar — aynı tip
         ViewBag.Related = await _db.SecurityResearches

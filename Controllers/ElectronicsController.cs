@@ -59,8 +59,7 @@ public class ElectronicsController : BaseController
 
         await _viewCount.IncrementAsync("Projects", project.Id);
 
-        ViewBag.ContentHtml = Markdown.ToHtml(project.Content ?? "",
-            new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+        ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(project.Content);
 
         var extra = new ElectronicsExtraData();
         if (!string.IsNullOrEmpty(project.ExtraData))

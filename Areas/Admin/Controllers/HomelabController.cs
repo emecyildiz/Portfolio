@@ -110,6 +110,9 @@ public class HomelabController : AdminBaseController
             : string.Join(", ", JsonSerializer.Deserialize<List<string>>(post.SoftwareUsed) ?? new());
 
         ViewBag.Images = await _media.GetByEntityAsync("homelab_post", id);
+        NetworkTopologyJsonService.TryNormalize(
+            post.NetworkTopology, out _, out var normalizedTopology);
+        ViewBag.NetworkTopologyJson = normalizedTopology;
 
         return View(post);
     }
@@ -121,6 +124,13 @@ public class HomelabController : AdminBaseController
     {
         var existing = await _db.HomelabPosts.IgnoreQueryFilters().FirstOrDefaultAsync(h => h.Id == id);
         if (existing == null) return NotFound();
+
+        if (!NetworkTopologyJsonService.TryNormalize(
+                NetworkTopologyJson, out _, out var normalizedTopology))
+        {
+            TempData["Error"] = "Ağ topolojisi geçersiz veya izin verilen sınırları aşıyor.";
+            return RedirectToAction(nameof(Edit), new { id });
+        }
 
         if (existing.Title != model.Title)
             existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "HomelabPosts", id);
@@ -148,8 +158,8 @@ public class HomelabController : AdminBaseController
                 SoftwareUsed.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList());
 
         // Network topology JSON'ı kaydet
-        if (!string.IsNullOrEmpty(NetworkTopologyJson))
-            existing.NetworkTopology = NetworkTopologyJson;
+        if (normalizedTopology != null)
+            existing.NetworkTopology = normalizedTopology;
 
         await _db.SaveChangesAsync();
 

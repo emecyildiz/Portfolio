@@ -58,12 +58,9 @@ public class TeamController : BaseController
 
         await _viewCount.IncrementAsync("TeamProjects", project.Id);
 
-        ViewBag.ContentHtml = Markdown.ToHtml(project.Content ?? "",
-            new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+        ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(project.Content);
 
-        var members = new List<TeamMember>();
-        if (!string.IsNullOrEmpty(project.TeamMembers))
-            members = JsonSerializer.Deserialize<List<TeamMember>>(project.TeamMembers) ?? members;
+        TeamMemberJsonService.TryNormalize(project.TeamMembers, out var members, out _);
         ViewBag.Members = members;
 
         ViewBag.Images = await _db.Media

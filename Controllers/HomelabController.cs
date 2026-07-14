@@ -54,8 +54,7 @@ public class HomelabController : BaseController
 
         await _viewCount.IncrementAsync("HomelabPosts", post.Id);
 
-        ViewBag.ContentHtml = Markdown.ToHtml(post.Content ?? "",
-            new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+        ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(post.Content);
 
         ViewBag.Hardware = string.IsNullOrEmpty(post.HardwareUsed) ? new List<string>()
             : JsonSerializer.Deserialize<List<string>>(post.HardwareUsed) ?? new();
@@ -74,23 +73,19 @@ public class HomelabController : BaseController
             .Take(3)
             .ToListAsync();
 
-        // Eğer ağ haritası varsa, bağlı Electronics projelerinin detaylarını da çek
-        if (!string.IsNullOrEmpty(post.NetworkTopology))
-        {
-            var topology = JsonSerializer.Deserialize<JsonElement>(post.NetworkTopology);
-            var linkedSlugs = new List<string>();
+        ViewBag.LinkedProjectsJson = "[]";
 
-            if (topology.TryGetProperty("nodes", out var nodesElement))
-            {
-                foreach (var node in nodesElement.EnumerateArray())
-                {
-                    if (node.TryGetProperty("linkedProjectSlug", out var slugProp) &&
-                        !string.IsNullOrEmpty(slugProp.GetString()))
-                    {
-                        linkedSlugs.Add(slugProp.GetString()!);
-                    }
-                }
-            }
+        // Topolojiyi tip, boyut ve URL kurallarıyla doğrulayıp script bağlamı için yeniden serialize et.
+        if (NetworkTopologyJsonService.TryNormalize(
+                post.NetworkTopology, out var topology, out var normalizedTopology) &&
+            topology != null && normalizedTopology != null)
+        {
+            ViewBag.NetworkTopologyJson = normalizedTopology;
+            var linkedSlugs = topology.Nodes
+                .Select(node => node.LinkedProjectSlug)
+                .Where(slug => !string.IsNullOrWhiteSpace(slug))
+                .Distinct()
+                .ToList();
 
             if (linkedSlugs.Any())
             {
@@ -107,10 +102,6 @@ public class HomelabController : BaseController
                     .ToListAsync();
 
                 ViewBag.LinkedProjectsJson = JsonSerializer.Serialize(linkedProjects);
-            }
-            else
-            {
-                ViewBag.LinkedProjectsJson = "[]";
             }
         }
 

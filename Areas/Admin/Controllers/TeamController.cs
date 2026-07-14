@@ -49,6 +49,13 @@ public class TeamController : AdminBaseController
             return View(model);
         }
 
+        if (!TeamMemberJsonService.TryNormalize(
+                TeamMembersJson, out _, out var normalizedTeamMembers))
+        {
+            TempData["Error"] = "Ekip üyesi bilgileri veya bağlantıları geçersiz.";
+            return View(model);
+        }
+
         try
         {
             var category = await _db.Categories.FirstOrDefaultAsync(c => c.Slug == "team");
@@ -64,8 +71,8 @@ public class TeamController : AdminBaseController
             model.UpdatedAt = DateTime.UtcNow;
             model.PublishedAt = model.Status == VisibilityStatus.Public ? DateTime.UtcNow : null;
 
-            if (!string.IsNullOrEmpty(TeamMembersJson))
-                model.TeamMembers = TeamMembersJson;
+            if (normalizedTeamMembers != null)
+                model.TeamMembers = normalizedTeamMembers;
 
             _db.TeamProjects.Add(model);
             await _db.SaveChangesAsync();
@@ -104,9 +111,7 @@ public class TeamController : AdminBaseController
         if (project == null) return NotFound();
 
         // Ekip üyelerini parse et
-        var members = new List<TeamMember>();
-        if (!string.IsNullOrEmpty(project.TeamMembers))
-            members = JsonSerializer.Deserialize<List<TeamMember>>(project.TeamMembers) ?? members;
+        TeamMemberJsonService.TryNormalize(project.TeamMembers, out var members, out _);
 
         ViewBag.Members = members;
         ViewBag.Images = await _media.GetByEntityAsync("team_project", id);
@@ -121,6 +126,13 @@ public class TeamController : AdminBaseController
     {
         var existing = await _db.TeamProjects.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == id);
         if (existing == null) return NotFound();
+
+        if (!TeamMemberJsonService.TryNormalize(
+                TeamMembersJson, out _, out var normalizedTeamMembers))
+        {
+            TempData["Error"] = "Ekip üyesi bilgileri veya bağlantıları geçersiz.";
+            return RedirectToAction(nameof(Edit), new { id });
+        }
 
         if (existing.Title != model.Title)
             existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "TeamProjects", id);
@@ -142,8 +154,8 @@ public class TeamController : AdminBaseController
         existing.IsFeatured = model.IsFeatured;
         existing.UpdatedAt  = DateTime.UtcNow;
 
-        if (!string.IsNullOrEmpty(TeamMembersJson))
-            existing.TeamMembers = TeamMembersJson;
+        if (normalizedTeamMembers != null)
+            existing.TeamMembers = normalizedTeamMembers;
 
         await _db.SaveChangesAsync();
 

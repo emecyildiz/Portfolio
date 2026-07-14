@@ -183,9 +183,14 @@
 
 <script>
     let members = @Html.Raw(membersJson);
+    const htmlEscapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => htmlEscapeMap[character]);
+    }
 
     function addMember() {
-        members.push({Name: '', Role: '', Github_url: '', Linkedin_url: '' });
+        members.push({ Name: '', Role: '', GithubUrl: '', LinkedinUrl: '' });
         renderMembers();
     }
 
@@ -204,16 +209,16 @@
                             class="text-xs text-red-400 hover:text-red-300">Kaldır</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <input placeholder="Ad Soyad" value="${m.Name || ''}"
+                    <input placeholder="Ad Soyad" value="${escapeHtml(m.Name || '')}"
                            oninput="members[${i}].Name = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="Rol" value="${m.Role || ''}"
+                    <input placeholder="Rol" value="${escapeHtml(m.Role || '')}"
                            oninput="members[${i}].Role = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="GitHub URL" value="${m.GithubUrl || ''}"
+                    <input placeholder="GitHub URL" value="${escapeHtml(m.GithubUrl || '')}"
                            oninput="members[${i}].GithubUrl = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
-                    <input placeholder="LinkedIn URL" value="${m.LinkedinUrl || ''}"
+                    <input placeholder="LinkedIn URL" value="${escapeHtml(m.LinkedinUrl || '')}"
                            oninput="members[${i}].LinkedinUrl = this.value"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
                 </div>
