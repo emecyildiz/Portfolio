@@ -197,7 +197,12 @@
     let devices = [];
     let connections = [];
     let electronicsProjects = [];
-        let iconLibrary = [];
+    let iconLibrary = [];
+    const endpoints = {
+        electronicsProjects: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("GetElectronicsProjects", "Homelab", new { area = "Admin" }))),
+        iconLibrary: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("GetIconLibrary", "Homelab", new { area = "Admin" }))),
+        uploadIcon: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("UploadIcon", "Homelab", new { area = "Admin" })))
+    };
 
     function selectLibraryIcon(deviceId, url) {
         if (url) {
@@ -208,7 +213,7 @@
 
         document.addEventListener('DOMContentLoaded', async function() {
         try {
-            const res = await fetch('/money/homelab/getelectronicsprojects');
+            const res = await fetch(endpoints.electronicsProjects);
             electronicsProjects = await res.json();
         } catch (e) {
             console.error('Electronics projeleri alınamadı', e);
@@ -216,7 +221,7 @@
 
         // İkon kütüphanesini çek
         try {
-            const iconRes = await fetch('/money/homelab/geticonlibrary');
+            const iconRes = await fetch(endpoints.iconLibrary);
             iconLibrary = await iconRes.json();
         } catch (e) {
             console.error('İkon kütüphanesi alınamadı', e);
@@ -275,7 +280,7 @@
         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
         try {
-            const res = await fetch('/money/homelab/uploadicon', {
+            const res = await fetch(endpoints.uploadIcon, {
                 method: 'POST',
                 headers: { 'RequestVerificationToken': token },
                 body: formData
