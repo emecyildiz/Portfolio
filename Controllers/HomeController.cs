@@ -1,4 +1,3 @@
-using Markdig;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
@@ -56,7 +55,7 @@ public class HomeController : BaseController
             .OrderBy(c => c.SortOrder)
             .ToListAsync();
 
-        // Timeline widget — son 6 aktivite
+        // Timeline widget - latest 6 activities
         ViewBag.RecentActivity = await _activity.GetRecentActivityAsync(_db, 6);
 
         return View(model);

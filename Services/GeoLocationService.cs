@@ -1,10 +1,15 @@
 ﻿using System.Text.Json;
 
+using System.Net;
+using System.Net.Sockets;
+
 namespace Portfolio.Services;
 
 public interface IGeoLocationService
 {
-    Task<(string? Country, string? City)> LookupAsync(string ip);
+    Task<(string? Country, string? City)> LookupAsync(
+        string ip,
+        CancellationToken cancellationToken = default);
 }
 
 public class GeoLocationService : IGeoLocationService
@@ -16,17 +21,28 @@ public class GeoLocationService : IGeoLocationService
         _http = http;
     }
 
-    public async Task<(string? Country, string? City)> LookupAsync(string ip)
+    public async Task<(string? Country, string? City)> LookupAsync(
+        string ip,
+        CancellationToken cancellationToken = default)
     {
-        // Lokal/özel IP'ler için sorgu atma (localhost, Docker iç network)
-        if (ip == "unknown" || ip.StartsWith("127.") || ip.StartsWith("172.") || ip.StartsWith("192.168."))
+        // Never send local or private addresses to an external provider.
+        if (!IPAddress.TryParse(ip, out var address) || IsPrivateOrLocal(address))
+        {
             return (null, null);
+        }
 
         try
         {
-            // ip-api.com ücretsiz, HTTPS desteklemiyor (free tier), dikkat
-            var response = await _http.GetStringAsync($"http://ip-api.com/json/{ip}?fields=status,country,city");
-            var json = JsonDocument.Parse(response);
+            // Replace this HTTP-only free provider before production deployment.
+            using var response = await _http.GetAsync(
+                $"http://ip-api.com/json/{Uri.EscapeDataString(ip)}?fields=status,country,city",
+                cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var json = await JsonDocument.ParseAsync(
+                responseStream,
+                cancellationToken: cancellationToken);
 
             if (json.RootElement.GetProperty("status").GetString() == "success")
             {
@@ -35,11 +51,45 @@ public class GeoLocationService : IGeoLocationService
                 return (country, city);
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch
         {
-            // Servis erişilemezse sessizce boş dön, siteyi bozmasın
+            // A geolocation failure must never break the public page.
         }
 
         return (null, null);
+    }
+
+    private static bool IsPrivateOrLocal(IPAddress address)
+    {
+        if (address.IsIPv4MappedToIPv6)
+        {
+            address = address.MapToIPv4();
+        }
+
+        if (IPAddress.IsLoopback(address))
+        {
+            return true;
+        }
+
+        var bytes = address.GetAddressBytes();
+
+        if (address.AddressFamily == AddressFamily.InterNetwork)
+        {
+            return bytes[0] == 0 ||
+                   bytes[0] == 10 ||
+                   (bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127) ||
+                   (bytes[0] == 169 && bytes[1] == 254) ||
+                   (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) ||
+                   (bytes[0] == 192 && bytes[1] == 168);
+        }
+
+        return address.AddressFamily == AddressFamily.InterNetworkV6 &&
+               (address.IsIPv6LinkLocal ||
+                address.IsIPv6SiteLocal ||
+                (bytes[0] & 0xFE) == 0xFC);
     }
 }

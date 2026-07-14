@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
     ports:
-      - "5432:5432"          # Geliştirmede açık — pgAdmin veya DBeaver ile bağlanabilirsin
+      - "127.0.0.1:5432:5432" # Local pgAdmin/DBeaver access only
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile    # Visual Studio'nun oluşturduğu Dockerfile
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     depends_on:
       db:
         condition: service_healthy
