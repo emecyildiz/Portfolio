@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@(ViewData["Title"] is string pageTitle && !string.IsNullOrWhiteSpace(pageTitle) ? $"{pageTitle} — Portfolio" : "Portfolio")</title>
     <meta name="description" content="@ViewData["Description"]" />
-    <!-- Open Graph -->
+
     @{
         var ogImage = ViewBag.OgImage as string;
         var fullOgImage = !string.IsNullOrEmpty(ogImage)
@@ -19,13 +19,11 @@
     <meta property="og:image" content="@fullOgImage" />
     <meta property="og:locale" content="en_US" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="@ViewData["Title"] — Portfolio" />
     <meta name="twitter:description" content="@ViewData["Description"]" />
     <meta name="twitter:image" content="@fullOgImage" />
 
-    <!-- Canonical -->
     <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
 
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
@@ -34,279 +32,365 @@
             theme: {
                 extend: {
                     colors: {
+                        ink: '#07090D',
+                        panel: '#0D1219',
+                        raised: '#121923',
+                        line: '#202C38',
+                        signal: '#B8F36B',
+                        cyan: '#55D6FF',
+                        ember: '#FF8A4C',
                         accent: {
-                            blue:   '#3B82F6',
-                            purple: '#8B5CF6',
-                            teal:   '#14B8A6',
-                            red:    '#EF4444',
-                            amber:  '#F59E0B',
+                            blue: '#55D6FF',
+                            purple: '#A78BFA',
+                            teal: '#5EEAD4',
+                            red: '#FB7185',
+                            amber: '#FBBF24'
                         }
                     },
                     fontFamily: {
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                        sans: ['Space Grotesk', 'Inter', 'sans-serif'],
+                        mono: ['IBM Plex Mono', 'JetBrains Mono', 'monospace']
+                    },
+                    boxShadow: {
+                        signal: '0 0 0 1px rgba(184,243,107,.12), 0 24px 70px rgba(0,0,0,.35)',
+                        panel: '0 24px 80px rgba(0,0,0,.24)'
                     }
                 }
             }
         }
     </script>
 
-    <!-- Monospace font for the terminal-inspired interface -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-
-        /* Gradient text */
+        :root { color-scheme: dark; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            background:
+                radial-gradient(circle at 12% -8%, rgba(85, 214, 255, .09), transparent 30rem),
+                radial-gradient(circle at 88% 8%, rgba(184, 243, 107, .07), transparent 26rem),
+                #07090D;
+        }
+        ::selection { color: #07090D; background: #B8F36B; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #07090D; }
+        ::-webkit-scrollbar-thumb { background: #273543; border: 2px solid #07090D; border-radius: 999px; }
+        .font-mono { font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace; }
+        .site-grid {
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: linear-gradient(to bottom, black, transparent 80%);
+        }
+        .surface {
+            background: linear-gradient(145deg, rgba(18,25,35,.92), rgba(10,14,20,.92));
+            border: 1px solid rgba(148,163,184,.15);
+            box-shadow: 0 24px 80px rgba(0,0,0,.24);
+        }
+        .technical-frame { position: relative; }
+        .technical-frame::before,
+        .technical-frame::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+        }
+        .technical-frame::before {
+            top: -1px;
+            left: -1px;
+            border-top: 1px solid #B8F36B;
+            border-left: 1px solid #B8F36B;
+        }
+        .technical-frame::after {
+            right: -1px;
+            bottom: -1px;
+            border-right: 1px solid #55D6FF;
+            border-bottom: 1px solid #55D6FF;
+        }
         .gradient-text {
-            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            color: #F8FAFC;
+            background: linear-gradient(105deg, #FFFFFF 18%, #B8F36B 58%, #55D6FF 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
-        /* Glow effect */
-        .glow-blue { box-shadow: 0 0 20px rgba(59,130,246,0.15); }
-        .glow-purple { box-shadow: 0 0 20px rgba(139,92,246,0.15); }
-
-        /* Nav link hover */
         .nav-link { position: relative; }
         .nav-link::after {
             content: '';
             position: absolute;
-            bottom: -2px;
+            right: 0;
+            bottom: -9px;
             left: 0;
-            width: 0;
             height: 1px;
-            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
-            transition: width 0.3s ease;
+            background: #B8F36B;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .2s ease;
         }
-        .nav-link:hover::after { width: 100%; }
-
-        /* Fade in */
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-link:hover::after,
+        .nav-link:focus-visible::after,
+        .nav-link.is-active::after { transform: scaleX(1); }
+        .card-lift { transition: transform .25s ease, border-color .25s ease, background-color .25s ease; }
+        .card-lift:hover { transform: translateY(-3px); }
+        .focus-ring:focus-visible {
+            outline: 2px solid #B8F36B;
+            outline-offset: 4px;
+        }
+        .page-enter { animation: pageEnter .45s ease both; }
+        @@keyframes pageEnter {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @@media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
     </style>
 </head>
 
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
-    <!-- Page transition progress bar -->
-    <div id="pageLoadBar" class="fixed top-0 left-0 h-0.5 bg-blue-500 z-[100] transition-all duration-300" style="width: 0%;"></div>
-    <!-- Navbar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800/50">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+<body class="min-h-screen overflow-x-hidden bg-ink text-slate-100 antialiased">
+    @{
+        var currentPath = Context.Request.Path.Value?.ToLowerInvariant() ?? "/";
+    }
 
-            <!-- Logo -->
-            <a href="/" class="font-mono text-lg font-bold gradient-text">
-                ~/portfolio
+    <a href="#main-content"
+       class="focus-ring fixed left-4 top-3 z-[120] -translate-y-20 rounded-md bg-signal px-4 py-2 text-sm font-semibold text-ink transition focus:translate-y-0">
+        Skip to content
+    </a>
+
+    <div aria-hidden="true" class="site-grid pointer-events-none fixed inset-x-0 top-0 -z-10 h-[48rem] opacity-70"></div>
+    <div aria-hidden="true" class="pointer-events-none fixed left-0 top-0 -z-10 h-px w-full bg-gradient-to-r from-transparent via-signal/50 to-transparent"></div>
+
+    <div id="pageLoadBar" class="fixed left-0 top-0 z-[110] h-0.5 bg-signal shadow-[0_0_18px_rgba(184,243,107,.7)] transition-all duration-300" style="width: 0%;"></div>
+
+    <header class="fixed inset-x-0 top-0 z-50 border-b border-white/[0.07] bg-ink/80 backdrop-blur-xl">
+        <nav aria-label="Primary navigation" class="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            <a href="/" class="focus-ring group inline-flex items-center gap-3 rounded-sm" aria-label="Portfolio home">
+                <span class="grid h-9 w-9 place-items-center border border-signal/40 bg-signal/[0.07] font-mono text-sm font-semibold text-signal transition group-hover:bg-signal group-hover:text-ink">~/</span>
+                <span class="hidden sm:block">
+                    <span class="block font-mono text-sm font-semibold tracking-tight text-white">portfolio</span>
+                    <span class="block font-mono text-[9px] uppercase tracking-[0.24em] text-slate-500">systems / security</span>
+                </span>
             </a>
 
-            <!-- Desktop Nav -->
-            <div class="hidden md:flex items-center gap-6">
-                <a href="/" class="nav-link text-sm text-gray-400 hover:text-white transition">Home</a>
+            <div class="hidden items-center gap-7 md:flex">
+                <a href="/" class="nav-link focus-ring rounded-sm text-sm font-medium transition @(currentPath == "/" ? "is-active text-white" : "text-slate-400 hover:text-white")">Home</a>
 
-                <!-- Work dropdown -->
-                <div class="relative group">
-                    <button class="nav-link text-sm text-gray-400 hover:text-white transition flex items-center gap-1">
-                        Work
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
+                <div class="group relative">
+                    <button type="button" class="nav-link focus-ring flex items-center gap-1.5 rounded-sm text-sm font-medium text-slate-400 transition hover:text-white group-focus-within:text-white">
+                        Work <span aria-hidden="true" class="text-[10px] text-signal">⌄</span>
                     </button>
-                    <div class="absolute top-full left-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-xl">
-                        @if (ViewBag.NavCategories != null)
-                        {
-                            @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
+                    <div class="invisible absolute left-1/2 top-full w-60 -translate-x-1/2 translate-y-4 pt-5 opacity-0 transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                        <div class="surface rounded-xl p-2 shadow-panel">
+                            <p class="px-3 pb-2 pt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600">Explore the lab</p>
+                            @if (ViewBag.NavCategories != null)
                             {
-                                var url = cat.Slug switch
+                                @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
                                 {
-                                    "security" => "/security",
-                                    "electronics" => "/electronics",
-                                    "webapps" => "/webapps",
-                                    "homelab" => "/homelab",
-                                    "blog" => "/blog",
-                                    "team" => "/team",
-                                    _ => $"/{cat.Slug}"
-                                };
-                                var label = cat.Slug switch
-                                {
-                                    "security" => "Security",
-                                    "electronics" => "Electronics",
-                                    "webapps" => "Web Apps",
-                                    "homelab" => "Homelab",
-                                    "blog" => "Blog",
-                                    "team" => "Team",
-                                    _ => cat.Name
-                                };
-                                <a href="@url" class="block px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition">@label</a>
+                                    var url = cat.Slug switch
+                                    {
+                                        "security" => "/security",
+                                        "electronics" => "/electronics",
+                                        "webapps" => "/webapps",
+                                        "homelab" => "/homelab",
+                                        "blog" => "/blog",
+                                        "team" => "/team",
+                                        _ => $"/{cat.Slug}"
+                                    };
+                                    var label = cat.Slug switch
+                                    {
+                                        "security" => "Security",
+                                        "electronics" => "Electronics",
+                                        "webapps" => "Web Apps",
+                                        "homelab" => "Homelab",
+                                        "blog" => "Blog",
+                                        "team" => "Team",
+                                        _ => cat.Name
+                                    };
+                                    var isActive = currentPath == url || currentPath.StartsWith($"{url}/");
+                                    <a href="@url" class="focus-ring flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition @(isActive ? "bg-signal/10 text-signal" : "text-slate-300 hover:bg-white/[0.05] hover:text-white")">
+                                        <span>@label</span><span aria-hidden="true" class="font-mono text-[10px] text-slate-600">↗</span>
+                                    </a>
+                                }
                             }
-                        }
-                        @if (ViewBag.NavPages != null && ((List<Portfolio.Models.Page>)ViewBag.NavPages).Any())
-                        {
-                            <div class="border-t border-gray-800 my-2"></div>
-                            @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
+                            @if (ViewBag.NavPages != null && ((List<Portfolio.Models.Page>)ViewBag.NavPages).Any())
                             {
-                                <a href="/pages/@navPage.Slug" class="block px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition">@navPage.Title</a>
+                                <div class="my-2 border-t border-white/[0.07]"></div>
+                                @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
+                                {
+                                    <a href="/pages/@navPage.Slug" class="focus-ring block rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/[0.05] hover:text-white">@navPage.Title</a>
+                                }
                             }
-                        }
+                        </div>
                     </div>
                 </div>
 
-                <a href="/activity" class="nav-link text-sm text-gray-400 hover:text-white transition">Activity</a>
+                <a href="/activity" class="nav-link focus-ring rounded-sm text-sm font-medium transition @(currentPath.StartsWith("/activity") ? "is-active text-white" : "text-slate-400 hover:text-white")">Activity</a>
 
-                <!-- Search button -->
-                <button onclick="toggleSearch()" aria-label="Open search"
-                        class="text-gray-400 hover:text-white transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                <button type="button" onclick="toggleSearch(true)" aria-label="Open search" class="focus-ring group grid h-9 w-9 place-items-center rounded-full border border-white/10 text-slate-400 transition hover:border-cyan/40 hover:text-cyan">
+                    <span aria-hidden="true" class="relative block h-3.5 w-3.5 rounded-full border border-current after:absolute after:-bottom-1 after:-right-1 after:h-1.5 after:w-px after:-rotate-45 after:bg-current"></span>
                 </button>
 
-                <a href="/hire" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition font-medium">
-                    Hire Me
+                <a href="/hire" class="focus-ring inline-flex items-center gap-2 rounded-md bg-signal px-4 py-2 text-sm font-semibold text-ink transition hover:bg-white">
+                    Start a conversation <span aria-hidden="true">↗</span>
                 </a>
             </div>
 
-            <!-- Mobile menu button -->
-            <button id="mobileMenuBtn" aria-label="Toggle navigation" aria-controls="mobileMenu" aria-expanded="false"
-                    class="md:hidden text-gray-400 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+            <button id="mobileMenuBtn" type="button" aria-label="Toggle navigation" aria-controls="mobileMenu" aria-expanded="false" class="focus-ring grid h-10 w-10 place-items-center rounded-md border border-white/10 text-slate-300 md:hidden">
+                <span aria-hidden="true" class="flex w-4 flex-col gap-1.5"><span class="h-px w-full bg-current"></span><span class="h-px w-full bg-current"></span></span>
             </button>
-        </div>
+        </nav>
 
-        <!-- Mobile Nav -->
-        <div id="mobileMenu" class="hidden md:hidden border-t border-gray-800 px-6 py-4 space-y-3">
-            <a href="/" class="block text-sm text-gray-400 hover:text-white transition">Home</a>
-
-            @if (ViewBag.NavCategories != null)
-            {
-                @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
+        <div id="mobileMenu" class="hidden border-t border-white/[0.07] bg-ink/95 px-4 py-5 backdrop-blur-xl md:hidden">
+            <div class="mx-auto max-w-7xl space-y-1">
+                <a href="/" class="focus-ring block rounded-lg px-3 py-3 text-sm @(currentPath == "/" ? "bg-signal/10 text-signal" : "text-slate-300 hover:bg-white/[0.05]")">Home</a>
+                @if (ViewBag.NavCategories != null)
                 {
-                    var url = cat.Slug switch
+                    @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
                     {
-                        "security" => "/security",
-                        "electronics" => "/electronics",
-                        "webapps" => "/webapps",
-                        "homelab" => "/homelab",
-                        "blog" => "/blog",
-                        "team" => "/team",
-                        _ => $"/{cat.Slug}"
-                    };
-                    var label = cat.Slug switch
-                    {
-                        "security" => "Security",
-                        "electronics" => "Electronics",
-                        "webapps" => "Web Apps",
-                        "homelab" => "Homelab",
-                        "blog" => "Blog",
-                        "team" => "Team",
-                        _ => cat.Name
-                    };
-                    <a href="@url" class="block text-sm text-gray-400 hover:text-white transition">@label</a>
+                        var url = cat.Slug switch
+                        {
+                            "security" => "/security",
+                            "electronics" => "/electronics",
+                            "webapps" => "/webapps",
+                            "homelab" => "/homelab",
+                            "blog" => "/blog",
+                            "team" => "/team",
+                            _ => $"/{cat.Slug}"
+                        };
+                        var label = cat.Slug switch
+                        {
+                            "security" => "Security",
+                            "electronics" => "Electronics",
+                            "webapps" => "Web Apps",
+                            "homelab" => "Homelab",
+                            "blog" => "Blog",
+                            "team" => "Team",
+                            _ => cat.Name
+                        };
+                        var isActive = currentPath == url || currentPath.StartsWith($"{url}/");
+                        <a href="@url" class="focus-ring flex items-center justify-between rounded-lg px-3 py-3 text-sm @(isActive ? "bg-signal/10 text-signal" : "text-slate-300 hover:bg-white/[0.05]")"><span>@label</span><span aria-hidden="true" class="text-slate-600">↗</span></a>
+                    }
                 }
-            }
-
-            @if (ViewBag.NavPages != null)
-            {
-                @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
+                @if (ViewBag.NavPages != null)
                 {
-                    <a href="/pages/@navPage.Slug" class="block text-sm text-gray-400 hover:text-white transition">@navPage.Title</a>
+                    @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
+                    {
+                        <a href="/pages/@navPage.Slug" class="focus-ring block rounded-lg px-3 py-3 text-sm text-slate-300 hover:bg-white/[0.05]">@navPage.Title</a>
+                    }
                 }
-            }
-
-            <a href="/activity" class="block text-sm text-gray-400 hover:text-white transition">Activity</a>
-            <a href="/search" class="block text-sm text-gray-400 hover:text-white transition">Search</a>
-            <a href="/hire" class="block text-sm text-blue-400 hover:text-blue-300 transition">Hire Me</a>
+                <a href="/activity" class="focus-ring block rounded-lg px-3 py-3 text-sm @(currentPath.StartsWith("/activity") ? "bg-signal/10 text-signal" : "text-slate-300 hover:bg-white/[0.05]")">Activity</a>
+                <div class="grid grid-cols-2 gap-2 pt-3">
+                    <button type="button" onclick="toggleSearch(true)" class="focus-ring rounded-md border border-white/10 px-4 py-3 text-left text-sm text-slate-300">Search</button>
+                    <a href="/hire" class="focus-ring rounded-md bg-signal px-4 py-3 text-center text-sm font-semibold text-ink">Hire Me</a>
+                </div>
+            </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Search overlay -->
-    <div id="searchOverlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-start justify-center pt-32 px-4">
-        <div class="w-full max-w-xl">
-            <form method="get" action="/search" class="flex gap-2">
-                <input type="text" name="q" id="searchInput"
-                       placeholder="Search the portfolio (press Enter)"
-                       class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 text-white text-lg focus:outline-none focus:border-blue-500 transition" />
-                <button type="button" onclick="toggleSearch()" aria-label="Close search"
-                        class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-4 rounded-lg transition">
-                    ✕
-                </button>
+    <div id="searchOverlay" role="dialog" aria-modal="true" aria-label="Portfolio search" aria-hidden="true" class="hidden fixed inset-0 z-[70] items-start justify-center bg-ink/90 px-4 pt-24 backdrop-blur-xl sm:pt-32">
+        <div class="w-full max-w-2xl">
+            <div class="mb-4 flex items-end justify-between">
+                <div>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-signal">Query the archive</p>
+                    <h2 class="mt-1 text-xl font-semibold text-white">Search projects and research</h2>
+                </div>
+                <button type="button" onclick="toggleSearch(false)" aria-label="Close search" class="focus-ring rounded-md border border-white/10 px-3 py-2 font-mono text-xs text-slate-400 hover:text-white">ESC</button>
+            </div>
+            <form method="get" action="/search" class="surface technical-frame flex items-center gap-3 rounded-xl p-2">
+                <label for="searchInput" class="sr-only">Search the portfolio</label>
+                <span aria-hidden="true" class="pl-3 font-mono text-sm text-signal">$</span>
+                <input type="search" name="q" id="searchInput" autocomplete="off" placeholder="malware analysis, ESP32, homelab..." class="min-w-0 flex-1 bg-transparent px-1 py-3 text-base text-white placeholder:text-slate-600 focus:outline-none sm:text-lg" />
+                <button type="submit" class="focus-ring rounded-md bg-signal px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white">Search</button>
             </form>
+            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">Press Enter to search · Escape to close</p>
         </div>
     </div>
 
-    <script>
-        function toggleSearch() {
-            const overlay = document.getElementById('searchOverlay');
-            overlay.classList.toggle('hidden');
-            if (!overlay.classList.contains('hidden')) {
-                document.getElementById('searchInput').focus();
-            }
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                document.getElementById('searchOverlay').classList.add('hidden');
-            }
-        });
-
-        document.getElementById('searchOverlay').addEventListener('click', function(e) {
-            if (e.target === this) toggleSearch();
-        });
-
-        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobileMenu');
-            mobileMenu.classList.toggle('hidden');
-            this.setAttribute('aria-expanded', String(!mobileMenu.classList.contains('hidden')));
-        });
-    </script>
-
-    <!-- Page content -->
-    <main class="flex-1 pt-16 fade-in">
+    <main id="main-content" class="page-enter min-h-[70vh] pt-[72px]">
         @RenderBody()
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-gray-800/50 mt-20">
-        <div class="max-w-6xl mx-auto px-6 py-10">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <p class="font-mono text-sm text-gray-600">~/portfolio</p>
+    <footer class="mt-24 border-t border-white/[0.07] bg-black/20">
+        <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+            <div class="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
+                <div>
+                    <div class="mb-4 flex items-center gap-3">
+                        <span class="h-2 w-2 rounded-full bg-signal shadow-[0_0_14px_rgba(184,243,107,.7)]"></span>
+                        <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">System online · built in public</p>
+                    </div>
+                    <p class="max-w-xl text-sm leading-6 text-slate-500">A working archive of cybersecurity research, electronics, software, and self-hosted infrastructure.</p>
+                </div>
                 @await Component.InvokeAsync("FooterLinks")
-                <p class="text-gray-700 text-xs font-mono">© 2026</p>
+            </div>
+            <div class="mt-8 flex flex-col gap-2 border-t border-white/[0.07] pt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+                <p>~/portfolio</p>
+                <p>© 2026 · All systems documented</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Lightweight page transition progress bar.
-        (function() {
+        let searchPreviousFocus = null;
+
+        function toggleSearch(forceOpen) {
+            const overlay = document.getElementById('searchOverlay');
+            const shouldOpen = typeof forceOpen === 'boolean'
+                ? forceOpen
+                : overlay.classList.contains('hidden');
+
+            overlay.classList.toggle('hidden', !shouldOpen);
+            overlay.classList.toggle('flex', shouldOpen);
+            overlay.setAttribute('aria-hidden', String(!shouldOpen));
+            document.body.classList.toggle('overflow-hidden', shouldOpen);
+
+            if (shouldOpen) {
+                const mobileMenu = document.getElementById('mobileMenu');
+                const mobileMenuButton = document.getElementById('mobileMenuBtn');
+                mobileMenu.classList.add('hidden');
+                mobileMenuButton.setAttribute('aria-expanded', 'false');
+                searchPreviousFocus = document.activeElement;
+                window.setTimeout(() => document.getElementById('searchInput').focus(), 0);
+            } else if (searchPreviousFocus) {
+                searchPreviousFocus.focus();
+            }
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') toggleSearch(false);
+        });
+
+        document.getElementById('searchOverlay').addEventListener('click', function (event) {
+            if (event.target === this) toggleSearch(false);
+        });
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', function () {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const isOpen = mobileMenu.classList.toggle('hidden') === false;
+            this.setAttribute('aria-expanded', String(isOpen));
+        });
+
+        (function () {
             const bar = document.getElementById('pageLoadBar');
 
-            // Start progress for internal navigation.
-            document.addEventListener('click', function(e) {
-                const link = e.target.closest('a');
+            document.addEventListener('click', function (event) {
+                const link = event.target.closest('a');
                 if (link && link.href && link.target !== '_blank' &&
                     link.href.startsWith(window.location.origin) &&
                     !link.href.includes('#')) {
-                    bar.style.width = '30%';
-                    setTimeout(() => bar.style.width = '70%', 150);
+                    bar.style.width = '32%';
+                    window.setTimeout(() => bar.style.width = '72%', 150);
                 }
             });
 
-            // Complete and reset the bar when the next page finishes loading.
-            window.addEventListener('load', function() {
+            window.addEventListener('load', function () {
                 bar.style.width = '100%';
-                setTimeout(() => {
-                    bar.style.width = '0%';
-                }, 300);
+                window.setTimeout(() => bar.style.width = '0%', 300);
             });
         })();
     </script>

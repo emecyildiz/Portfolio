@@ -2,19 +2,19 @@
 
 @if (Model.Count > 0)
 {
-    <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+    <nav aria-label="Footer navigation" class="flex flex-wrap items-center gap-x-5 gap-y-2 md:justify-end">
         @foreach (var link in Model)
         {
             if (link.OpenInNewTab)
             {
                 <a href="@link.Url" target="_blank" rel="noopener noreferrer"
-                   class="text-gray-600 hover:text-white transition text-sm">@link.Label</a>
+                   class="focus-ring rounded-sm font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500 transition hover:text-signal">@link.Label ↗</a>
             }
             else
             {
                 <a href="@link.Url"
-                   class="text-gray-600 hover:text-white transition text-sm">@link.Label</a>
+                   class="focus-ring rounded-sm font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500 transition hover:text-signal">@link.Label</a>
             }
         }
-    </div>
+    </nav>
 }
