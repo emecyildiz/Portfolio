@@ -3,15 +3,15 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
     # ports yok — PostgreSQL internete açık değil, sadece iç Docker network'ten erişilir
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is required} -d ${POSTGRES_DB:?POSTGRES_DB is required}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -28,7 +28,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      # Production portu yalnızca localhost'a bağlı olduğu için forwarded header bayrağı dışarıdan spoof edilemez.
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+      - AllowedHosts=${ALLOWED_HOSTS:?ALLOWED_HOSTS is required}
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB:?POSTGRES_DB is required};Username=${POSTGRES_USER:?POSTGRES_USER is required};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       - AdminPath=${ADMIN_PATH:?ADMIN_PATH is required}
       - AdminEmail=${ADMIN_EMAIL:?ADMIN_EMAIL is required}
       - AdminPassword=${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
