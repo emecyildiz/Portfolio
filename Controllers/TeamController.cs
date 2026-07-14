@@ -24,6 +24,9 @@ public class TeamController : BaseController
         .IgnoreQueryFilters()
         .FirstOrDefaultAsync(c => c.Slug == "team");
 
+        if (category?.IsPrivate == true)
+            return NotFound();
+
         if (category == null || category.Status != VisibilityStatus.Public)
             return View("CategoryUnavailable");
 
@@ -40,6 +43,9 @@ public class TeamController : BaseController
         var category = await _db.Categories
         .IgnoreQueryFilters()
         .FirstOrDefaultAsync(c => c.Slug == "team");
+
+        if (category?.IsPrivate == true)
+            return NotFound();
 
         if (category == null || category.Status != VisibilityStatus.Public)
             return View("CategoryUnavailable");

@@ -23,6 +23,9 @@ public class SecurityController : BaseController
         .IgnoreQueryFilters()
         .FirstOrDefaultAsync(c => c.Slug == "security");
 
+        if (category?.IsPrivate == true)
+            return NotFound();
+
         if (category == null || category.Status != VisibilityStatus.Public)
             return View("CategoryUnavailable");
 
@@ -48,6 +51,9 @@ public class SecurityController : BaseController
         var category = await _db.Categories
         .IgnoreQueryFilters()
         .FirstOrDefaultAsync(c => c.Slug == "security");
+
+        if (category?.IsPrivate == true)
+            return NotFound();
 
         if (category == null || category.Status != VisibilityStatus.Public)
             return View("CategoryUnavailable");

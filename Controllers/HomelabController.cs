@@ -23,6 +23,9 @@ public class HomelabController : BaseController
         .IgnoreQueryFilters()
         .FirstOrDefaultAsync(c => c.Slug == "homelab");
 
+        if (category?.IsPrivate == true)
+            return NotFound();
+
         if (category == null || category.Status != VisibilityStatus.Public)
             return View("CategoryUnavailable");
 

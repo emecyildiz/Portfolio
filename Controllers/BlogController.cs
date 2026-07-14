@@ -22,6 +22,9 @@ public class BlogController : BaseController
         .IgnoreQueryFilters()
         .FirstOrDefaultAsync(c => c.Slug == "blog");
 
+        if (category?.IsPrivate == true)
+            return NotFound();
+
         if (category == null || category.Status != VisibilityStatus.Public)
             return View("CategoryUnavailable");
 
@@ -38,6 +41,9 @@ public class BlogController : BaseController
         var category = await _db.Categories
         .IgnoreQueryFilters()
         .FirstOrDefaultAsync(c => c.Slug == "blog");
+
+        if (category?.IsPrivate == true)
+            return NotFound();
 
         if (category == null || category.Status != VisibilityStatus.Public)
             return View("CategoryUnavailable");
