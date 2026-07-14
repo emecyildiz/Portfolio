@@ -1,7 +1,7 @@
 ﻿@model Portfolio.Models.ViewModels.HomepageViewModel
 @{
-    ViewData["Title"] = "Ana Sayfa";
-    ViewData["Description"] = "Siber güvenlik, elektronik ve yazılım geliştirme alanlarında çalışmalarım";
+    ViewData["Title"] = "Home";
+    ViewData["Description"] = "Cybersecurity research, electronics projects, homelab work, and software development.";
 }
 
 <!-- Hero -->
@@ -9,21 +9,21 @@
     <div class="max-w-3xl">
         <p class="font-mono text-accent-blue text-sm mb-4">$ whoami</p>
         <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            Siber Güvenlik<br />
-            <span class="gradient-text">Araştırmacısı</span>
+            Cybersecurity<br />
+            <span class="gradient-text">Researcher</span>
         </h1>
         <p class="text-gray-400 text-lg leading-relaxed mb-8 max-w-2xl">
-            Malware analizi, donanım güvenliği ve RF sistemleri üzerine araştırmalar yapıyorum.
-            Elektronik projeler geliştiriyor, homelab'ımda ağ güvenliği testleri yürütüyorum.
+            I research malware analysis, hardware security, and RF systems.
+            I build electronics projects and run network security experiments in my homelab.
         </p>
         <div class="flex flex-wrap gap-4">
             <a href="/security"
                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition glow-blue">
-                Araştırmalarım
+                View Research
             </a>
             <a href="/hire"
                class="border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white px-6 py-3 rounded-lg font-medium transition">
-                İşe Al
+                Hire Me
             </a>
         </div>
         <!-- Şu an ne yapıyorum -->
@@ -39,7 +39,7 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </span>
-                        <span class="text-xs text-gray-500 font-mono">şu an üzerinde çalışıyorum:</span>
+                        <span class="text-xs text-gray-500 font-mono">currently working on:</span>
                         <span class="text-sm text-gray-300 group-hover:text-white transition">@working.Title →</span>
                     </a>
                 }
@@ -50,7 +50,7 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </span>
-                        <span class="text-xs text-gray-500 font-mono">şu an üzerinde çalışıyorum:</span>
+                        <span class="text-xs text-gray-500 font-mono">currently working on:</span>
                         <span class="text-sm text-gray-300">@working.Title</span>
                     </div>
                 }
@@ -70,10 +70,10 @@
         </div>
         <div class="space-y-2 text-gray-400">
             <p><span class="text-green-400">➜</span> <span class="text-blue-400">~</span> cat skills.txt</p>
-            <p class="text-gray-300">Siber Güvenlik: Malware Analysis, RF Security, Hardware Vuln</p>
-            <p class="text-gray-300">Elektronik: ESP32, Arduino, Devre Tasarımı</p>
+            <p class="text-gray-300">Cybersecurity: Malware Analysis, RF Security, Hardware Vulnerabilities</p>
+            <p class="text-gray-300">Electronics: ESP32, Arduino, Circuit Design</p>
             <p class="text-gray-300">Homelab: pfSense, VLAN, Docker, Proxmox</p>
-            <p class="text-gray-300">Geliştirme: C#, Python, ASP.NET Core</p>
+            <p class="text-gray-300">Development: C#, Python, ASP.NET Core</p>
             <p><span class="text-green-400">➜</span> <span class="text-blue-400">~</span> <span class="animate-pulse">_</span></p>
         </div>
     </div>
@@ -89,9 +89,9 @@
         <div class="flex items-center justify-between mb-8">
             <div>
                 <p class="font-mono text-green-400 text-xs mb-1">// activity</p>
-                <h2 class="text-2xl font-bold text-white">Son Çalışmalar</h2>
+                <h2 class="text-2xl font-bold text-white">Recent Work</h2>
             </div>
-            <a href="/activity" class="text-sm text-gray-500 hover:text-white transition">Tüm Geçmiş →</a>
+            <a href="/activity" class="text-sm text-gray-500 hover:text-white transition">View Timeline →</a>
         </div>
 
         <div class="space-y-2">
@@ -121,9 +121,9 @@
         <div class="flex items-center justify-between mb-8">
             <div>
                 <p class="font-mono text-accent-red text-xs mb-1">// featured</p>
-                <h2 class="text-2xl font-bold text-white">Güvenlik Araştırmaları</h2>
+                <h2 class="text-2xl font-bold text-white">Security Research</h2>
             </div>
-            <a href="/security" class="text-sm text-gray-500 hover:text-white transition">Tümü →</a>
+            <a href="/security" class="text-sm text-gray-500 hover:text-white transition">View All →</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -164,9 +164,9 @@
         <div class="flex items-center justify-between mb-8">
             <div>
                 <p class="font-mono text-accent-blue text-xs mb-1">// featured</p>
-                <h2 class="text-2xl font-bold text-white">Projeler</h2>
+                <h2 class="text-2xl font-bold text-white">Projects</h2>
             </div>
-            <a href="/electronics" class="text-sm text-gray-500 hover:text-white transition">Tümü →</a>
+            <a href="/electronics" class="text-sm text-gray-500 hover:text-white transition">View All →</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -204,7 +204,7 @@
                 <p class="font-mono text-accent-teal text-xs mb-1">// featured</p>
                 <h2 class="text-2xl font-bold text-white">Homelab</h2>
             </div>
-            <a href="/homelab" class="text-sm text-gray-500 hover:text-white transition">Tümü →</a>
+            <a href="/homelab" class="text-sm text-gray-500 hover:text-white transition">View All →</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -215,7 +215,7 @@
                     <span class="text-xs text-teal-400 font-mono">@h.Topic</span>
                     <h3 class="text-white font-medium mt-2 mb-2 group-hover:text-teal-300 transition">@h.Title</h3>
                     <p class="text-gray-500 text-sm line-clamp-2">@h.Summary</p>
-                    <p class="text-gray-700 text-xs mt-3">@h.ReadingTimeMinutes dk okuma</p>
+                    <p class="text-gray-700 text-xs mt-3">@h.ReadingTimeMinutes min read</p>
                 </a>
             }
         </div>
@@ -231,7 +231,7 @@
                 <p class="font-mono text-accent-purple text-xs mb-1">// recent</p>
                 <h2 class="text-2xl font-bold text-white">Blog</h2>
             </div>
-            <a href="/blog" class="text-sm text-gray-500 hover:text-white transition">Tümü →</a>
+            <a href="/blog" class="text-sm text-gray-500 hover:text-white transition">View All →</a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -248,7 +248,7 @@
                         <h3 class="text-white font-medium mb-1 group-hover:text-purple-300 transition">@b.Title</h3>
                         <p class="text-gray-500 text-sm line-clamp-2">@b.Summary</p>
                         <p class="text-gray-700 text-xs mt-2">
-                            @(b.PublishedAt?.ToString("dd MMM yyyy") ?? "") · @b.ReadingTimeMinutes dk
+                            @(b.PublishedAt?.ToString("dd MMM yyyy") ?? "") · @b.ReadingTimeMinutes min read
                         </p>
                     </div>
                 </a>
@@ -266,7 +266,7 @@
     <section class="max-w-6xl mx-auto px-6 py-16 border-t border-gray-800/50">
         <div class="mb-8">
             <p class="font-mono text-amber-400 text-xs mb-1">// certifications</p>
-            <h2 class="text-2xl font-bold text-white">Sertifikalar</h2>
+            <h2 class="text-2xl font-bold text-white">Certifications</h2>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -288,9 +288,9 @@
                     <p class="text-gray-700 text-xs mt-1">@cert.IssuedDate.ToString("MMM yyyy")</p>
                     @if (!string.IsNullOrEmpty(cert.CredentialUrl))
                     {
-                        <a href="@cert.CredentialUrl" target="_blank"
+                        <a href="@cert.CredentialUrl" target="_blank" rel="noopener noreferrer"
                            class="text-xs text-blue-400 hover:text-blue-300 transition mt-2 inline-block">
-                            Doğrula →
+                            Verify →
                         </a>
                     }
                 </div>
@@ -303,13 +303,13 @@
 <section class="max-w-6xl mx-auto px-6 py-16 border-t border-gray-800/50">
     <div class="bg-gradient-to-r from-blue-950/50 to-purple-950/50 border border-blue-900/30 rounded-2xl p-10 text-center">
         <p class="font-mono text-blue-400 text-sm mb-3">// contact</p>
-        <h2 class="text-3xl font-bold text-white mb-4">Birlikte çalışalım</h2>
+        <h2 class="text-3xl font-bold text-white mb-4">Let's work together</h2>
         <p class="text-gray-400 mb-8 max-w-md mx-auto">
-            Ağ güvenliği, penetrasyon testi veya elektronik proje danışmanlığı için iletişime geç.
+            Get in touch for network security, penetration testing, or electronics project consulting.
         </p>
         <a href="/hire"
            class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition inline-block glow-blue">
-            İletişime Geç
+            Get in Touch
         </a>
     </div>
 </section>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] is string pageTitle && !string.IsNullOrWhiteSpace(pageTitle) ? $"{pageTitle} — Portfolyo" : "Portfolyo")</title>
+    <title>@(ViewData["Title"] is string pageTitle && !string.IsNullOrWhiteSpace(pageTitle) ? $"{pageTitle} — Portfolio" : "Portfolio")</title>
     <meta name="description" content="@ViewData["Description"]" />
     <!-- Open Graph -->
     @{
@@ -12,7 +12,7 @@
         ? (ogImage.StartsWith("http") ? ogImage : $"{Context.Request.Scheme}://{Context.Request.Host}{ogImage}")
         : $"{Context.Request.Scheme}://{Context.Request.Host}/og-default.png";
     }
-    <meta property="og:title" content="@ViewData["Title"] — Portfolyo" />
+    <meta property="og:title" content="@ViewData["Title"] — Portfolio" />
     <meta property="og:description" content="@ViewData["Description"]" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
@@ -21,7 +21,7 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="@ViewData["Title"] — Portfolyo" />
+    <meta name="twitter:title" content="@ViewData["Title"] — Portfolio" />
     <meta name="twitter:description" content="@ViewData["Description"]" />
     <meta name="twitter:image" content="@fullOgImage" />
 
@@ -104,17 +104,17 @@
 
             <!-- Logo -->
             <a href="/" class="font-mono text-lg font-bold gradient-text">
-                ~/portfolyo
+                ~/portfolio
             </a>
 
             <!-- Desktop Nav -->
             <div class="hidden md:flex items-center gap-6">
-                <a href="/" class="nav-link text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
+                <a href="/" class="nav-link text-sm text-gray-400 hover:text-white transition">Home</a>
 
                 <!-- İçerik dropdown -->
                 <div class="relative group">
                     <button class="nav-link text-sm text-gray-400 hover:text-white transition flex items-center gap-1">
-                        İçerikler
+                        Work
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -136,12 +136,12 @@
                                 };
                                 var label = cat.Slug switch
                                 {
-                                    "security" => "Güvenlik",
-                                    "electronics" => "Elektronik",
+                                    "security" => "Security",
+                                    "electronics" => "Electronics",
                                     "webapps" => "Web Apps",
                                     "homelab" => "Homelab",
                                     "blog" => "Blog",
-                                    "team" => "Ekip",
+                                    "team" => "Team",
                                     _ => cat.Name
                                 };
                                 <a href="@url" class="block px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition">@label</a>
@@ -158,22 +158,24 @@
                     </div>
                 </div>
 
-                <a href="/activity" class="nav-link text-sm text-gray-400 hover:text-white transition">Aktivite</a>
+                <a href="/activity" class="nav-link text-sm text-gray-400 hover:text-white transition">Activity</a>
 
                 <!-- Arama ikonu -->
-                <button onclick="toggleSearch()" class="text-gray-400 hover:text-white transition">
+                <button onclick="toggleSearch()" aria-label="Open search"
+                        class="text-gray-400 hover:text-white transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </button>
 
                 <a href="/hire" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition font-medium">
-                    İşe Al
+                    Hire Me
                 </a>
             </div>
 
             <!-- Mobile menu button -->
-            <button id="mobileMenuBtn" class="md:hidden text-gray-400 hover:text-white">
+            <button id="mobileMenuBtn" aria-label="Toggle navigation" aria-controls="mobileMenu" aria-expanded="false"
+                    class="md:hidden text-gray-400 hover:text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -182,7 +184,7 @@
 
         <!-- Mobile Nav -->
         <div id="mobileMenu" class="hidden md:hidden border-t border-gray-800 px-6 py-4 space-y-3">
-            <a href="/" class="block text-sm text-gray-400 hover:text-white transition">Ana Sayfa</a>
+            <a href="/" class="block text-sm text-gray-400 hover:text-white transition">Home</a>
 
             @if (ViewBag.NavCategories != null)
             {
@@ -198,7 +200,17 @@
                         "team" => "/team",
                         _ => $"/{cat.Slug}"
                     };
-                    <a href="@url" class="block text-sm text-gray-400 hover:text-white transition">@cat.Name</a>
+                    var label = cat.Slug switch
+                    {
+                        "security" => "Security",
+                        "electronics" => "Electronics",
+                        "webapps" => "Web Apps",
+                        "homelab" => "Homelab",
+                        "blog" => "Blog",
+                        "team" => "Team",
+                        _ => cat.Name
+                    };
+                    <a href="@url" class="block text-sm text-gray-400 hover:text-white transition">@label</a>
                 }
             }
 
@@ -210,9 +222,9 @@
                 }
             }
 
-            <a href="/activity" class="block text-sm text-gray-400 hover:text-white transition">Aktivite</a>
-            <a href="/search" class="block text-sm text-gray-400 hover:text-white transition">Ara</a>
-            <a href="/hire" class="block text-sm text-blue-400 hover:text-blue-300 transition">İşe Al</a>
+            <a href="/activity" class="block text-sm text-gray-400 hover:text-white transition">Activity</a>
+            <a href="/search" class="block text-sm text-gray-400 hover:text-white transition">Search</a>
+            <a href="/hire" class="block text-sm text-blue-400 hover:text-blue-300 transition">Hire Me</a>
         </div>
     </nav>
 
@@ -221,9 +233,9 @@
         <div class="w-full max-w-xl">
             <form method="get" action="/search" class="flex gap-2">
                 <input type="text" name="q" id="searchInput"
-                       placeholder="Ne arıyorsun? (Enter'a bas)"
+                       placeholder="Search the portfolio (press Enter)"
                        class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-5 py-4 text-white text-lg focus:outline-none focus:border-blue-500 transition" />
-                <button type="button" onclick="toggleSearch()"
+                <button type="button" onclick="toggleSearch()" aria-label="Close search"
                         class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-4 rounded-lg transition">
                     ✕
                 </button>
@@ -251,7 +263,9 @@
         });
 
         document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-            document.getElementById('mobileMenu').classList.toggle('hidden');
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+            this.setAttribute('aria-expanded', String(!mobileMenu.classList.contains('hidden')));
         });
     </script>
 
@@ -264,7 +278,7 @@
     <footer class="border-t border-gray-800/50 mt-20">
         <div class="max-w-6xl mx-auto px-6 py-10">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <p class="font-mono text-sm text-gray-600">~/portfolyo</p>
+                <p class="font-mono text-sm text-gray-600">~/portfolio</p>
                 @await Component.InvokeAsync("FooterLinks")
                 <p class="text-gray-700 text-xs font-mono">© 2026</p>
             </div>

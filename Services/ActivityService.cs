@@ -24,7 +24,7 @@ public class ActivityService : IActivityService
                 Summary = s.Summary,
                 Url = $"/security/{s.Slug}",
                 Type = "security",
-                TypeLabel = "Güvenlik Araştırması",
+                TypeLabel = "Security Research",
                 ColorClass = "text-red-400 bg-red-900/20 border-red-900/50",
                 Date = s.PublishedAt
             })
@@ -40,7 +40,7 @@ public class ActivityService : IActivityService
                 Summary = p.Summary,
                 Url = $"/{p.Category.Slug}/{p.Slug}",
                 Type = p.Category.Slug,
-                TypeLabel = p.Category.Slug == "electronics" ? "Elektronik Projesi" : "Web Uygulaması",
+                TypeLabel = p.Category.Slug == "electronics" ? "Electronics Project" : "Web Application",
                 ColorClass = p.Category.Slug == "electronics"
                     ? "text-blue-400 bg-blue-900/20 border-blue-900/50"
                     : "text-purple-400 bg-purple-900/20 border-purple-900/50",
@@ -87,7 +87,7 @@ public class ActivityService : IActivityService
                 Summary = t.Summary,
                 Url = $"/team/{t.Slug}",
                 Type = "team",
-                TypeLabel = "Ekip Projesi",
+                TypeLabel = "Team Project",
                 ColorClass = "text-amber-400 bg-amber-900/20 border-amber-900/50",
                 Date = t.PublishedAt
             })

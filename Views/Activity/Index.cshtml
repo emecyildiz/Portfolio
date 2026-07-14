@@ -1,20 +1,20 @@
 ﻿@model List<Portfolio.Models.ViewModels.ActivityItem>
 @{
-    ViewData["Title"] = "Tüm Aktiviteler";
-    ViewData["Description"] = "Tüm proje, araştırma ve blog yazılarının kronolojik listesi";
+    ViewData["Title"] = "Activity";
+    ViewData["Description"] = "A chronological timeline of projects, research, homelab work, and blog posts.";
 }
 
 <div class="max-w-3xl mx-auto px-6 py-16">
     <div class="mb-12">
         <p class="font-mono text-green-400 text-sm mb-2">// activity</p>
-        <h1 class="text-4xl font-bold text-white mb-4">Tüm Çalışmalar</h1>
-        <p class="text-gray-400">Tüm içeriklerin kronolojik listesi.</p>
+        <h1 class="text-4xl font-bold text-white mb-4">All Work</h1>
+        <p class="text-gray-400">A chronological timeline of everything published on the site.</p>
     </div>
 
     @if (!Model.Any())
     {
         <div class="text-center py-20 text-gray-600">
-            <p class="font-mono">// henüz içerik yok</p>
+            <p class="font-mono">// no published work yet</p>
         </div>
     }
     else
