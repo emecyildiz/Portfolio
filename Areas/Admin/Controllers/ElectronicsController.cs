@@ -186,7 +186,9 @@ public class ElectronicsController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteImage(int mediaId, int projectId)
     {
-        await _media.DeleteAsync(mediaId);
+        if (!await _media.DeleteAsync(mediaId, "project", projectId))
+            return NotFound();
+
         return RedirectToAction(nameof(Edit), new { id = projectId });
     }
 
@@ -195,15 +197,8 @@ public class ElectronicsController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetCover(int mediaId, int projectId)
     {
-        await _media.SetCoverAsync(mediaId, "project", projectId);
-
-        var media = await _db.Media.FindAsync(mediaId);
-        var project = await _db.Projects.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == projectId);
-        if (project != null && media != null)
-        {
-            project.CoverImageUrl = media.Url;
-            await _db.SaveChangesAsync();
-        }
+        if (!await _media.SetCoverAsync(mediaId, "project", projectId))
+            return NotFound();
 
         return RedirectToAction(nameof(Edit), new { id = projectId });
     }

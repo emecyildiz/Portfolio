@@ -170,7 +170,9 @@ public class TeamController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteImage(int mediaId, int projectId)
     {
-        await _media.DeleteAsync(mediaId);
+        if (!await _media.DeleteAsync(mediaId, "team_project", projectId))
+            return NotFound();
+
         return RedirectToAction(nameof(Edit), new { id = projectId });
     }
 
@@ -178,14 +180,9 @@ public class TeamController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetCover(int mediaId, int projectId)
     {
-        await _media.SetCoverAsync(mediaId, "team_project", projectId);
-        var media = await _db.Media.FindAsync(mediaId);
-        var project = await _db.TeamProjects.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == projectId);
-        if (project != null && media != null)
-        {
-            project.CoverImageUrl = media.Url;
-            await _db.SaveChangesAsync();
-        }
+        if (!await _media.SetCoverAsync(mediaId, "team_project", projectId))
+            return NotFound();
+
         return RedirectToAction(nameof(Edit), new { id = projectId });
     }
 

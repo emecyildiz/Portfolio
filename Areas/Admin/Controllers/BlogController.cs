@@ -122,7 +122,9 @@ public class BlogController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteImage(int mediaId, int postId)
     {
-        await _media.DeleteAsync(mediaId);
+        if (!await _media.DeleteAsync(mediaId, "blog_post", postId))
+            return NotFound();
+
         return RedirectToAction(nameof(Edit), new { id = postId });
     }
 
@@ -130,14 +132,9 @@ public class BlogController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetCover(int mediaId, int postId)
     {
-        await _media.SetCoverAsync(mediaId, "blog_post", postId);
-        var media = await _db.Media.FindAsync(mediaId);
-        var post = await _db.BlogPosts.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Id == postId);
-        if (post != null && media != null)
-        {
-            post.CoverImageUrl = media.Url;
-            await _db.SaveChangesAsync();
-        }
+        if (!await _media.SetCoverAsync(mediaId, "blog_post", postId))
+            return NotFound();
+
         return RedirectToAction(nameof(Edit), new { id = postId });
     }
 

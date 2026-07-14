@@ -171,7 +171,9 @@ public class SecurityController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteImage(int mediaId, int researchId)
     {
-        await _media.DeleteAsync(mediaId);
+        if (!await _media.DeleteAsync(mediaId, "security_research", researchId))
+            return NotFound();
+
         return RedirectToAction(nameof(Edit), new { id = researchId });
     }
 
@@ -179,18 +181,8 @@ public class SecurityController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetCover(int mediaId, int researchId)
     {
-        await _media.SetCoverAsync(mediaId, "security_research", researchId);
-
-        var media = await _db.Media.FindAsync(mediaId);
-        var research = await _db.SecurityResearches
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(s => s.Id == researchId);
-
-        if (research != null && media != null)
-        {
-            research.CoverImageUrl = media.Url;
-            await _db.SaveChangesAsync();
-        }
+        if (!await _media.SetCoverAsync(mediaId, "security_research", researchId))
+            return NotFound();
 
         return RedirectToAction(nameof(Edit), new { id = researchId });
     }
