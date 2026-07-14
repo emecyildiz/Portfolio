@@ -37,6 +37,7 @@ public sealed class SecurityHeadersMiddleware
                 headers.CacheControl = "no-store, no-cache, must-revalidate";
                 headers.Pragma = "no-cache";
                 headers.Expires = "0";
+                headers["X-Robots-Tag"] = "noindex, nofollow, noarchive";
             }
 
             return Task.CompletedTask;

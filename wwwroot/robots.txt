@@ -1,6 +1,0 @@
-﻿User-agent: *
-Disallow: /money/
-
-Allow: /
-
-Sitemap: https://SITEADIN.com/sitemap.xml

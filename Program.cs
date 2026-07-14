@@ -333,7 +333,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 
-app.MapControllers();  
+app.MapControllers();
+
+app.MapGet("/robots.txt", (HttpContext context) =>
+{
+    var baseUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase}";
+    var content = $"""
+        User-agent: *
+        Allow: /
+
+        Sitemap: {baseUrl}/sitemap.xml
+        """;
+
+    return Results.Text(content, "text/plain", System.Text.Encoding.UTF8);
+}).ExcludeFromDescription();
 
 
 app.MapControllerRoute(
