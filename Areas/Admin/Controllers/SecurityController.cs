@@ -205,9 +205,9 @@ public class SecurityController : AdminBaseController
         if (research == null) return NotFound();
 
         if (research.Status != VisibilityStatus.Public &&
-            research.DisclosureStatus != DisclosureStatus.PubliclyDisclosed)
+            !AdminPublishValidator.CanPublishSecurity(ModelState, research, _slugService))
         {
-            TempData["Error"] = "Research cannot be published before it is marked as publicly disclosed.";
+            TempData["Error"] = "This research cannot be published yet. Open Edit and correct the highlighted fields, including disclosure status.";
             return RedirectToAction(nameof(Index));
         }
 

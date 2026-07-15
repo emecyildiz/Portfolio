@@ -4,30 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] — Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        ink: '#07090D', panel: '#0D1219', raised: '#121923', line: '#202C38',
-                        signal: '#B8F36B', cyan: '#55D6FF', ember: '#FF8A4C'
-                    },
-                    fontFamily: {
-                        sans: ['Space Grotesk', 'Inter', 'sans-serif'],
-                        mono: ['IBM Plex Mono', 'JetBrains Mono', 'monospace']
-                    },
-                    boxShadow: { panel: '0 24px 80px rgba(0,0,0,.28)' }
-                }
-            }
-        }
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tailwind.min.css" asp-append-version="true" />
     <style>
         :root { color-scheme: dark; }
-        body { font-family: 'Space Grotesk', 'Inter', sans-serif; }
+        body { font-family: 'Space Grotesk Variable', 'Inter Variable', sans-serif; }
         .font-mono { font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace; }
         .admin-grid {
             background-image: linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);

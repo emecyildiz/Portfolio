@@ -6,7 +6,7 @@ public static class SafeUrlPolicy
         [Uri.UriSchemeHttp, Uri.UriSchemeHttps, Uri.UriSchemeMailto, "tel"];
 
     private static readonly HashSet<string> WebResourceSchemes =
-        [Uri.UriSchemeHttp, Uri.UriSchemeHttps];
+        [Uri.UriSchemeHttps];
 
     public static bool IsSafeNavigationUrl(string? value)
     {
@@ -26,14 +26,6 @@ public static class SafeUrlPolicy
         var url = value.Trim();
         return IsSafeRelativeUrl(url) ||
                IsAllowedAbsoluteUrl(url, WebResourceSchemes);
-    }
-
-    public static bool IsSafeAbsoluteHttpUrl(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return true;
-
-        return IsAllowedAbsoluteUrl(value.Trim(), WebResourceSchemes);
     }
 
     public static bool IsSafeAbsoluteHttpsUrl(string? value)

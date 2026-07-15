@@ -239,6 +239,13 @@ public class ElectronicsController : AdminBaseController
         var project = await _db.Projects.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (project == null) return NotFound();
 
+        if (project.Status != VisibilityStatus.Public &&
+            !AdminPublishValidator.CanPublishElectronics(ModelState, project, _slugService))
+        {
+            TempData["Error"] = "This project cannot be published yet. Open Edit and correct the highlighted fields.";
+            return RedirectToAction(nameof(Index));
+        }
+
         project.Status = project.Status == VisibilityStatus.Public
             ? VisibilityStatus.Draft
             : VisibilityStatus.Public;

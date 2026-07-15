@@ -95,6 +95,13 @@ public class PageController : AdminBaseController
         var page = await _db.Pages.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (page == null) return NotFound();
 
+        if (page.Status != VisibilityStatus.Public &&
+            !AdminPublishValidator.CanPublishPage(ModelState, page, _slugService))
+        {
+            TempData["Error"] = "This page cannot be published yet. Open Edit and correct the highlighted fields.";
+            return RedirectToAction(nameof(Index));
+        }
+
         page.Status = page.Status == VisibilityStatus.Public
             ? VisibilityStatus.Draft
             : VisibilityStatus.Public;

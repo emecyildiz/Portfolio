@@ -162,6 +162,13 @@ public class BlogController : AdminBaseController
         var post = await _db.BlogPosts.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Id == id);
         if (post == null) return NotFound();
 
+        if (post.Status != VisibilityStatus.Public &&
+            !AdminPublishValidator.CanPublishBlog(ModelState, post, _slugService))
+        {
+            TempData["Error"] = "This post cannot be published yet. Open Edit and correct the highlighted fields.";
+            return RedirectToAction(nameof(Index));
+        }
+
         post.Status = post.Status == VisibilityStatus.Public
             ? VisibilityStatus.Draft : VisibilityStatus.Public;
 

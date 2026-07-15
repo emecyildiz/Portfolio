@@ -1,5 +1,16 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
+FROM node:22-alpine AS client-assets
+WORKDIR /src
+COPY ["package.json", "package-lock.json", "./"]
+RUN npm ci
+COPY ["tailwind.config.js", "./"]
+COPY ["Assets", "./Assets"]
+COPY ["Areas", "./Areas"]
+COPY ["Views", "./Views"]
+COPY ["wwwroot", "./wwwroot"]
+RUN npm run assets:build
+
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
@@ -16,6 +27,10 @@ COPY ["Portfolio.csproj", "."]
 RUN dotnet restore "./Portfolio.csproj"
 COPY . .
 WORKDIR "/src/."
+COPY --from=client-assets /src/wwwroot/css/fonts.css ./wwwroot/css/fonts.css
+COPY --from=client-assets /src/wwwroot/css/tailwind.min.css ./wwwroot/css/tailwind.min.css
+COPY --from=client-assets /src/wwwroot/fonts ./wwwroot/fonts
+COPY --from=client-assets /src/wwwroot/vendor ./wwwroot/vendor
 RUN dotnet build "./Portfolio.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage

@@ -9,7 +9,7 @@ public static class SiteLinksJsonService
     private const int MaxLinks = 20;
 
     private static readonly HashSet<string> AllowedSchemes =
-        [Uri.UriSchemeHttp, Uri.UriSchemeHttps, Uri.UriSchemeMailto];
+        [Uri.UriSchemeHttps, Uri.UriSchemeMailto];
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -48,8 +48,7 @@ public static class SiteLinksJsonService
                     link.Url.Any(char.IsControl) ||
                     !Uri.TryCreate(link.Url, UriKind.Absolute, out var uri) ||
                     !AllowedSchemes.Contains(uri.Scheme) ||
-                    ((uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps) &&
-                     string.IsNullOrWhiteSpace(uri.Host)) ||
+                    (uri.Scheme == Uri.UriSchemeHttps && string.IsNullOrWhiteSpace(uri.Host)) ||
                     (uri.Scheme == Uri.UriSchemeMailto && string.IsNullOrWhiteSpace(uri.AbsolutePath)))
                 {
                     return false;

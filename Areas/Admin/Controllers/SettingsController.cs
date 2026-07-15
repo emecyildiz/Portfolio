@@ -33,7 +33,7 @@ public class SettingsController : AdminBaseController
         if (!SiteLinksJsonService.TryNormalize(
                 footerLinksJson, out _, out var normalizedLinks))
         {
-            TempData["Error"] = "The links are invalid. Only https://, http://, and mailto: addresses are allowed.";
+            TempData["Error"] = "The links are invalid. Only https:// and mailto: addresses are allowed.";
             return RedirectToAction(nameof(Index));
         }
 

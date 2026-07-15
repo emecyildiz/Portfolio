@@ -160,6 +160,7 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddSingleton<IGeoLocationService, GeoLocationService>();
+builder.Services.AddHostedService<PageViewRetentionService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"));

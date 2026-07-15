@@ -212,6 +212,13 @@ public class TeamController : AdminBaseController
         var project = await _db.TeamProjects.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == id);
         if (project == null) return NotFound();
 
+        if (project.Status != VisibilityStatus.Public &&
+            !AdminPublishValidator.CanPublishTeam(ModelState, project, _slugService))
+        {
+            TempData["Error"] = "This team project cannot be published yet. Open Edit and correct the highlighted fields.";
+            return RedirectToAction(nameof(Index));
+        }
+
         project.Status = project.Status == VisibilityStatus.Public
             ? VisibilityStatus.Draft : VisibilityStatus.Public;
 

@@ -76,7 +76,7 @@
             </aside>
         </dialog>
 
-        <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+        <script src="~/vendor/vis-network/vis-network.min.js" asp-append-version="true"></script>
         <script>
             const topologyData = @Html.Raw(topologyJson);
             const linkedProjects = @Html.Raw(ViewBag.LinkedProjectsJson ?? "[]");
@@ -130,7 +130,7 @@
                     image: imageUrl || undefined,
                     color: imageUrl ? undefined : (typeColors[node.deviceType] || '#94A3B8'),
                     size: 24,
-                    font: { color: '#0F172A', size: 13, face: 'Space Grotesk', strokeWidth: 3, strokeColor: '#E8EEF2' },
+                    font: { color: '#0F172A', size: 13, face: 'Space Grotesk Variable', strokeWidth: 3, strokeColor: '#E8EEF2' },
                     title: escapeHtml(node.shortInfo || node.label),
                     borderWidth: 2,
                     shapeProperties: { useImageSize: false, interpolation: false },

@@ -216,6 +216,13 @@ public class HomelabController : AdminBaseController
         var post = await _db.HomelabPosts.IgnoreQueryFilters().FirstOrDefaultAsync(h => h.Id == id);
         if (post == null) return NotFound();
 
+        if (post.Status != VisibilityStatus.Public &&
+            !AdminPublishValidator.CanPublishHomelab(ModelState, post, _slugService))
+        {
+            TempData["Error"] = "This homelab post cannot be published yet. Open Edit and correct the highlighted fields.";
+            return RedirectToAction(nameof(Index));
+        }
+
         post.Status = post.Status == VisibilityStatus.Public
             ? VisibilityStatus.Draft : VisibilityStatus.Public;
 
