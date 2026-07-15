@@ -36,8 +36,13 @@ public class BlogController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(BlogPost model, List<IFormFile>? Images)
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Summary,Content,IsFeatured,Status")] BlogPost model,
+        List<IFormFile>? Images)
     {
+        AdminContentValidator.ValidateBlog(ModelState, model, _slugService);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -90,10 +95,22 @@ public class BlogController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, BlogPost model, List<IFormFile>? Images)
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Summary,Content,IsFeatured,Status")] BlogPost model,
+        List<IFormFile>? Images)
     {
         var existing = await _db.BlogPosts.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Id == id);
         if (existing == null) return NotFound();
+
+        AdminContentValidator.ValidateBlog(ModelState, model, _slugService);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+        if (!ModelState.IsValid)
+        {
+            model.Id = id;
+            ViewBag.Images = await _media.GetByEntityAsync("blog_post", id);
+            return View(model);
+        }
 
         if (existing.Title != model.Title)
             existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "BlogPosts", id);

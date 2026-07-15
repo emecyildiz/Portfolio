@@ -13,11 +13,17 @@ public class TeamController : AdminBaseController
 {
     private readonly ISlugService _slugService;
     private readonly IMediaService _media;
+    private readonly ILogger<TeamController> _logger;
 
-    public TeamController(AppDbContext db, ISlugService slugService, IMediaService media) : base(db)
+    public TeamController(
+        AppDbContext db,
+        ISlugService slugService,
+        IMediaService media,
+        ILogger<TeamController> logger) : base(db)
     {
         _slugService = slugService;
         _media = media;
+        _logger = logger;
     }
 
     public async Task<IActionResult> Index()
@@ -35,9 +41,18 @@ public class TeamController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(TeamProject model,
+    public async Task<IActionResult> Create(
+    [Bind("Id,Title,Summary,Content,EventName,EventDate,EventUrl,MyRole,Outcome,GithubUrl,LiveDemoUrl,IsFeatured,Status")] TeamProject model,
     string? TeamMembersJson, List<IFormFile>? Images)
     {
+        AdminContentValidator.ValidateTeam(ModelState, model, _slugService);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
+        var membersAreValid = TeamMemberJsonService.TryNormalize(
+            TeamMembersJson, out _, out var normalizedTeamMembers);
+        if (!membersAreValid)
+            ModelState.AddModelError(string.Empty, "Team member details or links are invalid.");
+
         if (!ModelState.IsValid)
         {
             var errors = ModelState
@@ -46,13 +61,6 @@ public class TeamController : AdminBaseController
                 .ToList();
 
             TempData["Error"] = "Form errors: " + string.Join(" | ", errors);
-            return View(model);
-        }
-
-        if (!TeamMemberJsonService.TryNormalize(
-                TeamMembersJson, out _, out var normalizedTeamMembers))
-        {
-            TempData["Error"] = "Team member details or links are invalid.";
             return View(model);
         }
 
@@ -97,7 +105,8 @@ public class TeamController : AdminBaseController
         }
         catch (Exception ex)
         {
-            TempData["Error"] = $"Error: {ex.Message}";
+            _logger.LogError(ex, "Creating a team project failed.");
+            TempData["Error"] = "The team project could not be created. Review the form and try again.";
             return View(model);
         }
     }
@@ -121,17 +130,27 @@ public class TeamController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, TeamProject model,
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Summary,Content,EventName,EventDate,EventUrl,MyRole,Outcome,GithubUrl,LiveDemoUrl,IsFeatured,Status")] TeamProject model,
         string? TeamMembersJson, List<IFormFile>? Images)
     {
         var existing = await _db.TeamProjects.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == id);
         if (existing == null) return NotFound();
 
-        if (!TeamMemberJsonService.TryNormalize(
-                TeamMembersJson, out _, out var normalizedTeamMembers))
+        AdminContentValidator.ValidateTeam(ModelState, model, _slugService);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+        var membersAreValid = TeamMemberJsonService.TryNormalize(
+            TeamMembersJson, out var submittedMembers, out var normalizedTeamMembers);
+        if (!membersAreValid)
+            ModelState.AddModelError(string.Empty, "Team member details or links are invalid.");
+
+        if (!ModelState.IsValid)
         {
-            TempData["Error"] = "Team member details or links are invalid.";
-            return RedirectToAction(nameof(Edit), new { id });
+            model.Id = id;
+            ViewBag.Members = submittedMembers;
+            ViewBag.Images = await _media.GetByEntityAsync("team_project", id);
+            return View(model);
         }
 
         if (existing.Title != model.Title)
@@ -154,7 +173,7 @@ public class TeamController : AdminBaseController
         existing.IsFeatured = model.IsFeatured;
         existing.UpdatedAt  = DateTime.UtcNow;
 
-        if (normalizedTeamMembers != null)
+        if (!string.IsNullOrWhiteSpace(TeamMembersJson))
             existing.TeamMembers = normalizedTeamMembers;
 
         await _db.SaveChangesAsync();

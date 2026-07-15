@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models;
 using Portfolio.Models.Enums;
+using Portfolio.Services;
 
 namespace Portfolio.Areas.Admin.Controllers;
 
@@ -11,6 +12,8 @@ namespace Portfolio.Areas.Admin.Controllers;
 [Authorize]
 public class CategoryController : AdminBaseController
 {
+    private static readonly HashSet<string> ProtectedCategorySlugs =
+        ["security", "electronics", "webapps", "homelab", "blog", "team", "notes"];
 
     public CategoryController(AppDbContext db) : base(db) { }
 
@@ -29,8 +32,14 @@ public class CategoryController : AdminBaseController
     // Save a new category
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Category model)
+    public async Task<IActionResult> Create(
+        [Bind("Id,Name,Slug,Description,IconClass,SortOrder,IsPrivate,Status")] Category model)
     {
+        AdminContentValidator.ValidateCategory(ModelState, model);
+
+        if (await _db.Categories.AnyAsync(category => category.Slug == model.Slug))
+            ModelState.AddModelError(nameof(model.Slug), "This slug is already in use.");
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -54,14 +63,25 @@ public class CategoryController : AdminBaseController
     // Save changes
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Category model)
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Name,Slug,Description,IconClass,SortOrder,IsPrivate,Status")] Category model)
     {
         if (id != model.Id) return BadRequest();
-        if (!ModelState.IsValid) return View(model);
 
         // Load the existing database record.
         var existing = await _db.Categories.FindAsync(id);
         if (existing == null) return NotFound();
+
+        AdminContentValidator.ValidateCategory(ModelState, model);
+
+        if (ProtectedCategorySlugs.Contains(existing.Slug) && existing.Slug != model.Slug)
+            ModelState.AddModelError(nameof(model.Slug), "The slug of a built-in category cannot be changed.");
+
+        if (await _db.Categories.AnyAsync(category => category.Id != id && category.Slug == model.Slug))
+            ModelState.AddModelError(nameof(model.Slug), "This slug is already in use.");
+
+        if (!ModelState.IsValid) return View(model);
 
         // Update only editable fields to preserve database-managed values.
         existing.Name = model.Name;
@@ -103,6 +123,12 @@ public class CategoryController : AdminBaseController
     {
         var category = await _db.Categories.FindAsync(id);
         if (category == null) return NotFound();
+
+        if (ProtectedCategorySlugs.Contains(category.Slug))
+        {
+            TempData["Error"] = "Built-in categories cannot be deleted because public routes depend on them.";
+            return RedirectToAction(nameof(Index));
+        }
 
         _db.Categories.Remove(category);
         await _db.SaveChangesAsync();

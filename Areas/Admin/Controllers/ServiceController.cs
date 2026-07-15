@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models;
 using Portfolio.Models.Enums;
+using Portfolio.Services;
 
 namespace Portfolio.Areas.Admin.Controllers;
 
@@ -22,13 +23,12 @@ public class ServiceController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Service model)
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Description,IconClass,Status,SortOrder")] Service model)
     {
-        if (string.IsNullOrWhiteSpace(model.Title))
-        {
-            ModelState.AddModelError("", "Title is required.");
+        AdminContentValidator.ValidateService(ModelState, model);
+        if (!ModelState.IsValid)
             return View(model);
-        }
 
         model.CreatedAt = DateTime.UtcNow;
         model.UpdatedAt = DateTime.UtcNow;
@@ -46,10 +46,19 @@ public class ServiceController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Service model)
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Description,IconClass,Status,SortOrder")] Service model)
     {
         var existing = await _db.Services.FindAsync(id);
         if (existing == null) return NotFound();
+
+        AdminContentValidator.ValidateService(ModelState, model);
+        if (!ModelState.IsValid)
+        {
+            model.Id = id;
+            return View(model);
+        }
 
         existing.Title = model.Title;
         existing.Description = model.Description;

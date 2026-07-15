@@ -37,9 +37,13 @@ public class SecurityController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(SecurityResearch model,
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Summary,Content,ResearchType,TargetCategory,CveId,SeverityLevel,DisclosureStatus,GithubUrl,IsFeatured,Status")] SecurityResearch model,
         string? ToolsUsed, List<IFormFile>? Images)
     {
+        AdminContentValidator.ValidateSecurity(ModelState, model, _slugService, ToolsUsed);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -61,14 +65,10 @@ public class SecurityController : AdminBaseController
             : null;
 
         // Convert the tools string into a JSON list.
-        if (!string.IsNullOrEmpty(ToolsUsed))
-        {
-            var tools = ToolsUsed
-                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(t => t.Trim())
-                .ToList();
-            model.ToolsUsed = JsonSerializer.Serialize(tools);
-        }
+        var tools = ToolsUsed?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        model.ToolsUsed = tools is { Count: > 0 } ? JsonSerializer.Serialize(tools) : null;
 
         _db.SecurityResearches.Add(model);
         await _db.SaveChangesAsync();
@@ -115,13 +115,25 @@ public class SecurityController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, SecurityResearch model,
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Summary,Content,ResearchType,TargetCategory,CveId,SeverityLevel,DisclosureStatus,GithubUrl,IsFeatured,Status")] SecurityResearch model,
         string? ToolsUsed, List<IFormFile>? Images)
     {
         var existing = await _db.SecurityResearches
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(s => s.Id == id);
         if (existing == null) return NotFound();
+
+        AdminContentValidator.ValidateSecurity(ModelState, model, _slugService, ToolsUsed);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+        if (!ModelState.IsValid)
+        {
+            model.Id = id;
+            ViewBag.ToolsString = ToolsUsed ?? string.Empty;
+            ViewBag.Images = await _media.GetByEntityAsync("security_research", id);
+            return View(model);
+        }
 
         if (existing.Title != model.Title)
             existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "SecurityResearches", id);
@@ -147,14 +159,10 @@ public class SecurityController : AdminBaseController
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
 
-        if (!string.IsNullOrEmpty(ToolsUsed))
-        {
-            var tools = ToolsUsed
-                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(t => t.Trim())
-                .ToList();
-            existing.ToolsUsed = JsonSerializer.Serialize(tools);
-        }
+        var tools = ToolsUsed?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        existing.ToolsUsed = tools is { Count: > 0 } ? JsonSerializer.Serialize(tools) : null;
 
         await _db.SaveChangesAsync();
 
@@ -195,6 +203,13 @@ public class SecurityController : AdminBaseController
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(s => s.Id == id);
         if (research == null) return NotFound();
+
+        if (research.Status != VisibilityStatus.Public &&
+            research.DisclosureStatus != DisclosureStatus.PubliclyDisclosed)
+        {
+            TempData["Error"] = "Research cannot be published before it is marked as publicly disclosed.";
+            return RedirectToAction(nameof(Index));
+        }
 
         research.Status = research.Status == VisibilityStatus.Public
             ? VisibilityStatus.Draft

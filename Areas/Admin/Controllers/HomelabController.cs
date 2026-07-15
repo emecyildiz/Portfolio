@@ -40,9 +40,14 @@ public class HomelabController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(HomelabPost model,
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Summary,Content,Topic,NetworkDiagramUrl,IsFeatured,IsMainLab,Status")] HomelabPost model,
         string? HardwareUsed, string? SoftwareUsed, List<IFormFile>? Images)
     {
+        AdminContentValidator.ValidateHomelab(
+            ModelState, model, _slugService, HardwareUsed, SoftwareUsed);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -60,19 +65,14 @@ public class HomelabController : AdminBaseController
         model.UpdatedAt = DateTime.UtcNow;
         model.PublishedAt = model.Status == VisibilityStatus.Public ? DateTime.UtcNow : null;
 
-        if (!string.IsNullOrEmpty(HardwareUsed))
-        {
-            var hw = HardwareUsed.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(h => h.Trim()).ToList();
-            model.HardwareUsed = JsonSerializer.Serialize(hw);
-        }
-
-        if (!string.IsNullOrEmpty(SoftwareUsed))
-        {
-            var sw = SoftwareUsed.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim()).ToList();
-            model.SoftwareUsed = JsonSerializer.Serialize(sw);
-        }
+        var hardware = HardwareUsed?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        var software = SoftwareUsed?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        model.HardwareUsed = hardware is { Count: > 0 } ? JsonSerializer.Serialize(hardware) : null;
+        model.SoftwareUsed = software is { Count: > 0 } ? JsonSerializer.Serialize(software) : null;
 
         _db.HomelabPosts.Add(model);
         await _db.SaveChangesAsync();
@@ -119,17 +119,35 @@ public class HomelabController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, HomelabPost model,
+    public async Task<IActionResult> Edit(
+    int id,
+    [Bind("Id,Title,Summary,Content,Topic,NetworkDiagramUrl,IsFeatured,IsMainLab,Status")] HomelabPost model,
     string? HardwareUsed, string? SoftwareUsed, string? NetworkTopologyJson, List<IFormFile>? Images)
     {
         var existing = await _db.HomelabPosts.IgnoreQueryFilters().FirstOrDefaultAsync(h => h.Id == id);
         if (existing == null) return NotFound();
 
-        if (!NetworkTopologyJsonService.TryNormalize(
-                NetworkTopologyJson, out _, out var normalizedTopology))
+        AdminContentValidator.ValidateHomelab(
+            ModelState, model, _slugService, HardwareUsed, SoftwareUsed);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
+        var topologyIsValid = NetworkTopologyJsonService.TryNormalize(
+            NetworkTopologyJson, out _, out var normalizedTopology);
+        if (!topologyIsValid)
         {
-            TempData["Error"] = "The network topology is invalid or exceeds the allowed limits.";
-            return RedirectToAction(nameof(Edit), new { id });
+            ModelState.AddModelError(string.Empty, "The network topology is invalid or exceeds the allowed limits.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            model.Id = id;
+            ViewBag.HardwareString = HardwareUsed ?? string.Empty;
+            ViewBag.SoftwareString = SoftwareUsed ?? string.Empty;
+            ViewBag.Images = await _media.GetByEntityAsync("homelab_post", id);
+            ViewBag.NetworkTopologyJson = topologyIsValid
+                ? normalizedTopology
+                : existing.NetworkTopology;
+            return View(model);
         }
 
         if (existing.Title != model.Title)
@@ -149,16 +167,17 @@ public class HomelabController : AdminBaseController
         existing.ReadingTimeMinutes = _readingTime.Calculate(model.Content);
         existing.UpdatedAt = DateTime.UtcNow;
 
-        if (!string.IsNullOrEmpty(HardwareUsed))
-            existing.HardwareUsed = JsonSerializer.Serialize(
-                HardwareUsed.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(h => h.Trim()).ToList());
-
-        if (!string.IsNullOrEmpty(SoftwareUsed))
-            existing.SoftwareUsed = JsonSerializer.Serialize(
-                SoftwareUsed.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList());
+        var hardware = HardwareUsed?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        var software = SoftwareUsed?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+        existing.HardwareUsed = hardware is { Count: > 0 } ? JsonSerializer.Serialize(hardware) : null;
+        existing.SoftwareUsed = software is { Count: > 0 } ? JsonSerializer.Serialize(software) : null;
 
         // Save the network topology JSON.
-        if (normalizedTopology != null)
+        if (!string.IsNullOrWhiteSpace(NetworkTopologyJson))
             existing.NetworkTopology = normalizedTopology;
 
         await _db.SaveChangesAsync();

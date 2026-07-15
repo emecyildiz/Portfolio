@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models;
 using Portfolio.Models.Enums;
+using Portfolio.Services;
 
 namespace Portfolio.Areas.Admin.Controllers;
 
@@ -23,8 +24,11 @@ public class NoteController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Note model)
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Content,NoteType,RelatedUrl,IsTodo,IsCompleted,DueDate,Priority")] Note model)
     {
+        AdminContentValidator.ValidateNote(ModelState, model);
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -46,13 +50,20 @@ public class NoteController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Note model)
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Content,NoteType,RelatedUrl,IsTodo,IsCompleted,DueDate,Priority")] Note model)
     {
-        if (!ModelState.IsValid)
-            return View(model);
-
         var existing = await _db.Notes.FindAsync(id);
         if (existing == null) return NotFound();
+
+        AdminContentValidator.ValidateNote(ModelState, model);
+
+        if (!ModelState.IsValid)
+        {
+            model.Id = id;
+            return View(model);
+        }
 
         existing.Title = model.Title;
         existing.Content = model.Content;

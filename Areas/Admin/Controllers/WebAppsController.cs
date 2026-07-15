@@ -39,11 +39,16 @@ public class WebAppsController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Project model,
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,IsFeatured,Status")] Project model,
         string? TechStack, int? TeamSize, string? MyRole,
         string? Subdomain, bool IsSchoolProject,
         List<IFormFile>? Images)
     {
+        AdminContentValidator.ValidateProject(ModelState, model, _slugService);
+        AdminContentValidator.ValidateWebAppFields(ModelState, TechStack, TeamSize, MyRole, Subdomain);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
         if (!ModelState.IsValid)
             return View(model);
 
@@ -70,8 +75,8 @@ public class WebAppsController : AdminBaseController
         {
             TechStack = techStack,
             TeamSize = TeamSize,
-            MyRole = MyRole,
-            Subdomain = Subdomain,
+            MyRole = string.IsNullOrWhiteSpace(MyRole) ? null : MyRole.Trim(),
+            Subdomain = string.IsNullOrWhiteSpace(Subdomain) ? null : Subdomain.Trim().ToLowerInvariant(),
             IsSchoolProject = IsSchoolProject
         });
 
@@ -116,13 +121,34 @@ public class WebAppsController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Project model,
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,IsFeatured,Status")] Project model,
         string? TechStack, int? TeamSize, string? MyRole,
         string? Subdomain, bool IsSchoolProject,
         List<IFormFile>? Images)
     {
         var existing = await _db.Projects.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (existing == null) return NotFound();
+
+        AdminContentValidator.ValidateProject(ModelState, model, _slugService);
+        AdminContentValidator.ValidateWebAppFields(ModelState, TechStack, TeamSize, MyRole, Subdomain);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
+        if (!ModelState.IsValid)
+        {
+            model.Id = id;
+            ViewBag.Extra = new WebAppExtraData
+            {
+                TechStack = TechStack?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
+                TeamSize = TeamSize,
+                MyRole = MyRole,
+                Subdomain = Subdomain,
+                IsSchoolProject = IsSchoolProject
+            };
+            ViewBag.Images = await _media.GetByEntityAsync("project", id);
+            return View(model);
+        }
 
         if (existing.Title != model.Title)
             existing.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Projects", id);
@@ -149,8 +175,8 @@ public class WebAppsController : AdminBaseController
         {
             TechStack = techStack,
             TeamSize = TeamSize,
-            MyRole = MyRole,
-            Subdomain = Subdomain,
+            MyRole = string.IsNullOrWhiteSpace(MyRole) ? null : MyRole.Trim(),
+            Subdomain = string.IsNullOrWhiteSpace(Subdomain) ? null : Subdomain.Trim().ToLowerInvariant(),
             IsSchoolProject = IsSchoolProject
         });
 

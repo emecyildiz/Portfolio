@@ -42,6 +42,9 @@ public class MessageController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> MarkStatus(int id, ContactStatus status)
     {
+        if (!Enum.IsDefined(status))
+            return BadRequest();
+
         var message = await _db.ContactMessages.FindAsync(id);
         if (message == null) return NotFound();
 

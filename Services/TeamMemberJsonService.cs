@@ -56,5 +56,5 @@ public static class TeamMemberJsonService
 
     private static bool HasSafeExternalUrl(string? value) =>
         string.IsNullOrWhiteSpace(value) ||
-        (value.Length <= 2_048 && SafeUrlPolicy.IsSafeAbsoluteHttpUrl(value));
+        (value.Length <= 2_048 && SafeUrlPolicy.IsSafeAbsoluteHttpsUrl(value));
 }

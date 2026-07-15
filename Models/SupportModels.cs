@@ -10,7 +10,7 @@ namespace Portfolio.Models
         public string EntityType { get; set; } = string.Empty;
         public int EntityId { get; set; }
 
-        public string Url { get; set; } = string.Empty;           // Tam URL veya /uploads/... yolu
+        public string Url { get; set; } = string.Empty;           // Absolute URL or /uploads/... path
         public string Filename { get; set; } = string.Empty;      // Original filename
         public string? AltText { get; set; }                      // SEO and accessibility text
         public string? Caption { get; set; }                      // "ESP32 Wi-Fi chip"

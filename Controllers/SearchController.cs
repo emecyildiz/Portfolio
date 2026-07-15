@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 using Portfolio.Data;
 using Portfolio.Models.ViewModels;
 
@@ -9,16 +10,23 @@ public class SearchController : BaseController
 {
     public SearchController(AppDbContext db) : base(db) { }
 
+    [EnableRateLimiting("SearchLimit")]
     public async Task<IActionResult> Index(string? q)
     {
-        ViewBag.Query = q;
+        var term = q?.Trim();
+        ViewBag.Query = term;
 
-        if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
+        if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
         {
             return View(new List<SearchResultItem>());
         }
 
-        var term = q.Trim();
+        if (term.Length > 100)
+        {
+            ViewBag.SearchError = "Search queries cannot exceed 100 characters.";
+            return View(new List<SearchResultItem>());
+        }
+
         var results = new List<SearchResultItem>();
 
         // Security research

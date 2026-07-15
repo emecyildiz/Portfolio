@@ -8,7 +8,7 @@
     <div>
         <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Content structure</p>
         <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">New category</h2>
-        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Create a section and define how it participates in navigation.</p>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Create a section record. A new public category needs a matching controller and route before it can become a working public section.</p>
     </div>
     <a href="@Url.Action("Index", "Category", new { area = "Admin" })" class="focus-ring w-fit border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to categories</a>
 </div>
@@ -32,7 +32,7 @@
                 <div>
                     <label asp-for="Slug" class="admin-label">Slug</label>
                     <input asp-for="Slug" class="admin-input font-mono" autocomplete="off" aria-describedby="category-slug-help" placeholder="electronics" />
-                    <p id="category-slug-help" class="admin-hint">Core section slugs also map to controllers. Change them only when the corresponding routes are updated.</p>
+                    <p id="category-slug-help" class="admin-hint">Use lowercase letters, numbers, and hyphens. Built-in section slugs are protected because public routes depend on them.</p>
                     <span asp-validation-for="Slug"></span>
                 </div>
 

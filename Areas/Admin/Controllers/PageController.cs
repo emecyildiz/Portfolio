@@ -30,13 +30,12 @@ public class PageController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Page model)
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Content,CoverImageUrl,Status,ShowInNav,SortOrder")] Page model)
     {
-        if (string.IsNullOrWhiteSpace(model.Title))
-        {
-            TempData["Error"] = "Title is required.";
+        AdminContentValidator.ValidatePage(ModelState, model, _slugService);
+        if (!ModelState.IsValid)
             return View(model);
-        }
 
         model.Slug = await _slugService.GenerateUniqueAsync(model.Title, "Pages");
         model.CreatedAt = DateTime.UtcNow;
@@ -58,14 +57,17 @@ public class PageController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Page model)
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Content,CoverImageUrl,Status,ShowInNav,SortOrder")] Page model)
     {
         var existing = await _db.Pages.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (existing == null) return NotFound();
 
-        if (string.IsNullOrWhiteSpace(model.Title))
+        AdminContentValidator.ValidatePage(ModelState, model, _slugService);
+        if (!ModelState.IsValid)
         {
-            TempData["Error"] = "Title is required.";
+            model.Id = id;
             return View(model);
         }
 

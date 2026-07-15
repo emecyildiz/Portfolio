@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models;
 using Portfolio.Models.Enums;
+using Portfolio.Services;
 
 namespace Portfolio.Areas.Admin.Controllers;
 
@@ -23,13 +24,12 @@ public class CertificateController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Certificate model)
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Issuer,CredentialId,CredentialUrl,ImageUrl,IssuedDate,ExpiryDate,Status,SortOrder")] Certificate model)
     {
-        if (string.IsNullOrWhiteSpace(model.Title))
-        {
-            TempData["Error"] = "Title is required.";
+        AdminContentValidator.ValidateCertificate(ModelState, model);
+        if (!ModelState.IsValid)
             return View(model);
-        }
 
         model.CreatedAt = DateTime.UtcNow;
         model.UpdatedAt = DateTime.UtcNow;
@@ -49,10 +49,19 @@ public class CertificateController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Certificate model)
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Issuer,CredentialId,CredentialUrl,ImageUrl,IssuedDate,ExpiryDate,Status,SortOrder")] Certificate model)
     {
         var existing = await _db.Certificates.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Id == id);
         if (existing == null) return NotFound();
+
+        AdminContentValidator.ValidateCertificate(ModelState, model);
+        if (!ModelState.IsValid)
+        {
+            model.Id = id;
+            return View(model);
+        }
 
         existing.Title = model.Title;
         existing.Issuer = model.Issuer;

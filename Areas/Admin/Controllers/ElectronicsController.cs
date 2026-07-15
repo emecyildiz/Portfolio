@@ -43,11 +43,17 @@ public class ElectronicsController : AdminBaseController
     // Save a new project
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Project model,
+    public async Task<IActionResult> Create(
+        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,IsFeatured,Status")] Project model,
         string? Microcontroller, string? Components, string? SchematicUrl,
         string? ProgrammingLanguage, bool IsOpenSource,
         List<IFormFile>? Images)
     {
+        AdminContentValidator.ValidateProject(ModelState, model, _slugService);
+        AdminContentValidator.ValidateElectronicsFields(
+            ModelState, Microcontroller, Components, SchematicUrl, ProgrammingLanguage);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
         if (!ModelState.IsValid)
             return View(model);
         // Find the electronics category.
@@ -74,10 +80,10 @@ public class ElectronicsController : AdminBaseController
         // ExtraData JSONB
         model.ExtraData = JsonSerializer.Serialize(new ElectronicsExtraData
         {
-            Microcontroller = Microcontroller,
+            Microcontroller = string.IsNullOrWhiteSpace(Microcontroller) ? null : Microcontroller.Trim(),
             Components = components,
-            SchematicUrl = SchematicUrl,
-            ProgrammingLanguage = ProgrammingLanguage,
+            SchematicUrl = string.IsNullOrWhiteSpace(SchematicUrl) ? null : SchematicUrl.Trim(),
+            ProgrammingLanguage = string.IsNullOrWhiteSpace(ProgrammingLanguage) ? null : ProgrammingLanguage.Trim(),
             IsOpenSource = IsOpenSource
         });
 
@@ -130,13 +136,35 @@ public class ElectronicsController : AdminBaseController
     // Save changes
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Project model,
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,IsFeatured,Status")] Project model,
         string? Microcontroller, string? Components, string? SchematicUrl,
         string? ProgrammingLanguage, bool IsOpenSource,
         List<IFormFile>? Images)
     {
         var existing = await _db.Projects.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
         if (existing == null) return NotFound();
+
+        AdminContentValidator.ValidateProject(ModelState, model, _slugService);
+        AdminContentValidator.ValidateElectronicsFields(
+            ModelState, Microcontroller, Components, SchematicUrl, ProgrammingLanguage);
+        await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
+
+        if (!ModelState.IsValid)
+        {
+            model.Id = id;
+            ViewBag.Extra = new ElectronicsExtraData
+            {
+                Microcontroller = Microcontroller,
+                Components = Components?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
+                SchematicUrl = SchematicUrl,
+                ProgrammingLanguage = ProgrammingLanguage,
+                IsOpenSource = IsOpenSource
+            };
+            ViewBag.Images = await _media.GetByEntityAsync("project", id);
+            return View(model);
+        }
 
         // Update the slug only when the title changes.
         if (existing.Title != model.Title)
@@ -162,10 +190,10 @@ public class ElectronicsController : AdminBaseController
 
         existing.ExtraData = JsonSerializer.Serialize(new ElectronicsExtraData
         {
-            Microcontroller = Microcontroller,
+            Microcontroller = string.IsNullOrWhiteSpace(Microcontroller) ? null : Microcontroller.Trim(),
             Components = components,
-            SchematicUrl = SchematicUrl,
-            ProgrammingLanguage = ProgrammingLanguage,
+            SchematicUrl = string.IsNullOrWhiteSpace(SchematicUrl) ? null : SchematicUrl.Trim(),
+            ProgrammingLanguage = string.IsNullOrWhiteSpace(ProgrammingLanguage) ? null : ProgrammingLanguage.Trim(),
             IsOpenSource = IsOpenSource
         });
 

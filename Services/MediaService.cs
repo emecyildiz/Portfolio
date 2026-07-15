@@ -13,6 +13,12 @@ public interface IMediaService
                           string? altText = null, string? caption = null);
 
     /// <summary>
+    /// Validates an image before an entity is saved so invalid uploads cannot leave partial records.
+    /// Returns null when the upload is valid.
+    /// </summary>
+    Task<string?> GetUploadValidationErrorAsync(IFormFile file);
+
+    /// <summary>
     /// Gets all images attached to a content item.
     /// </summary>
     Task<List<Media>> GetByEntityAsync(string entityType, int entityId);
@@ -58,18 +64,9 @@ public class MediaService : IMediaService
         if (!await EntityExistsAsync(entityType, entityId))
             throw new InvalidOperationException("The content item for this media could not be found.");
 
-        // Enforce the size limit from appsettings (10 MB by default).
-        var maxSize = _config.GetValue<long>("MediaStorage:MaxFileSizeBytes", 10_485_760);
-        if (file.Length <= 0)
-            throw new InvalidOperationException("An empty file cannot be uploaded.");
-
-        if (file.Length > maxSize)
-            throw new InvalidOperationException($"The file is too large. Maximum: {maxSize / 1_048_576} MB");
-
-        // The extension, MIME type, and actual file signature must match.
-        var validatedUpload = await UploadFileValidator.ValidateImageAsync(file);
+        var (validatedUpload, validationError) = await ValidateUploadAsync(file);
         if (validatedUpload == null)
-            throw new InvalidOperationException("The file is not a valid JPEG, PNG, WebP, or GIF image.");
+            throw new InvalidOperationException(validationError ?? "The image upload is invalid.");
 
         // Generate a unique filename; never include the user-supplied name in the physical path.
         var uniqueName = $"{Guid.NewGuid()}{validatedUpload.Extension}";
@@ -119,6 +116,12 @@ public class MediaService : IMediaService
         }
 
         return media;
+    }
+
+    public async Task<string?> GetUploadValidationErrorAsync(IFormFile file)
+    {
+        var (_, error) = await ValidateUploadAsync(file);
+        return error;
     }
 
     public async Task<List<Media>> GetByEntityAsync(string entityType, int entityId)
@@ -315,6 +318,21 @@ public class MediaService : IMediaService
         {
             // Preserve the original upload or database error; cleanup can happen during maintenance.
         }
+    }
+
+    private async Task<(ValidatedUpload? Upload, string? Error)> ValidateUploadAsync(IFormFile file)
+    {
+        var maxSize = _config.GetValue<long>("MediaStorage:MaxFileSizeBytes", 10_485_760);
+        if (file.Length <= 0)
+            return (null, "Empty image files cannot be uploaded.");
+
+        if (file.Length > maxSize)
+            return (null, $"Each image must be no larger than {maxSize / 1_048_576} MB.");
+
+        var validatedUpload = await UploadFileValidator.ValidateImageAsync(file);
+        return validatedUpload == null
+            ? (null, "Images must be valid JPEG, PNG, WebP, or GIF files whose extension, MIME type, and contents match.")
+            : (validatedUpload, null);
     }
 
     private async Task<int> GetNextSortOrderAsync(string entityType, int entityId)

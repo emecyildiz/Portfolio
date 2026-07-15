@@ -242,7 +242,6 @@ namespace Portfolio.Data
         public override int SaveChanges()
         {
             UpdateTimestamps();
-            // AuditService runs here; see Services/AuditService.cs.
             return base.SaveChanges();
         }
 
