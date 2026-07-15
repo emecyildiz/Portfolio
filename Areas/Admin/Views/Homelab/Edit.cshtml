@@ -131,7 +131,7 @@
                             </button>
                         </div>
                         <div id="network-layout-editor"
-                             class="h-96 overflow-hidden border border-line bg-ink"></div>
+                             class="h-96 overflow-hidden border border-slate-400/30" style="background-color: #e8eef2; background-image: linear-gradient(rgba(15, 23, 42, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, .08) 1px, transparent 1px); background-size: 32px 32px;"></div>
                         <p id="network-layout-status" class="admin-hint"></p>
                     </div>
                 </div>
@@ -218,7 +218,7 @@
     new EasyMDE({
         element: document.getElementById('content-editor'),
         spellChecker: false,
-        toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'ordered-list', '|', 'link', 'image', '|', 'preview', 'side-by-side', 'fullscreen']
+        toolbar: window.portfolioMarkdownToolbar
     });
 </script>
 <script>
@@ -327,9 +327,9 @@
             image: imageUrl || undefined,
             color: imageUrl ? undefined : (layoutTypeColors[device.deviceType] || '#6B7280'),
             size: 24,
-            font: { color: '#D1D5DB', size: 13, face: 'Inter' },
+            font: { color: '#0F172A', size: 13, face: 'Inter', strokeWidth: 3, strokeColor: '#E8EEF2' },
             borderWidth: 2,
-            shapeProperties: { useImageSize: false },
+            shapeProperties: { useImageSize: false, interpolation: false },
             x: device.x,
             y: device.y
         };
@@ -359,8 +359,8 @@
             from: connection.from,
             to: connection.to,
             label: connection.label || '',
-            color: { color: '#4B5563' },
-            font: { color: '#6B7280', size: 10, strokeWidth: 0 },
+            color: { color: '#475569' },
+            font: { color: '#334155', size: 10, strokeWidth: 3, strokeColor: '#E8EEF2' },
             smooth: false
         })));
 

@@ -14,8 +14,8 @@
         <div class="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
                 <div class="flex flex-wrap items-center gap-3"><span class="inline-flex items-center gap-2 rounded-full border border-signal/20 bg-signal/[0.06] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-signal"><span class="h-1.5 w-1.5 rounded-full bg-signal"></span>Available for selected work</span><span class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Secure · Traceable · Direct</span></div>
-                <h1 class="mt-7 max-w-5xl text-5xl font-semibold leading-[.95] tracking-[-0.055em] text-white sm:text-7xl">Bring me a system worth understanding<span class="text-signal">.</span></h1>
-                <p class="mt-7 max-w-3xl text-lg leading-8 text-slate-400">Cybersecurity research, network infrastructure, software, and electronics support—approached with clear scope, documented decisions, and practical outcomes.</p>
+                <h1 class="mt-7 max-w-5xl text-5xl font-semibold leading-[.95] tracking-[-0.055em] text-white sm:text-7xl">Hire me for security and engineering work<span class="text-signal">.</span></h1>
+                <p class="mt-7 max-w-3xl text-lg leading-8 text-slate-400">I take on selected cybersecurity, network infrastructure, software, and electronics work with a clear scope, documented decisions, and practical outcomes.</p>
             </div>
             <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
                 <button type="button" onclick="openTrackModal()" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.02] px-5 py-3.5 text-sm font-medium text-slate-300 transition hover:border-cyan/30 hover:text-white">Track a request <span aria-hidden="true">→</span></button>
@@ -47,9 +47,9 @@
 
     <section class="grid gap-10 border-t border-white/[0.07] pt-16 lg:grid-cols-[.65fr_1.35fr] lg:gap-16 lg:pt-20">
         <div>
-            <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-signal">Open a channel</p>
-            <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Start with the problem, not the solution.</h2>
-            <p class="mt-5 text-sm leading-7 text-slate-500">Share the context, desired outcome, and any constraints. A ticket number is generated after submission so you can check the request status later.</p>
+            <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-signal">Work inquiry</p>
+            <h2 class="mt-4 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Tell me what you need built, tested, or understood.</h2>
+            <p class="mt-5 text-sm leading-7 text-slate-500">Share the project or role, desired outcome, timeline, and constraints. A ticket number is generated after submission so you can check the inquiry status later.</p>
             <ol class="mt-8 space-y-4 border-l border-line pl-5">
                 <li><span class="font-mono text-[9px] uppercase tracking-[0.16em] text-signal">01 / Submit</span><p class="mt-1 text-sm text-slate-400">Describe the system or project.</p></li>
                 <li><span class="font-mono text-[9px] uppercase tracking-[0.16em] text-cyan">02 / Retain</span><p class="mt-1 text-sm text-slate-400">Save the generated ticket number.</p></li>
@@ -75,16 +75,16 @@
                     <div><label for="contactEmail" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Email</label><input id="contactEmail" name="Email" type="email" required maxlength="300" autocomplete="email" placeholder="you@example.com" class="w-full rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none" /></div>
                 </div>
 
-                <div><label for="contactSubject" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Subject</label><input id="contactSubject" name="Subject" type="text" maxlength="200" placeholder="What would you like to discuss?" class="w-full rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none" /></div>
+                <div><label for="contactSubject" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Project or role</label><input id="contactSubject" name="Subject" type="text" maxlength="200" placeholder="What are you hiring for?" class="w-full rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none" /></div>
 
                 @if (services.Any())
                 {
                     <div><label for="serviceSelect" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Service of interest</label><select name="ServiceId" id="serviceSelect" class="w-full rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm text-white transition focus:border-cyan/40 focus:outline-none"><option value="">Select a service (optional)</option>@foreach (var service in services){<option value="@service.Id">@service.Title</option>}</select></div>
                 }
 
-                <div><label for="contactMessage" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Message</label><textarea id="contactMessage" name="Message" rows="6" required maxlength="5000" placeholder="Describe the project, system, or question..." class="w-full resize-y rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm leading-6 text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none"></textarea><p class="mt-2 text-xs text-slate-700">Avoid including passwords, access tokens, private keys, or confidential datasets.</p></div>
+                <div><label for="contactMessage" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Project brief</label><textarea id="contactMessage" name="Message" rows="6" required maxlength="5000" placeholder="Describe the work, expected outcome, timeline, and constraints..." class="w-full resize-y rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm leading-6 text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none"></textarea><p class="mt-2 text-xs text-slate-700">Avoid including passwords, access tokens, private keys, or confidential datasets.</p></div>
 
-                <button type="submit" class="focus-ring inline-flex w-full items-center justify-center gap-3 rounded-md bg-signal px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Submit request <span aria-hidden="true">↗</span></button>
+                <button type="submit" class="focus-ring inline-flex w-full items-center justify-center gap-3 rounded-md bg-signal px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">Send work inquiry <span aria-hidden="true">↗</span></button>
             </form>
         </div>
     </section>

@@ -148,6 +148,13 @@
     }
 
     <script>
+        window.portfolioMarkdownToolbar = [
+            'bold', 'italic', 'strikethrough', 'heading', '|',
+            'quote', 'code', 'unordered-list', 'ordered-list', '|',
+            'link', 'image', 'table', 'horizontal-rule', '|',
+            'preview', 'side-by-side', 'fullscreen'
+        ];
+
         const adminSidebar = document.getElementById('adminSidebar');
         const adminSidebarOverlay = document.getElementById('adminSidebarOverlay');
         const adminMenuButton = document.getElementById('adminMenuButton');
@@ -197,6 +204,24 @@
 
         document.querySelectorAll('.admin-toast').forEach(toast => {
             window.setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; }, 3200);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const markdownEditor = document.getElementById('content-editor');
+            const editorContainer = document.querySelector('.EasyMDEContainer');
+            if (!markdownEditor || !editorContainer || document.getElementById('markdownSyntaxGuide')) return;
+
+            editorContainer.insertAdjacentHTML('afterend', `
+                <details id="markdownSyntaxGuide" class="mt-3 border border-line bg-ink/50 p-4 text-xs text-slate-400">
+                    <summary class="focus-ring cursor-pointer select-none font-medium text-slate-300">Markdown formatting reference</summary>
+                    <div class="mt-4 grid gap-2 font-mono text-[11px] sm:grid-cols-2 xl:grid-cols-3">
+                        <code># Heading</code><code>## Subheading</code><code>**bold**</code>
+                        <code>*italic*</code><code>~~strikethrough~~</code><code>&gt; quote</code>
+                        <code>- list item</code><code>[label](https://...)</code><code>&#96;&#96;&#96; code block</code>
+                    </div>
+                    <p class="mt-4 leading-5 text-slate-600">The toolbar also supports images, tables, dividers, code, and live preview. Raw HTML is disabled for security. A line beginning with # creates a heading; hashtag metadata is not connected to these editors yet.</p>
+                </details>
+            `);
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
