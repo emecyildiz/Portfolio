@@ -13,7 +13,7 @@ namespace Portfolio.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260711021510_sitesetting")]
-    partial class sitesetting
+    partial class SiteSetting
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

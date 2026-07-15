@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
-    # ports yok — PostgreSQL internete açık değil, sadece iç Docker network'ten erişilir
+    # No host port: PostgreSQL is reachable only through the internal Docker network
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "127.0.0.1:5000:8080" # Nginx bu porta yalnızca localhost üzerinden bağlanır
+      - "127.0.0.1:5000:8080" # Nginx connects to this port through localhost only
     depends_on:
       db:
         condition: service_healthy

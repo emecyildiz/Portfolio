@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Portfolio.Migrations
 {
     /// <inheritdoc />
-    public partial class sitesetting : Migration
+    public partial class SiteSetting : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
