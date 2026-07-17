@@ -4,8 +4,7 @@
     ViewData["Description"] = "Cybersecurity research, electronics projects, homelab work, and software development.";
     var activity = ViewBag.RecentActivity as List<Portfolio.Models.ViewModels.ActivityItem> ?? new();
     var certs = ViewBag.Certificates as List<Portfolio.Models.Certificate> ?? new();
-    var currentlyWorking = ViewBag.CurrentlyWorking as Portfolio.Models.Note;
-    var currentFocusUrl = currentlyWorking?.RelatedUrl?.Trim();
+    var currentFocusUrl = Model.CurrentFocus?.Url?.Trim();
     var hasSafeCurrentFocusUrl = false;
     if (!string.IsNullOrWhiteSpace(currentFocusUrl))
     {
@@ -55,7 +54,7 @@
                 </a>
             </div>
 
-            @if (currentlyWorking != null)
+            @if (Model.CurrentFocus != null)
             {
                 <div class="mt-7 max-w-2xl">
                     @if (hasSafeCurrentFocusUrl)
@@ -63,7 +62,7 @@
                         <a href="@currentFocusUrl" target="_blank" rel="noopener noreferrer" class="focus-ring group inline-flex max-w-full items-center gap-3 rounded-md border border-white/[0.08] bg-panel/70 px-4 py-3 transition hover:border-signal/30">
                             <span class="relative flex h-2 w-2 shrink-0"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal opacity-60"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-signal"></span></span>
                             <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">Current focus</span>
-                            <span class="truncate text-sm text-slate-300 transition group-hover:text-white">@currentlyWorking.Title</span>
+                            <span class="truncate text-sm text-slate-300 transition group-hover:text-white">@Model.CurrentFocus.Title</span>
                             <span aria-hidden="true" class="text-signal">↗</span>
                         </a>
                     }
@@ -72,7 +71,7 @@
                         <div class="inline-flex max-w-full items-center gap-3 rounded-md border border-white/[0.08] bg-panel/70 px-4 py-3">
                             <span class="relative flex h-2 w-2 shrink-0"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal opacity-60"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-signal"></span></span>
                             <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">Current focus</span>
-                            <span class="truncate text-sm text-slate-300">@currentlyWorking.Title</span>
+                            <span class="truncate text-sm text-slate-300">@Model.CurrentFocus.Title</span>
                         </div>
                     }
                 </div>

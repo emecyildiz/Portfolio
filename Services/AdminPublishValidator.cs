@@ -94,8 +94,13 @@ public static class AdminPublishValidator
             JoinList(hardware),
             JoinList(software));
 
-        if (!NetworkTopologyJsonService.TryNormalize(post.NetworkTopology, out _, out _))
-            modelState.AddModelError(string.Empty, StoredDataError);
+        if (!NetworkTopologyJsonService.TryNormalize(
+                post.NetworkTopology, out _, out _, out var topologyValidationError))
+        {
+            modelState.AddModelError(
+                string.Empty,
+                topologyValidationError ?? StoredDataError);
+        }
 
         post.Status = originalStatus;
         return modelState.IsValid;

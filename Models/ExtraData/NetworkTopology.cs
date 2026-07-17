@@ -28,6 +28,7 @@ public class NetworkNode
 
     // Homelab-specific information shared by every device.
     public string ShortInfo { get; set; } = string.Empty;       // Short summary shown on hover
+    // Kept as IpAddress in JSON for compatibility; only public, redacted network labels are accepted.
     public string? IpAddress { get; set; }
     public string HomelabRole { get; set; } = string.Empty;     // Purpose on this network
     public string? HomelabNotes { get; set; }                    // Additional notes
@@ -38,5 +39,5 @@ public class NetworkEdge
     public int From { get; set; }
     public int To { get; set; }
     public string ConnectionType { get; set; } = "ethernet";     // ethernet, wifi, usb, power, other
-    public string? Label { get; set; }                           // "VLAN 10", "WAN" gibi
+    public string? Label { get; set; }                           // For example, "VLAN 10" or "WAN"
 }

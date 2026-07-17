@@ -1,0 +1,38 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>@ViewData["Title"] — Admin Console</title>
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tailwind.min.css" asp-append-version="true" />
+    <style>
+        body {
+            background-color: #070b0f;
+            background-image:
+                linear-gradient(rgba(33, 48, 61, .16) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(33, 48, 61, .16) 1px, transparent 1px),
+                radial-gradient(circle at 15% 20%, rgba(56, 217, 255, .08), transparent 30%),
+                radial-gradient(circle at 85% 75%, rgba(157, 255, 32, .07), transparent 28%);
+            background-size: 32px 32px, 32px 32px, auto, auto;
+        }
+        .focus-ring:focus-visible { outline: 2px solid #9dff20; outline-offset: 3px; }
+        .field-validation-error { display: block; margin-top: .5rem; color: #fecdd3; font-size: .75rem; }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-slate-100 antialiased">
+    <main class="mx-auto flex min-h-screen w-full max-w-2xl flex-col justify-center px-5 py-10 sm:px-8">
+        <a href="/" class="focus-ring mb-10 inline-flex w-fit items-center gap-3 rounded-sm text-sm text-slate-400 transition hover:text-white">
+            <span class="flex h-9 w-9 items-center justify-center border border-line bg-panel font-mono text-xs font-semibold text-signal">P/</span>
+            <span class="font-mono uppercase tracking-[0.2em]">Portfolio system</span>
+        </a>
+        <section class="w-full border border-line bg-panel/95 p-6 shadow-2xl shadow-black/30 backdrop-blur sm:p-9">
+            @RenderBody()
+        </section>
+    </main>
+</body>
+</html>

@@ -29,6 +29,13 @@ if (!Regex.IsMatch(adminPath, "^[A-Za-z0-9][A-Za-z0-9_-]{2,63}$"))
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection must be configured.");
 
+if (builder.Environment.IsProduction() &&
+    connectionString.Contains("Password=change-me", StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException(
+        "The placeholder database password cannot be used in production.");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         connectionString,
@@ -264,6 +271,8 @@ var pageViewSkipPrefixes = new[]
     new PathString("/lib"),
     new PathString("/uploads"),
     new PathString("/icons"),
+    new PathString("/.well-known"),
+    new PathString("/blog/rss.xml"),
     new PathString("/favicon.ico"),
     new PathString("/robots.txt"),
     new PathString("/sitemap.xml"),

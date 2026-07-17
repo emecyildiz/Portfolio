@@ -38,6 +38,21 @@ public static class SafeUrlPolicy
                !string.IsNullOrWhiteSpace(uri.Host);
     }
 
+    public static bool IsSafeHttpsOrRootRelativeUrl(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
+
+        var url = value.Trim();
+        var isSafeRootRelativeUrl = url.StartsWith('/') &&
+                                    !url.StartsWith("//") &&
+                                    !url.Contains('\\') &&
+                                    !url.Any(char.IsControl) &&
+                                    Uri.TryCreate(url, UriKind.Relative, out _);
+
+        return isSafeRootRelativeUrl || IsAllowedAbsoluteUrl(url, WebResourceSchemes);
+    }
+
     private static bool IsSafeRelativeUrl(string value)
     {
         if (value.StartsWith("//") ||

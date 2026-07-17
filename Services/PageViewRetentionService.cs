@@ -18,7 +18,7 @@ public sealed class PageViewRetentionService : BackgroundService
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
-        _retentionDays = configuration.GetValue("Privacy:PageViewRetentionDays", 90);
+        _retentionDays = configuration.GetValue("Privacy:PageViewRetentionDays", 30);
 
         if (_retentionDays is < 7 or > 365)
         {

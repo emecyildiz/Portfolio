@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
-using Portfolio.Models.Enums;
 using Portfolio.Models.ViewModels;
 using Portfolio.Services;
 
@@ -45,10 +44,17 @@ public class HomeController : BaseController
                 .ToListAsync(),
         };
 
-        ViewBag.CurrentlyWorking = await _db.Notes
-            .Where(n => n.IsTodo && !n.IsCompleted &&
-                   (n.Priority == NotePriority.High || n.Priority == NotePriority.Critical))
-            .OrderByDescending(n => n.CreatedAt)
+        model.CurrentFocus = await _db.SiteSettings
+            .AsNoTracking()
+            .Where(settings => settings.ShowCurrentFocus &&
+                               settings.CurrentFocusTitle != null &&
+                               settings.CurrentFocusTitle != string.Empty)
+            .OrderBy(settings => settings.Id)
+            .Select(settings => new CurrentFocusViewModel
+            {
+                Title = settings.CurrentFocusTitle!,
+                Url = settings.CurrentFocusUrl
+            })
             .FirstOrDefaultAsync();
 
         ViewBag.Certificates = await _db.Certificates

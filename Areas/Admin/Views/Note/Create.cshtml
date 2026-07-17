@@ -13,11 +13,6 @@
     <a href="@Url.Action("Index", "Note", new { area = "Admin" })" class="focus-ring w-fit border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to notes</a>
 </div>
 
-<aside class="mb-6 max-w-6xl border border-amber-300/20 bg-amber-300/[0.05] px-4 py-3.5 text-sm leading-6 text-amber-100/80" aria-label="Privacy reminder">
-    <span class="font-medium text-amber-100">Privacy reminder:</span>
-    An open High or Critical task can expose its title and related link in the public Current Focus widget. Note content remains private.
-</aside>
-
 <form method="post" class="max-w-6xl">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly"></div>
@@ -30,8 +25,7 @@
             <div class="mt-6 space-y-5">
                 <div>
                     <label asp-for="Title" class="admin-label">Title</label>
-                    <input asp-for="Title" class="admin-input" autocomplete="off" aria-describedby="note-title-help" placeholder="Review firmware analysis notes" />
-                    <p id="note-title-help" class="admin-hint">Avoid confidential details if this may become a High or Critical task.</p>
+                    <input asp-for="Title" class="admin-input" autocomplete="off" placeholder="Review firmware analysis notes" />
                     <span asp-validation-for="Title"></span>
                 </div>
 
@@ -64,7 +58,7 @@
                 <div>
                     <label asp-for="RelatedUrl" class="admin-label">Related link <span class="font-normal text-slate-600">(optional)</span></label>
                     <input asp-for="RelatedUrl" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:/(?!/).+|https://.+)" title="Use a root-relative path or an HTTPS URL." aria-describedby="related-url-help" placeholder="/electronics/project-slug or https://..." />
-                    <p id="related-url-help" class="admin-hint">Used as the public Current Focus destination when this task qualifies. Prefer a root-relative path or trusted HTTPS URL.</p>
+                    <p id="related-url-help" class="admin-hint">Optional private reference for this note. Use a root-relative path or trusted HTTPS URL.</p>
                     <span asp-validation-for="RelatedUrl"></span>
                 </div>
 
@@ -72,7 +66,7 @@
                     <input asp-for="IsTodo" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" id="isTodoCheck" />
                     <span>
                         <span class="block text-sm font-medium text-slate-300">Add to task list</span>
-                        <span class="mt-1 block text-xs leading-5 text-slate-600">Enables due-date tracking and Current Focus eligibility.</span>
+                        <span class="mt-1 block text-xs leading-5 text-slate-600">Enables due-date tracking.</span>
                     </span>
                 </label>
 

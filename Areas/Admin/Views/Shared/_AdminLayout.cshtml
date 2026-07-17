@@ -106,6 +106,7 @@
                 <a asp-area="Admin" asp-controller="Certificate" asp-action="Index" class="focus-ring block rounded-lg px-3 py-2.5 text-sm transition @(isActive("Certificate") ? "bg-violet-300/10 text-violet-200" : "text-slate-400 hover:bg-white/[0.04] hover:text-white")">Certificates</a>
                 <a asp-area="Admin" asp-controller="Message" asp-action="Index" class="focus-ring block rounded-lg px-3 py-2.5 text-sm transition @(isActive("Message") ? "bg-violet-300/10 text-violet-200" : "text-slate-400 hover:bg-white/[0.04] hover:text-white")">Messages</a>
                 <a asp-area="Admin" asp-controller="Settings" asp-action="Index" class="focus-ring block rounded-lg px-3 py-2.5 text-sm transition @(isActive("Settings") ? "bg-violet-300/10 text-violet-200" : "text-slate-400 hover:bg-white/[0.04] hover:text-white")">Settings</a>
+                <a asp-area="Admin" asp-controller="AccountSecurity" asp-action="Index" class="focus-ring block rounded-lg px-3 py-2.5 text-sm transition @(isActive("AccountSecurity") ? "bg-violet-300/10 text-violet-200" : "text-slate-400 hover:bg-white/[0.04] hover:text-white")">Account security</a>
             </div>
         </nav>
 
@@ -129,10 +130,246 @@
     }
 
     <script>
+        window.portfolioEditorContext = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(currentController));
+        window.portfolioContentTemplates = {
+            Security: `## Overview
+
+[Summarize the research question, result, and why the work matters.]
+
+## Authorization and disclosure
+
+[State that the target was owned, lab-based, a CTF, or otherwise explicitly authorized. Describe the disclosure status without exposing sensitive details.]
+
+## Scope and environment
+
+- Target:
+- Environment:
+- Constraints:
+- Tools:
+
+## Methodology
+
+[Explain the reproducible analysis process and decision points.]
+
+## Findings
+
+### Finding 1
+
+- Evidence:
+- Impact:
+- Remediation:
+
+## Validation
+
+[Describe how findings and fixes were verified safely.]
+
+## Lessons learned
+
+[Record technical insights, limitations, and what you would change next time.]`,
+
+            Electronics: `## Overview
+
+[Explain what was built, the intended use, and the final result.]
+
+## Objective and constraints
+
+- Objective:
+- Power / size / cost constraints:
+- Success criteria:
+
+## Components and design
+
+[Describe the main components, interfaces, and design decisions.]
+
+## Build process
+
+[Document the circuit, assembly, revisions, and important failures.]
+
+## Firmware and software
+
+[Explain the control logic, protocols, and supporting tools.]
+
+## Validation
+
+[Include measurements, test conditions, and observed behavior.]
+
+## Result
+
+[Compare the outcome with the success criteria.]
+
+## Lessons learned
+
+[Record tradeoffs, limitations, and the next revision.]`,
+
+            WebApps: `## Overview
+
+[Summarize the product, users, and delivered outcome.]
+
+## Problem and requirements
+
+- Problem:
+- Core requirements:
+- Constraints:
+
+## Architecture
+
+[Explain the main components, data flow, and important technology choices.]
+
+## Implementation
+
+[Describe the difficult parts and the decisions behind them.]
+
+## Security and privacy
+
+[Document authentication, validation, data handling, and abuse controls.]
+
+## Testing and validation
+
+[List automated checks, manual scenarios, and performance or reliability evidence.]
+
+## Outcome
+
+[State measurable results, current limitations, and production status.]
+
+## Next steps
+
+[List realistic improvements rather than generic future work.]`,
+
+            Homelab: `## Overview
+
+[Explain the infrastructure goal and the capability this lab provides.]
+
+## Requirements and constraints
+
+- Workloads:
+- Availability target:
+- Hardware / power / budget constraints:
+
+## Architecture
+
+[Describe services, trust boundaries, segmentation, and data flow using public-safe details.]
+
+## Implementation
+
+[Document provisioning, configuration management, storage, and deployment choices.]
+
+## Security and privacy
+
+[Explain hardening, access control, secret handling, and backup boundaries without publishing live operational details.]
+
+## Monitoring and validation
+
+[Describe health checks, logging, failure tests, and recovery verification.]
+
+## Outcome
+
+[Summarize reliability, learning value, and current limitations.]
+
+## Lessons learned
+
+[Record tradeoffs and the next planned improvement.]`,
+
+            Team: `## Overview
+
+[Summarize the challenge, event, team, and final outcome.]
+
+## Problem and constraints
+
+[Explain the brief, deadline, rules, and success criteria.]
+
+## My role
+
+[State your ownership and distinguish your work from the team's work.]
+
+## Team approach
+
+[Describe responsibilities, collaboration, and major decisions.]
+
+## Implementation
+
+[Explain the work you personally contributed and the evidence supporting it.]
+
+## Outcome
+
+[Include the delivered result, evaluation, award, or measurable impact.]
+
+## Lessons learned
+
+[Reflect on technical and collaboration lessons.]`,
+
+            Blog: `## Context
+
+[Introduce the question, event, or problem that motivated the article.]
+
+## Key idea
+
+[State the central argument or technical insight.]
+
+## Walkthrough
+
+[Explain the process in clear, reproducible steps.]
+
+## Observations
+
+[Discuss evidence, tradeoffs, failures, and limitations.]
+
+## Takeaways
+
+- [Practical conclusion]
+- [Important limitation]
+- [Next experiment or question]
+
+## References
+
+- [Primary documentation or source]`,
+
+            Page: `## Purpose
+
+[Explain what this page helps the visitor understand or do.]
+
+## Main information
+
+[Add the primary content in short, scannable sections.]
+
+## Details
+
+[Add supporting context, constraints, or frequently needed information.]
+
+## Next step
+
+[Provide one clear action or destination when appropriate.]`
+        };
+
+        window.insertPortfolioContentTemplate = editor => {
+            const template = window.portfolioContentTemplates[window.portfolioEditorContext];
+            if (!template) return;
+
+            const currentContent = editor.value();
+            if (currentContent.trim().length > 0 &&
+                !window.confirm('Insert the structured template at the current cursor without replacing existing content?')) {
+                return;
+            }
+
+            if (currentContent.trim().length === 0) {
+                editor.value(template);
+            } else {
+                const document = editor.codemirror.getDoc();
+                document.replaceRange(`\n\n${template}`, document.getCursor());
+            }
+
+            editor.codemirror.focus();
+        };
+
         window.portfolioMarkdownToolbar = [
             'bold', 'italic', 'strikethrough', 'heading', '|',
             'quote', 'code', 'unordered-list', 'ordered-list', '|',
             'link', 'image', 'table', 'horizontal-rule', '|',
+            {
+                name: 'structured-template',
+                action: window.insertPortfolioContentTemplate,
+                className: 'fa fa-list-alt',
+                title: 'Insert a structured content template'
+            }, '|',
             'preview', 'side-by-side', 'fullscreen'
         ];
 
@@ -200,7 +437,7 @@
                         <code>*italic*</code><code>~~strikethrough~~</code><code>&gt; quote</code>
                         <code>- list item</code><code>[label](https://...)</code><code>&#96;&#96;&#96; code block</code>
                     </div>
-                    <p class="mt-4 leading-5 text-slate-600">The toolbar also supports images, tables, dividers, code, and live preview. Raw HTML is disabled for security. A line beginning with # creates a heading; hashtag metadata is not connected to these editors yet.</p>
+                    <p class="mt-4 leading-5 text-slate-600">The structured-template toolbar button inserts a category-specific case-study outline. The toolbar also supports images, tables, dividers, code, and live preview. Raw HTML is disabled for security. A line beginning with # creates a heading; hashtag metadata is not connected to these editors yet.</p>
                 </details>
             `);
         });

@@ -1,0 +1,41 @@
+@model Portfolio.Models.ViewModels.TwoFactorLoginViewModel
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AuthChallengeLayout.cshtml";
+    ViewData["Title"] = "Two-Factor Verification";
+}
+
+<div class="mb-8 flex items-start justify-between gap-5">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-signal">Second factor</p>
+        <h1 class="mt-3 text-3xl font-semibold tracking-[-0.03em] text-white">Verify your identity</h1>
+        <p class="mt-2 text-sm leading-6 text-slate-400">Enter the current 6-digit code from your authenticator app.</p>
+    </div>
+    <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-signal shadow-[0_0_18px_rgba(157,255,32,.8)]" aria-hidden="true"></span>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="mb-6 border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200" role="alert">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(value => value.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<form method="post" asp-action="LoginWithTwoFactor" class="space-y-5">
+    @Html.AntiForgeryToken()
+    <input asp-for="RememberMe" type="hidden" />
+    <div>
+        <label asp-for="Code" class="mb-2 block text-sm font-medium text-slate-300"></label>
+        <input asp-for="Code" autocomplete="one-time-code" inputmode="numeric" autofocus maxlength="16"
+               class="focus-ring w-full border border-line bg-ink px-4 py-3 font-mono text-lg tracking-[0.3em] text-white transition hover:border-slate-600 focus:border-signal focus:outline-none" />
+        <span asp-validation-for="Code"></span>
+    </div>
+    <button type="submit" class="focus-ring flex w-full items-center justify-center bg-signal px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white">Verify and sign in</button>
+</form>
+
+<div class="mt-7 flex flex-col gap-2 border-t border-line pt-5 text-sm">
+    <a asp-action="LoginWithRecoveryCode" class="focus-ring w-fit text-cyan transition hover:text-white">Use a recovery code</a>
+    <a asp-action="Login" class="focus-ring w-fit text-slate-500 transition hover:text-white">Return to password sign-in</a>
+</div>

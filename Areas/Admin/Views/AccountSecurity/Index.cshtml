@@ -1,0 +1,95 @@
+@model Portfolio.Models.ViewModels.ManageTwoFactorViewModel
+@{
+    ViewData["Title"] = "Account Security";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Administrator identity</p>
+        <h2 class="mt-2 text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">Account security</h2>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Protect the private console with a standards-based TOTP authenticator and one-time recovery codes.</p>
+    </div>
+    <span class="w-fit border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] @(Model.IsEnabled ? "border-signal/25 bg-signal/[0.05] text-signal" : "border-amber-300/25 bg-amber-300/[0.05] text-amber-200")">
+        @(Model.IsEnabled ? "2FA enabled" : "2FA not enabled")
+    </span>
+</div>
+
+<div asp-validation-summary="ModelOnly"></div>
+
+@if (!Model.IsEnabled)
+{
+    <div class="grid max-w-6xl gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(20rem,.8fr)]">
+        <section class="admin-surface p-5 sm:p-6" aria-labelledby="authenticator-setup-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-signal">Step 1</p>
+            <h3 id="authenticator-setup-heading" class="mt-2 text-lg font-semibold text-white">Add the account to your authenticator</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-500">Choose manual setup in Microsoft Authenticator, Google Authenticator, Aegis, 2FAS, or another TOTP-compatible app.</p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.SharedKey))
+            {
+                <dl class="mt-6 space-y-4">
+                    <div class="border border-line bg-ink/60 p-4">
+                        <dt class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Issuer</dt>
+                        <dd class="mt-2 text-sm text-slate-200">Portfolio Admin</dd>
+                    </div>
+                    <div class="border border-line bg-ink/60 p-4">
+                        <dt class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Secret key</dt>
+                        <dd class="mt-2 break-all font-mono text-sm tracking-[0.12em] text-signal">@Model.SharedKey</dd>
+                    </div>
+                    <div class="border border-line bg-ink/60 p-4">
+                        <dt class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Setup URI</dt>
+                        <dd class="mt-2 break-all font-mono text-[11px] leading-5 text-slate-400">@Model.AuthenticatorUri</dd>
+                    </div>
+                </dl>
+            }
+            else
+            {
+                <p class="mt-6 border border-rose-300/20 bg-rose-300/[0.05] p-4 text-sm text-rose-200">An authenticator key could not be generated. Review the validation message and try again.</p>
+            }
+        </section>
+
+        <aside class="admin-surface h-fit p-5 sm:p-6" aria-labelledby="authenticator-verify-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-cyan">Step 2</p>
+            <h3 id="authenticator-verify-heading" class="mt-2 text-lg font-semibold text-white">Verify and enable</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-500">Enter the current 6-digit code. The server accepts standards-based time windows; your device clock must be accurate.</p>
+
+            <form method="post" asp-action="EnableAuthenticator" class="mt-6">
+                @Html.AntiForgeryToken()
+                <label asp-for="AuthenticatorCode" class="admin-label"></label>
+                <input asp-for="AuthenticatorCode" class="admin-input font-mono tracking-[0.25em]" autocomplete="one-time-code" inputmode="numeric" maxlength="16" />
+                <span asp-validation-for="AuthenticatorCode"></span>
+                <button type="submit" class="focus-ring mt-5 w-full bg-signal px-6 py-2.5 text-sm font-semibold text-ink transition hover:bg-white" @(!string.IsNullOrWhiteSpace(Model.SharedKey) ? null : "disabled")>Enable two-factor authentication</button>
+            </form>
+        </aside>
+    </div>
+}
+else
+{
+    <div class="grid max-w-6xl gap-6 lg:grid-cols-2">
+        <section class="admin-surface p-5 sm:p-6" aria-labelledby="recovery-status-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-signal">Recovery access</p>
+            <h3 id="recovery-status-heading" class="mt-2 text-lg font-semibold text-white">@Model.RecoveryCodesLeft recovery codes remaining</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-500">A recovery code can replace the authenticator once and is consumed immediately. Generating a new set invalidates every previous code.</p>
+            @if (Model.RecoveryCodesLeft <= 3)
+            {
+                <p class="mt-5 border border-amber-300/20 bg-amber-300/[0.05] p-4 text-sm leading-6 text-amber-100/80">Generate and store a new set before the remaining codes run out.</p>
+            }
+            <form method="post" asp-action="GenerateRecoveryCodes" class="mt-6" onsubmit="return confirm('Generate new recovery codes and invalidate every previous code?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="focus-ring border border-cyan/25 px-5 py-2.5 text-sm text-cyan transition hover:bg-cyan/10">Generate new recovery codes</button>
+            </form>
+        </section>
+
+        <section class="admin-surface p-5 sm:p-6" aria-labelledby="authenticator-reset-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-rose-300">Sensitive action</p>
+            <h3 id="authenticator-reset-heading" class="mt-2 text-lg font-semibold text-white">Reset authenticator</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-500">This disables the current key. You must configure the new key before signing out or starting another session.</p>
+            <form method="post" asp-action="ResetAuthenticator" class="mt-6" onsubmit="return confirm('Reset the current authenticator key?');">
+                @Html.AntiForgeryToken()
+                <label for="currentPassword" class="admin-label">Current password</label>
+                <input type="password" name="currentPassword" id="currentPassword" autocomplete="current-password" required class="admin-input" />
+                <button type="submit" class="focus-ring mt-5 border border-rose-300/25 px-5 py-2.5 text-sm text-rose-200 transition hover:bg-rose-300/10">Reset authenticator</button>
+            </form>
+        </section>
+    </div>
+}

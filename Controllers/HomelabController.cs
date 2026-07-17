@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models.Enums;
+using Portfolio.Models.ExtraData;
 using Portfolio.Services;
 using System.Text.Json;
 
@@ -89,17 +90,41 @@ public class HomelabController : BaseController
 
             if (linkedSlugs.Any())
             {
-                var linkedProjects = await _db.Projects
+                var linkedProjectRecords = await _db.Projects
                     .Where(p => linkedSlugs.Contains(p.Slug))
                     .Select(p => new
                     {
                         slug = p.Slug,
-                        title = p.Title,
                         coverImageUrl = p.CoverImageUrl,
-                        summary = p.Summary,
                         extraData = p.ExtraData
                     })
                     .ToListAsync();
+
+                var linkedProjects = linkedProjectRecords.Select(project =>
+                {
+                    string? hardwareDescription = null;
+                    if (!string.IsNullOrWhiteSpace(project.extraData))
+                    {
+                        try
+                        {
+                            var extra = JsonSerializer.Deserialize<ElectronicsExtraData>(project.extraData);
+                            hardwareDescription = extra?.Components is { Count: > 0 }
+                                ? string.Join(", ", extra.Components)
+                                : extra?.Microcontroller;
+                        }
+                        catch (JsonException)
+                        {
+                            // Invalid legacy extra data is omitted instead of being exposed to the client.
+                        }
+                    }
+
+                    return new
+                    {
+                        project.slug,
+                        project.coverImageUrl,
+                        hardwareDescription
+                    };
+                }).ToList();
 
                 ViewBag.LinkedProjectsJson = JsonSerializer.Serialize(linkedProjects);
             }

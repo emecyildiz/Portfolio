@@ -132,10 +132,12 @@ public class HomelabController : AdminBaseController
         await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
 
         var topologyIsValid = NetworkTopologyJsonService.TryNormalize(
-            NetworkTopologyJson, out _, out var normalizedTopology);
+            NetworkTopologyJson, out _, out var normalizedTopology, out var topologyValidationError);
         if (!topologyIsValid)
         {
-            ModelState.AddModelError(string.Empty, "The network topology is invalid or exceeds the allowed limits.");
+            ModelState.AddModelError(
+                string.Empty,
+                topologyValidationError ?? "The network topology is invalid or exceeds the allowed limits.");
         }
 
         if (!ModelState.IsValid)

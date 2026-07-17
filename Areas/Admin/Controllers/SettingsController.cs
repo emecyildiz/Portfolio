@@ -9,6 +9,8 @@ namespace Portfolio.Areas.Admin.Controllers;
 public class SettingsController : AdminBaseController
 {
     private const long MaxCvFileSize = 10_485_760;
+    private const int MaxCurrentFocusTitleLength = 160;
+    private const int MaxCurrentFocusUrlLength = 2048;
     private readonly IWebHostEnvironment _env;
 
     public SettingsController(AppDbContext db, IWebHostEnvironment env) : base(db)
@@ -24,6 +26,59 @@ public class SettingsController : AdminBaseController
             settings.FooterLinksJson, out _, out var normalizedLinks);
         ViewBag.FooterLinksJson = normalizedLinks;
         return View(settings);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveCurrentFocus(
+        bool showCurrentFocus,
+        string? currentFocusTitle,
+        string? currentFocusUrl)
+    {
+        var title = string.IsNullOrWhiteSpace(currentFocusTitle)
+            ? null
+            : currentFocusTitle.Trim();
+        var url = string.IsNullOrWhiteSpace(currentFocusUrl)
+            ? null
+            : currentFocusUrl.Trim();
+
+        if (showCurrentFocus && title == null)
+        {
+            TempData["Error"] = "A title is required when Current Focus is enabled.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (title is { Length: > MaxCurrentFocusTitleLength } ||
+            title?.Any(char.IsControl) == true)
+        {
+            TempData["Error"] = $"The Current Focus title must be {MaxCurrentFocusTitleLength} characters or fewer and cannot contain control characters.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (url is { Length: > MaxCurrentFocusUrlLength } ||
+            !SafeUrlPolicy.IsSafeHttpsOrRootRelativeUrl(url))
+        {
+            TempData["Error"] = "The Current Focus link must be a root-relative path or a valid HTTPS URL.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var settings = await _db.SiteSettings.OrderBy(item => item.Id).FirstOrDefaultAsync();
+        if (settings == null)
+        {
+            settings = new SiteSettings();
+            _db.SiteSettings.Add(settings);
+        }
+
+        settings.CurrentFocusTitle = title;
+        settings.CurrentFocusUrl = url;
+        settings.ShowCurrentFocus = showCurrentFocus;
+        settings.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = showCurrentFocus
+            ? "Current Focus is now visible on the homepage."
+            : "Current Focus was saved and is hidden from the homepage.";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]

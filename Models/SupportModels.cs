@@ -133,6 +133,14 @@ namespace Portfolio.Models
         public int Id { get; set; }
         public string? CvFileUrl { get; set; }
         public string? FooterLinksJson { get; set; }
+
+        [System.ComponentModel.DataAnnotations.MaxLength(160)]
+        public string? CurrentFocusTitle { get; set; }
+
+        [System.ComponentModel.DataAnnotations.MaxLength(2048)]
+        public string? CurrentFocusUrl { get; set; }
+
+        public bool ShowCurrentFocus { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -11,7 +11,7 @@ namespace Portfolio.Models
 
         public NoteType NoteType { get; set; } = NoteType.Idea;
 
-        public string? RelatedUrl { get; set; }    // Optional destination for the Current Focus widget
+        public string? RelatedUrl { get; set; }    // Optional private reference associated with the note
 
         // These fields are active in task mode.
         public bool IsTodo { get; set; } = false;

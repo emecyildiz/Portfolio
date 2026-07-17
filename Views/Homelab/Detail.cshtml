@@ -182,14 +182,7 @@
                         imageUrl = linked.coverImageUrl;
                         projectLink = `/electronics/${encodeURIComponent(linked.slug)}`;
 
-                        try {
-                            const extra = JSON.parse(linked.extraData || '{}');
-                            if (extra.components && extra.components.length) {
-                                hardwareDescription = extra.components.join(', ');
-                            } else if (extra.microcontroller) {
-                                hardwareDescription = extra.microcontroller;
-                            }
-                        } catch (error) { }
+                        hardwareDescription = linked.hardwareDescription || hardwareDescription;
                     }
                 }
 
@@ -203,7 +196,7 @@
                     </span>
                     ${device.shortInfo ? `<p class="mt-5 text-sm leading-6 text-slate-400">${escapeHtml(device.shortInfo)}</p>` : ''}
                     <div class="mt-6 space-y-5 border-t border-white/[0.07] pt-6">
-                        ${device.ipAddress ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">IP address</p><p class="mt-2 font-mono text-sm text-white">${escapeHtml(device.ipAddress)}</p></div>` : ''}
+                        ${device.ipAddress ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Network segment</p><p class="mt-2 font-mono text-sm text-white">${escapeHtml(device.ipAddress)}</p></div>` : ''}
                         ${hardwareDescription ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Hardware</p><p class="mt-2 text-sm leading-6 text-slate-300">${escapeHtml(hardwareDescription)}</p></div>` : ''}
                         ${device.homelabRole ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Network role</p><p class="mt-2 text-sm leading-6 text-slate-300">${escapeHtml(device.homelabRole)}</p></div>` : ''}
                         ${device.homelabNotes ? `<div><p class="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Notes</p><p class="mt-2 text-sm leading-6 text-slate-400">${escapeHtml(device.homelabNotes)}</p></div>` : ''}
