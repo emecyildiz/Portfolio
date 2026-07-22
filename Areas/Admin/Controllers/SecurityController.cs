@@ -41,6 +41,8 @@ public class SecurityController : AdminBaseController
         [Bind("Id,Title,Summary,Content,ResearchType,TargetCategory,CveId,SeverityLevel,DisclosureStatus,GithubUrl,IsFeatured,Status")] SecurityResearch model,
         string? ToolsUsed, List<IFormFile>? Images)
     {
+        ViewBag.ToolsString = ToolsUsed ?? string.Empty;
+
         AdminContentValidator.ValidateSecurity(ModelState, model, _slugService, ToolsUsed);
         await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
 

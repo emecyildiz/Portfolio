@@ -80,6 +80,29 @@ public static class NetworkTopologyJsonService
         }
     }
 
+    public static bool TryPrepareForEditing(string? json, out string? editableJson)
+    {
+        editableJson = null;
+
+        if (string.IsNullOrWhiteSpace(json) || json.Length > MaxJsonLength)
+            return false;
+
+        try
+        {
+            var topology = JsonSerializer.Deserialize<NetworkTopology>(json, JsonOptions);
+            if (topology?.Nodes == null || topology.Edges == null)
+                return false;
+
+            // Re-serialize with the safe JSON encoder before embedding rejected input back into the admin page.
+            editableJson = JsonSerializer.Serialize(topology, JsonOptions);
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
     private static bool IsValid(NetworkTopology topology, out string? validationError)
     {
         validationError = null;

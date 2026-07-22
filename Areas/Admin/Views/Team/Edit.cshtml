@@ -152,9 +152,10 @@
             document.getElementById('teamMembersJson').value = JSON.stringify(members);
         });
 
-        new EasyMDE({
+        window.createPortfolioMarkdownEditor({
             element: document.getElementById('content-editor'),
             spellChecker: false,
+            autoDownloadFontAwesome: false,
             toolbar: window.portfolioMarkdownToolbar
         });
     </script>

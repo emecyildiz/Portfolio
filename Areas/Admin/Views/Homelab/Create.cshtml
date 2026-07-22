@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "New Homelab Post";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var hardwareString = ViewBag.HardwareString as string ?? string.Empty;
+    var softwareString = ViewBag.SoftwareString as string ?? string.Empty;
 }
 
 @section Head {
@@ -38,8 +40,8 @@
                 <h3 id="homelab-technical-heading" class="mt-2 text-lg font-semibold text-white">Technical details</h3>
                 <div class="mt-6 grid gap-5 sm:grid-cols-2">
                     <div class="sm:col-span-2"><label asp-for="Topic" class="admin-label">Topic</label><select asp-for="Topic" asp-items="Html.GetEnumSelectList<Portfolio.Models.Enums.HomelabTopic>()" class="admin-select"></select><span asp-validation-for="Topic"></span></div>
-                    <div><label for="HardwareUsed" class="admin-label">Hardware <span class="font-normal text-slate-600">(optional)</span></label><input name="HardwareUsed" id="HardwareUsed" class="admin-input" autocomplete="off" placeholder="Raspberry Pi 4, firewall appliance" aria-describedby="homelab-hardware-help" /><p id="homelab-hardware-help" class="admin-hint">Separate items with commas.</p></div>
-                    <div><label for="SoftwareUsed" class="admin-label">Software <span class="font-normal text-slate-600">(optional)</span></label><input name="SoftwareUsed" id="SoftwareUsed" class="admin-input" autocomplete="off" placeholder="Proxmox, Grafana, pfSense" aria-describedby="homelab-software-help" /><p id="homelab-software-help" class="admin-hint">Separate items with commas.</p></div>
+                    <div><label for="HardwareUsed" class="admin-label">Hardware <span class="font-normal text-slate-600">(optional)</span></label><input name="HardwareUsed" id="HardwareUsed" value="@hardwareString" class="admin-input" autocomplete="off" placeholder="Raspberry Pi 4, firewall appliance" aria-describedby="homelab-hardware-help" /><p id="homelab-hardware-help" class="admin-hint">Separate items with commas.</p></div>
+                    <div><label for="SoftwareUsed" class="admin-label">Software <span class="font-normal text-slate-600">(optional)</span></label><input name="SoftwareUsed" id="SoftwareUsed" value="@softwareString" class="admin-input" autocomplete="off" placeholder="Proxmox, Grafana, pfSense" aria-describedby="homelab-software-help" /><p id="homelab-software-help" class="admin-hint">Separate items with commas.</p></div>
                     <div class="sm:col-span-2"><label asp-for="NetworkDiagramUrl" class="admin-label">Network diagram path <span class="font-normal text-slate-600">(optional)</span></label><input asp-for="NetworkDiagramUrl" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:/(?!/).+|https://.+)" title="Use a root-relative path or an HTTPS URL." placeholder="/uploads/diagrams/network.png" /><span asp-validation-for="NetworkDiagramUrl"></span><p class="admin-hint">The interactive map can be configured after the post is created.</p></div>
                 </div>
             </section>
@@ -69,9 +71,10 @@
 @section Scripts {
     <script src="~/vendor/easymde/easymde.min.js" asp-append-version="true"></script>
     <script>
-        new EasyMDE({
+        window.createPortfolioMarkdownEditor({
             element: document.getElementById('content-editor'),
             spellChecker: false,
+            autoDownloadFontAwesome: false,
             autosave: { enabled: true, uniqueId: 'homelab-create' },
             toolbar: window.portfolioMarkdownToolbar
         });

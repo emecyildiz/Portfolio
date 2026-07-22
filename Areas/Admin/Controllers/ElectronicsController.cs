@@ -49,6 +49,9 @@ public class ElectronicsController : AdminBaseController
         string? ProgrammingLanguage, bool IsOpenSource,
         List<IFormFile>? Images)
     {
+        ViewBag.Extra = BuildSubmittedExtraData(
+            Microcontroller, Components, SchematicUrl, ProgrammingLanguage, IsOpenSource);
+
         AdminContentValidator.ValidateProject(ModelState, model, _slugService);
         AdminContentValidator.ValidateElectronicsFields(
             ModelState, Microcontroller, Components, SchematicUrl, ProgrammingLanguage);
@@ -154,14 +157,8 @@ public class ElectronicsController : AdminBaseController
         if (!ModelState.IsValid)
         {
             model.Id = id;
-            ViewBag.Extra = new ElectronicsExtraData
-            {
-                Microcontroller = Microcontroller,
-                Components = Components?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
-                SchematicUrl = SchematicUrl,
-                ProgrammingLanguage = ProgrammingLanguage,
-                IsOpenSource = IsOpenSource
-            };
+            ViewBag.Extra = BuildSubmittedExtraData(
+                Microcontroller, Components, SchematicUrl, ProgrammingLanguage, IsOpenSource);
             ViewBag.Images = await _media.GetByEntityAsync("project", id);
             return View(model);
         }
@@ -208,6 +205,22 @@ public class ElectronicsController : AdminBaseController
 
         return RedirectToAction(nameof(Index));
     }
+
+    private static ElectronicsExtraData BuildSubmittedExtraData(
+        string? microcontroller,
+        string? components,
+        string? schematicUrl,
+        string? programmingLanguage,
+        bool isOpenSource) => new()
+        {
+            Microcontroller = microcontroller,
+            Components = components?
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList(),
+            SchematicUrl = schematicUrl,
+            ProgrammingLanguage = programmingLanguage,
+            IsOpenSource = isOpenSource
+        };
 
     // Delete an image
     [HttpPost]

@@ -95,9 +95,10 @@
 @section Scripts {
     <script src="~/vendor/easymde/easymde.min.js" asp-append-version="true"></script>
     <script>
-        new EasyMDE({
+        window.createPortfolioMarkdownEditor({
             element: document.getElementById('content-editor'),
             spellChecker: false,
+            autoDownloadFontAwesome: false,
             autosave: { enabled: true, uniqueId: 'page-create' },
             toolbar: window.portfolioMarkdownToolbar
         });

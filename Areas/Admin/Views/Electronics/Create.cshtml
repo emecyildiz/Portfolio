@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "New Electronics Project";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var extra = ViewBag.Extra as Portfolio.Models.ExtraData.ElectronicsExtraData
+        ?? new Portfolio.Models.ExtraData.ElectronicsExtraData();
 }
 
 @section Head {
@@ -53,23 +55,23 @@
                 <div class="mt-6 grid gap-5 sm:grid-cols-2">
                     <div>
                         <label for="Microcontroller" class="admin-label">Microcontroller</label>
-                        <input name="Microcontroller" id="Microcontroller" class="admin-input" autocomplete="off" placeholder="ESP32-WROOM-32" />
+                        <input name="Microcontroller" id="Microcontroller" value="@extra.Microcontroller" class="admin-input" autocomplete="off" placeholder="ESP32-WROOM-32" />
                     </div>
                     <div>
                         <label for="ProgrammingLanguage" class="admin-label">Programming language</label>
-                        <input name="ProgrammingLanguage" id="ProgrammingLanguage" class="admin-input" autocomplete="off" placeholder="C · Arduino Framework" />
+                        <input name="ProgrammingLanguage" id="ProgrammingLanguage" value="@extra.ProgrammingLanguage" class="admin-input" autocomplete="off" placeholder="C · Arduino Framework" />
                     </div>
                     <div class="sm:col-span-2">
                         <label for="Components" class="admin-label">Components</label>
-                        <input name="Components" id="Components" class="admin-input" autocomplete="off" aria-describedby="components-help" placeholder="SSD1306, Li-Po 3.7V, AMS1117" />
+                        <input name="Components" id="Components" value="@string.Join(", ", extra.Components ?? new List<string>())" class="admin-input" autocomplete="off" aria-describedby="components-help" placeholder="SSD1306, Li-Po 3.7V, AMS1117" />
                         <p id="components-help" class="admin-hint">Separate component names with commas.</p>
                     </div>
                     <div class="sm:col-span-2">
                         <label for="SchematicUrl" class="admin-label">Circuit schematic path <span class="font-normal text-slate-600">(optional)</span></label>
-                        <input name="SchematicUrl" id="SchematicUrl" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:/(?!/).+|https://.+)" title="Use a root-relative path or an HTTPS URL." placeholder="/uploads/schematics/project.pdf" />
+                        <input name="SchematicUrl" id="SchematicUrl" value="@extra.SchematicUrl" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:/(?!/).+|https://.+)" title="Use a root-relative path or an HTTPS URL." placeholder="/uploads/schematics/project.pdf" />
                     </div>
                     <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4 sm:col-span-2">
-                        <input name="IsOpenSource" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" />
+                        <input name="IsOpenSource" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" @(extra.IsOpenSource == true ? "checked" : null) />
                         <span>
                             <span class="block text-sm font-medium text-slate-300">Open-source project</span>
                             <span class="mt-1 block text-xs leading-5 text-slate-600">Marks the build as having publicly available source material.</span>
@@ -127,9 +129,10 @@
 @section Scripts {
     <script src="~/vendor/easymde/easymde.min.js" asp-append-version="true"></script>
     <script>
-        new EasyMDE({
+        window.createPortfolioMarkdownEditor({
             element: document.getElementById('content-editor'),
             spellChecker: false,
+            autoDownloadFontAwesome: false,
             autosave: { enabled: true, uniqueId: 'electronics-create' },
             toolbar: window.portfolioMarkdownToolbar
         });

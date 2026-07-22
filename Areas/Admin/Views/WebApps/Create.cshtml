@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "New Web Application";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var extra = ViewBag.Extra as Portfolio.Models.ExtraData.WebAppExtraData
+        ?? new Portfolio.Models.ExtraData.WebAppExtraData();
 }
 
 @section Head {
@@ -39,24 +41,24 @@
                 <div class="mt-6 grid gap-5 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label for="TechStack" class="admin-label">Technology stack</label>
-                        <input name="TechStack" id="TechStack" class="admin-input" autocomplete="off" aria-describedby="tech-stack-help" placeholder="React, ASP.NET Core, PostgreSQL" />
+                        <input name="TechStack" id="TechStack" value="@string.Join(", ", extra.TechStack ?? new List<string>())" class="admin-input" autocomplete="off" aria-describedby="tech-stack-help" placeholder="React, ASP.NET Core, PostgreSQL" />
                         <p id="tech-stack-help" class="admin-hint">Separate technologies with commas.</p>
                     </div>
                     <div>
                         <label for="TeamSize" class="admin-label">Team size <span class="font-normal text-slate-600">(optional)</span></label>
-                        <input name="TeamSize" id="TeamSize" type="number" min="1" class="admin-input" inputmode="numeric" placeholder="3" />
+                        <input name="TeamSize" id="TeamSize" type="number" min="1" value="@extra.TeamSize" class="admin-input" inputmode="numeric" placeholder="3" />
                     </div>
                     <div>
                         <label for="MyRole" class="admin-label">My role</label>
-                        <input name="MyRole" id="MyRole" class="admin-input" autocomplete="off" placeholder="Backend developer" />
+                        <input name="MyRole" id="MyRole" value="@extra.MyRole" class="admin-input" autocomplete="off" placeholder="Backend developer" />
                     </div>
                     <div class="sm:col-span-2">
                         <label for="Subdomain" class="admin-label">Subdomain <span class="font-normal text-slate-600">(optional)</span></label>
-                        <input name="Subdomain" id="Subdomain" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}" title="Enter a hostname without a scheme or path." aria-describedby="subdomain-help" placeholder="app.example.com" />
+                        <input name="Subdomain" id="Subdomain" value="@extra.Subdomain" class="admin-input font-mono" autocomplete="off" inputmode="url" pattern="(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}" title="Enter a hostname without a scheme or path." aria-describedby="subdomain-help" placeholder="app.example.com" />
                         <p id="subdomain-help" class="admin-hint">Hostname only; do not include https:// or a path.</p>
                     </div>
                     <label class="flex cursor-pointer items-start gap-3 border border-line bg-ink/50 p-4 sm:col-span-2">
-                        <input name="IsSchoolProject" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" />
+                        <input name="IsSchoolProject" type="checkbox" class="admin-checkbox mt-0.5 shrink-0" @(extra.IsSchoolProject == true ? "checked" : null) />
                         <span><span class="block text-sm font-medium text-slate-300">Academic project</span><span class="mt-1 block text-xs leading-5 text-slate-600">Identifies work completed in an academic context.</span></span>
                     </label>
                 </div>
@@ -90,9 +92,10 @@
 @section Scripts {
     <script src="~/vendor/easymde/easymde.min.js" asp-append-version="true"></script>
     <script>
-        new EasyMDE({
+        window.createPortfolioMarkdownEditor({
             element: document.getElementById('content-editor'),
             spellChecker: false,
+            autoDownloadFontAwesome: false,
             autosave: { enabled: true, uniqueId: 'webapps-create' },
             toolbar: window.portfolioMarkdownToolbar
         });

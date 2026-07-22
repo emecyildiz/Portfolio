@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "New Team Project";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var members = ViewBag.Members as List<Portfolio.Models.ExtraData.TeamMember> ?? new();
+    var membersJson = System.Text.Json.JsonSerializer.Serialize(members);
 }
 
 @section Head {
@@ -82,7 +84,7 @@
 @section Scripts {
     <script src="~/vendor/easymde/easymde.min.js" asp-append-version="true"></script>
     <script>
-        let members = [];
+        let members = @Html.Raw(membersJson);
         const htmlEscapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
         function escapeHtml(value) {
@@ -121,9 +123,10 @@
             document.getElementById('teamMembersJson').value = JSON.stringify(members);
         });
 
-        new EasyMDE({
+        window.createPortfolioMarkdownEditor({
             element: document.getElementById('content-editor'),
             spellChecker: false,
+            autoDownloadFontAwesome: false,
             autosave: { enabled: true, uniqueId: 'team-create' },
             toolbar: window.portfolioMarkdownToolbar
         });

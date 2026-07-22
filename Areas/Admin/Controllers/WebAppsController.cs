@@ -45,6 +45,9 @@ public class WebAppsController : AdminBaseController
         string? Subdomain, bool IsSchoolProject,
         List<IFormFile>? Images)
     {
+        ViewBag.Extra = BuildSubmittedExtraData(
+            TechStack, TeamSize, MyRole, Subdomain, IsSchoolProject);
+
         AdminContentValidator.ValidateProject(ModelState, model, _slugService);
         AdminContentValidator.ValidateWebAppFields(ModelState, TechStack, TeamSize, MyRole, Subdomain);
         await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
@@ -138,14 +141,8 @@ public class WebAppsController : AdminBaseController
         if (!ModelState.IsValid)
         {
             model.Id = id;
-            ViewBag.Extra = new WebAppExtraData
-            {
-                TechStack = TechStack?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
-                TeamSize = TeamSize,
-                MyRole = MyRole,
-                Subdomain = Subdomain,
-                IsSchoolProject = IsSchoolProject
-            };
+            ViewBag.Extra = BuildSubmittedExtraData(
+                TechStack, TeamSize, MyRole, Subdomain, IsSchoolProject);
             ViewBag.Images = await _media.GetByEntityAsync("project", id);
             return View(model);
         }
@@ -190,6 +187,22 @@ public class WebAppsController : AdminBaseController
 
         return RedirectToAction(nameof(Index));
     }
+
+    private static WebAppExtraData BuildSubmittedExtraData(
+        string? techStack,
+        int? teamSize,
+        string? myRole,
+        string? subdomain,
+        bool isSchoolProject) => new()
+        {
+            TechStack = techStack?
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList(),
+            TeamSize = teamSize,
+            MyRole = myRole,
+            Subdomain = subdomain,
+            IsSchoolProject = isSchoolProject
+        };
 
     [HttpPost]
     [ValidateAntiForgeryToken]

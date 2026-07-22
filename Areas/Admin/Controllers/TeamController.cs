@@ -49,9 +49,14 @@ public class TeamController : AdminBaseController
         await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
 
         var membersAreValid = TeamMemberJsonService.TryNormalize(
-            TeamMembersJson, out _, out var normalizedTeamMembers);
+            TeamMembersJson, out var submittedMembers, out var normalizedTeamMembers);
         if (!membersAreValid)
+        {
             ModelState.AddModelError(string.Empty, "Team member details or links are invalid.");
+            TeamMemberJsonService.TryPrepareForEditing(TeamMembersJson, out submittedMembers);
+        }
+
+        ViewBag.Members = submittedMembers;
 
         if (!ModelState.IsValid)
         {
@@ -143,7 +148,10 @@ public class TeamController : AdminBaseController
         var membersAreValid = TeamMemberJsonService.TryNormalize(
             TeamMembersJson, out var submittedMembers, out var normalizedTeamMembers);
         if (!membersAreValid)
+        {
             ModelState.AddModelError(string.Empty, "Team member details or links are invalid.");
+            TeamMemberJsonService.TryPrepareForEditing(TeamMembersJson, out submittedMembers);
+        }
 
         if (!ModelState.IsValid)
         {

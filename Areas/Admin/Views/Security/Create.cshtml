@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "New Security Research";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var toolsString = ViewBag.ToolsString as string ?? string.Empty;
 }
 
 @section Head {
@@ -80,7 +81,7 @@
                     </div>
                     <div class="sm:col-span-2">
                         <label for="ToolsUsed" class="admin-label">Tools used <span class="font-normal text-slate-600">(optional)</span></label>
-                        <input name="ToolsUsed" id="ToolsUsed" class="admin-input" autocomplete="off" placeholder="Ghidra, Wireshark, HackRF" aria-describedby="security-tools-help" />
+                        <input name="ToolsUsed" id="ToolsUsed" value="@toolsString" class="admin-input" autocomplete="off" placeholder="Ghidra, Wireshark, HackRF" aria-describedby="security-tools-help" />
                         <p id="security-tools-help" class="admin-hint">Separate tool names with commas.</p>
                     </div>
                     <div class="sm:col-span-2">
@@ -135,9 +136,10 @@
 @section Scripts {
     <script src="~/vendor/easymde/easymde.min.js" asp-append-version="true"></script>
     <script>
-        new EasyMDE({
+        window.createPortfolioMarkdownEditor({
             element: document.getElementById('content-editor'),
             spellChecker: false,
+            autoDownloadFontAwesome: false,
             autosave: { enabled: true, uniqueId: 'security-create' },
             toolbar: window.portfolioMarkdownToolbar
         });

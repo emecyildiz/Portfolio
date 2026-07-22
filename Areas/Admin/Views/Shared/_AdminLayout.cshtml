@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] — Admin</title>
     <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/tailwind.min.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
     <style>
         :root { color-scheme: dark; }
         body { font-family: 'Space Grotesk Variable', 'Inter Variable', sans-serif; }
@@ -30,23 +31,56 @@
         }
         .admin-checkbox { width: 1rem; height: 1rem; accent-color: #B8F36B; }
         .field-validation-error { display: block; margin-top: .4rem; color: #fda4af; font-size: .75rem; }
+        .admin-input.input-validation-error, .admin-select.input-validation-error, .admin-textarea.input-validation-error {
+            border-color: #fb7185; box-shadow: 0 0 0 3px rgba(251,113,133,.08);
+        }
         .validation-summary-errors { margin-bottom: 1.5rem; border: 1px solid rgba(253,164,175,.22); background: rgba(253,164,175,.06); padding: 1rem; color: #fecdd3; font-size: .875rem; }
         .validation-summary-errors ul { list-style: none; margin: 0; padding: 0; }
         .validation-summary-valid { display: none; }
-        .editor-toolbar { border-color: #202C38 !important; border-radius: 0 !important; background: #0D1219; }
-        .editor-toolbar button { color: #94a3b8 !important; }
+        .EasyMDEContainer .editor-toolbar { border-color: #202C38 !important; border-radius: 0 !important; background: #0D1219 !important; opacity: 1; }
+        .EasyMDEContainer .editor-toolbar button { color: #cbd5e1 !important; }
         .editor-toolbar button.active, .editor-toolbar button:hover { border-color: #334155 !important; background: #121923 !important; color: #B8F36B !important; }
         .editor-toolbar i.separator { border-color: #202C38 !important; }
-        .CodeMirror { min-height: 28rem; border-color: #202C38 !important; border-radius: 0 !important; background: #07090D; color: #e2e8f0; }
+        .EasyMDEContainer .editor-toolbar button.fa::before {
+            display: inline-block; min-width: 1rem; font-family: 'IBM Plex Mono', monospace; font-size: .72rem;
+            font-style: normal; font-weight: 600; line-height: 1; text-align: center;
+        }
+        .EasyMDEContainer .editor-toolbar .fa-bold::before { content: 'B'; font-weight: 700; }
+        .EasyMDEContainer .editor-toolbar .fa-italic::before { content: 'I'; font-style: italic; }
+        .EasyMDEContainer .editor-toolbar .fa-strikethrough::before { content: 'S'; text-decoration: line-through; }
+        .EasyMDEContainer .editor-toolbar .fa-header::before { content: 'H'; }
+        .EasyMDEContainer .editor-toolbar .fa-quote-left::before { content: '>'; }
+        .EasyMDEContainer .editor-toolbar .fa-code::before { content: '</>'; font-size: .6rem; }
+        .EasyMDEContainer .editor-toolbar .fa-list-ul::before { content: '•'; }
+        .EasyMDEContainer .editor-toolbar .fa-list-ol::before { content: '1.'; font-size: .62rem; }
+        .EasyMDEContainer .editor-toolbar .fa-link::before { content: '↗'; font-size: .9rem; }
+        .EasyMDEContainer .editor-toolbar .fa-image::before { content: 'IMG'; font-size: .55rem; }
+        .EasyMDEContainer .editor-toolbar .fa-table::before { content: '▦'; font-size: .9rem; }
+        .EasyMDEContainer .editor-toolbar .fa-minus::before { content: '—'; }
+        .EasyMDEContainer .editor-toolbar .fa-list-alt::before { content: 'TPL'; font-size: .55rem; }
+        .EasyMDEContainer .editor-toolbar .fa-eye::before { content: '◉'; font-size: .85rem; }
+        .EasyMDEContainer .editor-toolbar .fa-columns::before { content: '▥'; font-size: .88rem; }
+        .EasyMDEContainer .editor-toolbar .fa-arrows-alt::before { content: '⛶'; font-size: .9rem; }
+        .EasyMDEContainer .CodeMirror { min-height: 28rem; border-color: #202C38 !important; border-radius: 0 !important; background: #07090D !important; color: #e2e8f0 !important; }
+        .EasyMDEContainer.markdown-validation-error .CodeMirror { border-color: #fb7185 !important; box-shadow: 0 0 0 3px rgba(251,113,133,.08); }
+        .EasyMDEContainer .CodeMirror-gutters { border-color: #202C38 !important; background: #0A0E14 !important; }
+        .EasyMDEContainer .CodeMirror-selected { background: #263545 !important; }
+        .EasyMDEContainer .CodeMirror-placeholder { color: #475569 !important; }
         .CodeMirror-cursor { border-left-color: #B8F36B !important; }
-        .editor-statusbar { color: #64748b; }
-        .editor-preview, .editor-preview-side { background: #0D1219; color: #e2e8f0; }
+        .cm-s-easymde .cm-header { color: #B8F36B; font-weight: 700; }
+        .cm-s-easymde .cm-quote { color: #7dd3fc; }
+        .cm-s-easymde .cm-link { color: #c4b5fd; }
+        .cm-s-easymde .cm-url { color: #94a3b8; }
+        .cm-s-easymde .cm-comment, .cm-s-easymde .cm-formatting { color: #64748b; }
+        .EasyMDEContainer .editor-statusbar { color: #64748b; }
+        .EasyMDEContainer .editor-preview, .EasyMDEContainer .editor-preview-side { border-color: #202C38; background: #0D1219 !important; color: #e2e8f0; }
+        .EasyMDEContainer .editor-preview a, .EasyMDEContainer .editor-preview-side a { color: #7dd3fc; }
+        .EasyMDEContainer .editor-preview code, .EasyMDEContainer .editor-preview-side code { color: #B8F36B; }
         ::selection { color: #07090D; background: #B8F36B; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #07090D; }
         ::-webkit-scrollbar-thumb { background: #273543; border: 2px solid #07090D; border-radius: 999px; }
     </style>
-    @await RenderSectionAsync("Head", required: false)
 </head>
 <body class="min-h-screen overflow-x-hidden bg-ink text-slate-100 antialiased">
     @{
@@ -372,6 +406,106 @@
             }, '|',
             'preview', 'side-by-side', 'fullscreen'
         ];
+
+        window.createPortfolioMarkdownEditor = options => {
+            const editor = new EasyMDE(options);
+            const sourceElement = options.element;
+            const form = sourceElement?.closest('form');
+            if (!form) return editor;
+
+            const requiredTextFields = [
+                { name: 'Title', message: 'Title is required.' },
+                { name: 'Summary', message: 'Summary is required.' }
+            ];
+            if (window.portfolioEditorContext === 'Team') {
+                requiredTextFields.push({ name: 'MyRole', message: 'My role is required.' });
+            }
+
+            const setFieldError = (field, message) => {
+                const validationMessage = form.querySelector(`[data-valmsg-for="${field.name}"]`);
+                const isEmpty = field.value.trim().length === 0;
+                if (isEmpty) {
+                    field.dataset.requiredInvalid = 'true';
+                    field.classList.add('input-validation-error');
+                    field.setAttribute('aria-invalid', 'true');
+                } else if (field.dataset.requiredInvalid === 'true') {
+                    delete field.dataset.requiredInvalid;
+                    field.classList.remove('input-validation-error');
+                    field.setAttribute('aria-invalid', 'false');
+                }
+                if (validationMessage && isEmpty) {
+                    validationMessage.textContent = isEmpty ? message : '';
+                    validationMessage.classList.add('field-validation-error');
+                    validationMessage.classList.remove('field-validation-valid');
+                } else if (validationMessage?.textContent === message) {
+                    validationMessage.textContent = '';
+                    validationMessage.classList.remove('field-validation-error');
+                    validationMessage.classList.add('field-validation-valid');
+                }
+                return isEmpty;
+            };
+
+            form.addEventListener('submit', event => {
+                editor.codemirror.save();
+                let firstInvalidField = null;
+
+                requiredTextFields.forEach(requiredField => {
+                    const field = form.elements.namedItem(requiredField.name);
+                    if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) return;
+                    if (setFieldError(field, requiredField.message) && !firstInvalidField) firstInvalidField = field;
+                });
+
+                const contentIsEmpty = editor.value().trim().length === 0;
+                const editorContainer = sourceElement.nextElementSibling?.classList.contains('EasyMDEContainer')
+                    ? sourceElement.nextElementSibling
+                    : sourceElement.parentElement?.querySelector('.EasyMDEContainer');
+                const contentValidationMessage = form.querySelector('[data-valmsg-for="Content"]');
+                if (contentIsEmpty) {
+                    editorContainer?.classList.add('markdown-validation-error');
+                    sourceElement.dataset.requiredInvalid = 'true';
+                    sourceElement.setAttribute('aria-invalid', 'true');
+                    if (contentValidationMessage) {
+                        contentValidationMessage.textContent = 'Content is required.';
+                        contentValidationMessage.classList.add('field-validation-error');
+                        contentValidationMessage.classList.remove('field-validation-valid');
+                    }
+                } else if (sourceElement.dataset.requiredInvalid === 'true') {
+                    editorContainer?.classList.remove('markdown-validation-error');
+                    delete sourceElement.dataset.requiredInvalid;
+                    sourceElement.setAttribute('aria-invalid', 'false');
+                    if (contentValidationMessage?.textContent === 'Content is required.') {
+                        contentValidationMessage.textContent = '';
+                        contentValidationMessage.classList.remove('field-validation-error');
+                        contentValidationMessage.classList.add('field-validation-valid');
+                    }
+                }
+
+                if (!firstInvalidField && contentIsEmpty) firstInvalidField = sourceElement;
+                if (!firstInvalidField) return;
+
+                event.preventDefault();
+                if (firstInvalidField === sourceElement) editor.codemirror.focus();
+                else firstInvalidField.focus();
+                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            editor.codemirror.on('change', () => {
+                if (editor.value().trim().length === 0) return;
+                const editorContainer = sourceElement.nextElementSibling?.classList.contains('EasyMDEContainer')
+                    ? sourceElement.nextElementSibling
+                    : sourceElement.parentElement?.querySelector('.EasyMDEContainer');
+                const contentValidationMessage = form.querySelector('[data-valmsg-for="Content"]');
+                editorContainer?.classList.remove('markdown-validation-error');
+                sourceElement.setAttribute('aria-invalid', 'false');
+                if (contentValidationMessage?.textContent === 'Content is required.') {
+                    contentValidationMessage.textContent = '';
+                    contentValidationMessage.classList.remove('field-validation-error');
+                    contentValidationMessage.classList.add('field-validation-valid');
+                }
+            });
+
+            return editor;
+        };
 
         const adminSidebar = document.getElementById('adminSidebar');
         const adminSidebarOverlay = document.getElementById('adminSidebarOverlay');

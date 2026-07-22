@@ -10,6 +10,12 @@
 
 @section Head {
     <link rel="stylesheet" href="~/vendor/easymde/easymde.min.css" asp-append-version="true" />
+    <style>
+        .topology-field-invalid { border-color: #fb7185 !important; box-shadow: 0 0 0 3px rgba(251, 113, 133, .08) !important; }
+        .topology-card-invalid { border-color: rgba(251, 113, 133, .55) !important; }
+        .topology-field-error { margin-top: .4rem; color: #fda4af; font-size: .75rem; line-height: 1.25rem; }
+        #public-layout-lock-button[aria-pressed="true"] { border-color: rgba(184, 243, 107, .45); background: rgba(184, 243, 107, .08); color: #B8F36B; }
+    </style>
 }
 
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -111,6 +117,8 @@
 
                     <input type="hidden" name="NetworkTopologyJson" id="networkTopologyJson" />
 
+                    <div id="topology-validation-summary" class="mt-5 hidden border border-rose-300/30 bg-rose-300/[0.06] px-4 py-3 text-sm leading-6 text-rose-200" role="alert" tabindex="-1"></div>
+
                     <div id="devices-container" class="mb-6 mt-5 space-y-3"></div>
 
                     <div class="border-t border-line pt-5">
@@ -130,14 +138,20 @@
                                 <h4 class="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">Map layout</h4>
                                 <p class="admin-hint">Drag devices to set their positions on the public map.</p>
                             </div>
-                            <button type="button" onclick="resetTopologyLayout()"
-                                    class="focus-ring w-fit border border-line px-3 py-2 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white">
-                                Reset to grid
-                            </button>
+                            <div class="flex flex-wrap gap-2">
+                                <button id="public-layout-lock-button" type="button" onclick="togglePublicLayoutLock()" aria-pressed="false"
+                                        class="focus-ring w-fit border border-line px-3 py-2 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white">
+                                    Lock public layout
+                                </button>
+                                <button type="button" onclick="resetTopologyLayout()"
+                                        class="focus-ring w-fit border border-line px-3 py-2 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white">
+                                    Reset to grid
+                                </button>
+                            </div>
                         </div>
                         <div id="network-layout-editor"
                              class="h-96 overflow-hidden border border-slate-400/30" style="background-color: #e8eef2; background-image: linear-gradient(rgba(15, 23, 42, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, .08) 1px, transparent 1px); background-size: 32px 32px;"></div>
-                        <p id="network-layout-status" class="admin-hint"></p>
+                        <p id="network-layout-status" class="admin-hint" aria-live="polite"></p>
                     </div>
                 </div>
                 </div>
@@ -220,9 +234,10 @@
 <script src="~/vendor/easymde/easymde.min.js" asp-append-version="true"></script>
 <script src="~/vendor/vis-network/vis-network.min.js" asp-append-version="true"></script>
 <script>
-    new EasyMDE({
+    window.createPortfolioMarkdownEditor({
         element: document.getElementById('content-editor'),
         spellChecker: false,
+        autoDownloadFontAwesome: false,
         toolbar: window.portfolioMarkdownToolbar
     });
 </script>
@@ -235,6 +250,7 @@
     let layoutNetwork = null;
     let layoutNodes = null;
     let layoutEdges = null;
+    let isPublicLayoutLocked = false;
     const layoutTypeColors = {
         router: '#3B82F6', switch: '#8B5CF6', firewall: '#EF4444',
         server: '#10B981', pc: '#6B7280', laptop: '#6B7280',
@@ -244,8 +260,15 @@
     const endpoints = {
         electronicsProjects: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("GetElectronicsProjects", "Homelab", new { area = "Admin" }))),
         iconLibrary: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("GetIconLibrary", "Homelab", new { area = "Admin" }))),
-        uploadIcon: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("UploadIcon", "Homelab", new { area = "Admin" })))
+        uploadIcon: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("UploadIcon", "Homelab", new { area = "Admin" }))),
+        uploadDeviceImage: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Url.Action("UploadDeviceImage", "Homelab", new { area = "Admin" })))
     };
+    const serverTopologyValidationError = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.TopologyValidationError as string));
+    const allowedDeviceTypes = new Set([
+        'router', 'switch', 'firewall', 'server', 'pc', 'laptop',
+        'microcontroller', 'mobile', 'custom', 'sensor', 'audio', 'antenna'
+    ]);
+    const allowedConnectionTypes = new Set(['ethernet', 'wifi', 'usb', 'power', 'other']);
 
     const htmlEscapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
     function escapeHtml(value) {
@@ -258,18 +281,224 @@
         try {
             const rawValue = String(value).trim();
             const url = new URL(rawValue, window.location.origin);
-            const isRootRelative = rawValue.startsWith('/') && !rawValue.startsWith('//') && url.origin === window.location.origin;
-            return isRootRelative || url.protocol === 'https:' ? url.href : '';
+            const hasUnsafeCharacters = rawValue.includes('\\') || /[\u0000-\u001f\u007f]/.test(rawValue);
+            const isRootRelative = rawValue.startsWith('/') &&
+                !rawValue.startsWith('//') &&
+                !hasUnsafeCharacters &&
+                url.origin === window.location.origin;
+
+            if (isRootRelative) return rawValue;
+            return !hasUnsafeCharacters && url.protocol === 'https:' ? url.href : '';
         } catch {
             return '';
         }
     }
 
-    function selectLibraryIcon(deviceId, url) {
-        if (url) {
-            updateDevice(deviceId, 'iconUrl', url);
+    function clearTopologyValidation() {
+        document.querySelectorAll('.topology-field-invalid').forEach(element =>
+            element.classList.remove('topology-field-invalid'));
+        document.querySelectorAll('.topology-card-invalid').forEach(element =>
+            element.classList.remove('topology-card-invalid'));
+        document.querySelectorAll('[data-topology-error]').forEach(element => element.remove());
+
+        const summary = document.getElementById('topology-validation-summary');
+        summary.replaceChildren();
+        summary.classList.add('hidden');
+    }
+
+    function clearTopologyField(sourceElement) {
+        if (!sourceElement) return;
+
+        const group = sourceElement.closest('[data-topology-field-group]');
+        if (!group) return;
+
+        group.querySelectorAll('.topology-field-invalid').forEach(element =>
+            element.classList.remove('topology-field-invalid'));
+        group.querySelectorAll('[data-topology-error]').forEach(element => element.remove());
+
+        const card = sourceElement.closest('[data-topology-card]');
+        if (card && !card.querySelector('.topology-field-invalid, [data-topology-error]'))
+            card.classList.remove('topology-card-invalid');
+    }
+
+    function findTopologyControls(kind, id, field) {
+        const attribute = kind === 'device' ? 'deviceId' : 'connectionIndex';
+        const fieldAttribute = kind === 'device' ? 'deviceField' : 'connectionField';
+        return Array.from(document.querySelectorAll(`[data-${kind}-field]`)).filter(element =>
+            element.dataset[attribute] === String(id) && element.dataset[fieldAttribute] === field);
+    }
+
+    function markTopologyField(kind, id, field, message) {
+        const controls = findTopologyControls(kind, id, field);
+        if (controls.length === 0) return;
+
+        controls.forEach(control => control.classList.add('topology-field-invalid'));
+        const card = controls[0].closest('[data-topology-card]');
+        card?.classList.add('topology-card-invalid');
+
+        const group = controls[0].closest('[data-topology-field-group]') || controls[0].parentElement;
+        if (!group || group.querySelector(`[data-topology-error="${field}"]`)) return;
+
+        const error = document.createElement('p');
+        error.className = 'topology-field-error';
+        error.dataset.topologyError = field;
+        error.textContent = message;
+        group.appendChild(error);
+    }
+
+    function markTopologyCard(kind, id, message) {
+        const attribute = kind === 'device' ? 'deviceId' : 'connectionIndex';
+        const card = Array.from(document.querySelectorAll(`[data-topology-card="${kind}"]`))
+            .find(element => element.dataset[attribute] === String(id));
+        if (!card) return;
+
+        card.classList.add('topology-card-invalid');
+        const error = document.createElement('p');
+        error.className = 'topology-field-error';
+        error.dataset.topologyError = 'card';
+        error.textContent = message;
+        card.appendChild(error);
+    }
+
+    function showTopologyValidationSummary(messages, focusSummary = true) {
+        const summary = document.getElementById('topology-validation-summary');
+        summary.replaceChildren();
+
+        const heading = document.createElement('p');
+        heading.className = 'font-medium';
+        heading.textContent = 'The topology was not submitted. Your entries are still here.';
+        summary.appendChild(heading);
+
+        const list = document.createElement('ul');
+        list.className = 'mt-2 list-disc space-y-1 pl-5';
+        [...new Set(messages)].slice(0, 6).forEach(message => {
+            const item = document.createElement('li');
+            item.textContent = message;
+            list.appendChild(item);
+        });
+        summary.appendChild(list);
+        summary.classList.remove('hidden');
+        if (focusSummary) summary.focus();
+    }
+
+    function validateTopology(focusSummary = true, expandDevicesOnError = true) {
+        clearTopologyValidation();
+        const messages = [];
+        const addMessage = message => messages.push(message);
+
+        if (devices.length > 200)
+            addMessage('Use no more than 200 devices.');
+        if (connections.length > 500)
+            addMessage('Use no more than 500 connections.');
+
+        const seenIds = new Set();
+        devices.forEach(device => {
+            const deviceName = device.label || `Device ${device.id}`;
+            if (!Number.isInteger(device.id) || device.id <= 0 || seenIds.has(device.id)) {
+                const message = `${deviceName} has an invalid or duplicate internal identifier.`;
+                markTopologyCard('device', device.id, message);
+                addMessage(message);
+            }
+            seenIds.add(device.id);
+
+            if (!allowedDeviceTypes.has(device.deviceType)) {
+                const message = `${deviceName}: select a supported device type.`;
+                markTopologyField('device', device.id, 'deviceType', message);
+                addMessage(message);
+            }
+
+            const lengthRules = [
+                ['label', device.label, 200, 'Device name'],
+                ['shortInfo', device.shortInfo, 500, 'Short description'],
+                ['ipAddress', device.ipAddress, 100, 'Public network label'],
+                ['homelabRole', device.homelabRole, 500, 'Homelab role'],
+                ['homelabNotes', device.homelabNotes, 5000, 'Public notes'],
+                ['standaloneHardware', device.standaloneHardware, 2000, 'Hardware summary'],
+                ['linkedProjectSlug', device.linkedProjectSlug, 200, 'Linked project']
+            ];
+            lengthRules.forEach(([field, value, maximum, label]) => {
+                if (String(value || '').length <= maximum) return;
+                const message = `${deviceName}: ${label} cannot exceed ${maximum} characters.`;
+                markTopologyField('device', device.id, field, message);
+                addMessage(message);
+            });
+
+            if (device.iconUrl && !safeWebUrl(device.iconUrl)) {
+                const message = `${deviceName}: choose the icon again or upload a PNG/WebP file.`;
+                markTopologyField('device', device.id, 'iconUrl', message);
+                addMessage(message);
+            }
+
+            if (device.standaloneImageUrl && !safeWebUrl(device.standaloneImageUrl)) {
+                const message = `${deviceName}: remove the saved photo and upload it again.`;
+                markTopologyField('device', device.id, 'standaloneImageUrl', message);
+                addMessage(message);
+            }
+
+            if (containsRawNetworkIdentifier(device.ipAddress)) {
+                const message = `${deviceName}: replace the raw IP, CIDR or MAC value with a redacted public label.`;
+                markTopologyField('device', device.id, 'ipAddress', message);
+                addMessage(message);
+            }
+
+            const positionIsValid = [device.x, device.y].every(value =>
+                value == null || (Number.isFinite(value) && Math.abs(value) <= 100000));
+            if (!positionIsValid) {
+                const message = `${deviceName}: reset its map position to the grid.`;
+                markTopologyCard('device', device.id, message);
+                document.getElementById('network-layout-editor').classList.add('topology-field-invalid');
+                addMessage(message);
+            }
+        });
+
+        const deviceIds = new Set(devices.map(device => device.id));
+        connections.forEach((connection, index) => {
+            const connectionName = `Connection ${index + 1}`;
+            if (!deviceIds.has(connection.from)) {
+                const message = `${connectionName}: select an existing source device.`;
+                markTopologyField('connection', index, 'from', message);
+                addMessage(message);
+            }
+            if (!deviceIds.has(connection.to)) {
+                const message = `${connectionName}: select an existing destination device.`;
+                markTopologyField('connection', index, 'to', message);
+                addMessage(message);
+            }
+            if (connection.from === connection.to) {
+                const message = `${connectionName}: source and destination must be different devices.`;
+                markTopologyField('connection', index, 'from', message);
+                markTopologyField('connection', index, 'to', message);
+                addMessage(message);
+            }
+            if (!allowedConnectionTypes.has(connection.connectionType)) {
+                const message = `${connectionName}: select a supported connection type.`;
+                markTopologyField('connection', index, 'connectionType', message);
+                addMessage(message);
+            }
+            if (String(connection.label || '').length > 200) {
+                const message = `${connectionName}: the label cannot exceed 200 characters.`;
+                markTopologyField('connection', index, 'label', message);
+                addMessage(message);
+            }
+        });
+
+        if (messages.length === 0) return true;
+        if (expandDevicesOnError && devices.some(device => device._expanded !== true)) {
+            devices.forEach(device => device._expanded = true);
             renderDevices();
+            return validateTopology(focusSummary, false);
         }
+
+        showTopologyValidationSummary(messages, focusSummary);
+        return false;
+    }
+
+    function selectLibraryIcon(deviceId, url, sourceElement) {
+        updateDevice(deviceId, 'iconUrl', url || '', sourceElement);
+        renderDevices();
+        renderTopologyLayout();
+        document.getElementById('network-layout-status').textContent =
+            'The device icon changed. Select Update to save it with the topology.';
     }
 
         document.addEventListener('DOMContentLoaded', async function() {
@@ -292,11 +521,15 @@
         if (existingJson) {
             devices = existingJson.nodes || [];
             connections = existingJson.edges || [];
+            isPublicLayoutLocked = existingJson.isLayoutLocked === true;
         }
 
         renderDevices();
         renderConnections();
         renderTopologyLayout();
+        renderPublicLayoutLockState();
+        if (serverTopologyValidationError)
+            validateTopology(false);
     });
 
     function ensureDevicePositions() {
@@ -400,6 +633,25 @@
             'The layout was reset to the grid. Select Update to save the new positions.';
     }
 
+    function renderPublicLayoutLockState() {
+        const button = document.getElementById('public-layout-lock-button');
+        if (!button) return;
+
+        button.setAttribute('aria-pressed', String(isPublicLayoutLocked));
+        button.textContent = isPublicLayoutLocked ? 'Public layout locked' : 'Lock public layout';
+        button.title = isPublicLayoutLocked
+            ? 'Visitors can select devices, pan and zoom, but cannot move device positions.'
+            : 'Allow visitors to drag device positions during their current visit.';
+    }
+
+    function togglePublicLayoutLock() {
+        isPublicLayoutLocked = !isPublicLayoutLocked;
+        renderPublicLayoutLockState();
+        document.getElementById('network-layout-status').textContent = isPublicLayoutLocked
+            ? 'Public layout locked. Visitors will not be able to move devices after you select Update.'
+            : 'Public layout unlocked. Visitors may move devices temporarily after you select Update.';
+    }
+
     // ============ DEVICE MANAGEMENT ============
     function addDevice() {
         const newId = devices.length > 0 ? Math.max(...devices.map(d => d.id)) + 1 : 1;
@@ -432,7 +684,8 @@
         renderTopologyLayout();
     }
 
-    function updateDevice(id, field, value) {
+    function updateDevice(id, field, value, sourceElement) {
+        clearTopologyField(sourceElement);
         const device = devices.find(d => d.id === id);
         if (device) {
             device[field] = value;
@@ -460,8 +713,11 @@
             const data = await res.json();
 
             if (data.success) {
-                updateDevice(id, 'iconUrl', data.url);
+                updateDevice(id, 'iconUrl', data.url, inputEl);
                 renderDevices();
+                renderTopologyLayout();
+                document.getElementById('network-layout-status').textContent =
+                    'The device icon was uploaded. Select Update to save it with the topology.';
             } else {
                 alert('Error: ' + data.message);
             }
@@ -471,13 +727,57 @@
         }
     }
 
+    async function uploadDeviceImage(id, inputEl) {
+        const file = inputEl.files[0];
+        if (!file) return;
+
+        if (file.size > 5000000) {
+            alert('The device photo cannot exceed 5 MB.');
+            inputEl.value = '';
+            return;
+        }
+
+        inputEl.disabled = true;
+        const formData = new FormData();
+        formData.append('image', file);
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        try {
+            const response = await fetch(endpoints.uploadDeviceImage, {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': token },
+                body: formData
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert('Error: ' + (data.message || 'The device photo could not be uploaded.'));
+                return;
+            }
+
+            updateDevice(id, 'standaloneImageUrl', data.url, inputEl);
+            renderDevices();
+        } catch (error) {
+            alert('An error occurred while uploading the device photo.');
+            console.error(error);
+        } finally {
+            inputEl.disabled = false;
+        }
+    }
+
+    function removeDeviceImage(id) {
+        updateDevice(id, 'standaloneImageUrl', '');
+        renderDevices();
+    }
+
         function renderDevices() {
         const container = document.getElementById('devices-container');
         container.innerHTML = devices.map(d => {
             const isExpanded = d._expanded === true; // Expanded by default.
             const iconUrl = safeWebUrl(d.iconUrl);
+            const deviceImageUrl = safeWebUrl(d.standaloneImageUrl);
             return `
-            <article class="space-y-4 border border-line bg-raised/50 p-4">
+            <article class="space-y-4 border border-line bg-raised/50 p-4" data-topology-card="device" data-device-id="${d.id}">
                 <div class="flex items-center justify-between gap-4">
                     <button type="button" class="focus-ring flex min-w-0 flex-1 items-center gap-3 text-left" onclick="toggleDeviceExpand(${d.id})" aria-expanded="${isExpanded}">
                         ${iconUrl
@@ -494,15 +794,15 @@
 
                 ${isExpanded ? `
                 <div class="grid gap-3 sm:grid-cols-2">
-                    <div>
+                    <div data-topology-field-group>
                         <label class="admin-label">Device name</label>
-                        <input value="${escapeHtml(d.label)}" oninput="updateDevice(${d.id}, 'label', this.value)"
-                               class="admin-input" />
+                        <input value="${escapeHtml(d.label)}" oninput="updateDevice(${d.id}, 'label', this.value, this)"
+                               maxlength="200" data-device-id="${d.id}" data-device-field="label" class="admin-input" />
                     </div>
-                    <div>
+                    <div data-topology-field-group>
                         <label class="admin-label">Device type</label>
-                        <select onchange="updateDevice(${d.id}, 'deviceType', this.value)"
-                                class="admin-select">
+                        <select onchange="updateDevice(${d.id}, 'deviceType', this.value, this)"
+                                data-device-id="${d.id}" data-device-field="deviceType" class="admin-select">
                             ${['router','switch','firewall','server','pc','laptop','microcontroller','mobile','custom','sensor','audio','antenna'].map(t =>
                                 `<option value="${t}" ${d.deviceType === t ? 'selected' : ''}>${t}</option>`
                             ).join('')}
@@ -511,28 +811,29 @@
                 </div>
 
                     <div class="grid gap-3 sm:grid-cols-2">
-                        <div>
+                        <div data-topology-field-group>
                             <label class="admin-label">Choose from icon library</label>
-                            <select onchange="selectLibraryIcon(${d.id}, this.value)"
-                                class="admin-select">
+                            <select onchange="selectLibraryIcon(${d.id}, this.value, this)"
+                                data-device-id="${d.id}" data-device-field="iconUrl" class="admin-select">
                                 <option value="">-- Select --</option>
                                 ${iconLibrary.map(icon =>
-                    `               <option value="${escapeHtml(safeWebUrl(icon.url))}" ${d.iconUrl === icon.url ? 'selected' : ''}>${escapeHtml(icon.name)}</option>`
+                    `               <option value="${escapeHtml(safeWebUrl(icon.url))}" ${safeWebUrl(d.iconUrl) === safeWebUrl(icon.url) ? 'selected' : ''}>${escapeHtml(icon.name)}</option>`
                                 ).join('')}
                             </select>
                         </div>
-                        <div>
+                        <div data-topology-field-group>
                             <label class="admin-label">Or upload a file</label>
                             <input type="file" accept="image/png,image/webp"
                                 onchange="uploadDeviceIcon(${d.id}, this)"
+                                data-device-id="${d.id}" data-device-field="iconUrl"
                                 class="focus-ring w-full border border-line bg-ink p-2 text-xs text-slate-400 file:mr-3 file:border-0 file:bg-raised file:px-3 file:py-1.5 file:text-slate-300 hover:file:bg-line" />
                         </div>
                     </div>
 
-                <div>
+                <div data-topology-field-group>
                     <label class="admin-label">Link to an electronics project <span class="font-normal text-slate-600">(optional)</span></label>
-                    <select onchange="updateDevice(${d.id}, 'linkedProjectSlug', this.value)"
-                            class="admin-select">
+                    <select onchange="updateDevice(${d.id}, 'linkedProjectSlug', this.value, this)"
+                            data-device-id="${d.id}" data-device-field="linkedProjectSlug" class="admin-select">
                         <option value="">Not linked — enter details manually</option>
                         ${electronicsProjects.map(p =>
                             `<option value="${escapeHtml(p.slug)}" ${d.linkedProjectSlug === p.slug ? 'selected' : ''}>${escapeHtml(p.title)}</option>`
@@ -542,14 +843,27 @@
 
                 ${!d.linkedProjectSlug ? `
                 <div class="grid gap-3 sm:grid-cols-2">
-                    <div>
-                        <label class="admin-label">Image URL <span class="font-normal text-slate-600">(manual)</span></label>
-                        <input value="${escapeHtml(d.standaloneImageUrl || '')}" oninput="updateDevice(${d.id}, 'standaloneImageUrl', this.value)"
-                               class="admin-input" />
+                    <div data-topology-field-group>
+                        <label class="admin-label">Device photo <span class="font-normal text-slate-600">(optional)</span></label>
+                        ${deviceImageUrl ? `
+                            <div class="mb-3 flex items-center gap-3 border border-line bg-ink/60 p-2">
+                                <img src="${escapeHtml(deviceImageUrl)}" alt="" class="h-16 w-20 shrink-0 object-cover" />
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-xs text-slate-400">Photo ready</p>
+                                    <button type="button" onclick="removeDeviceImage(${d.id})" class="mt-1 text-xs text-rose-300 transition hover:text-white">Remove photo</button>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <input type="file" accept="image/jpeg,image/png,image/webp"
+                               onchange="uploadDeviceImage(${d.id}, this)"
+                               data-device-id="${d.id}" data-device-field="standaloneImageUrl"
+                               class="focus-ring w-full border border-line bg-ink p-2 text-xs text-slate-400 file:mr-3 file:border-0 file:bg-raised file:px-3 file:py-1.5 file:text-slate-300 hover:file:bg-line" />
+                        <p class="admin-hint">Shown in public device details. JPEG, PNG or WebP; maximum 5 MB.</p>
                     </div>
-                    <div>
+                    <div data-topology-field-group>
                         <label class="admin-label">Public hardware summary <span class="font-normal text-slate-600">(manual)</span></label>
-                        <input value="${escapeHtml(d.standaloneHardware || '')}" oninput="updateDevice(${d.id}, 'standaloneHardware', this.value)"
+                        <input value="${escapeHtml(d.standaloneHardware || '')}" oninput="updateDevice(${d.id}, 'standaloneHardware', this.value, this)"
+                               maxlength="2000" data-device-id="${d.id}" data-device-field="standaloneHardware"
                                placeholder="Model or component summary; omit serial numbers"
                                class="admin-input" />
                     </div>
@@ -557,31 +871,33 @@
                 ` : ''}
 
                 <div class="grid gap-3 sm:grid-cols-2">
-                    <div>
+                    <div data-topology-field-group>
                         <label class="admin-label">Short description <span class="font-normal text-slate-600">(shown on hover)</span></label>
-                        <input value="${escapeHtml(d.shortInfo || '')}" oninput="updateDevice(${d.id}, 'shortInfo', this.value)"
-                               class="admin-input" />
+                        <input value="${escapeHtml(d.shortInfo || '')}" oninput="updateDevice(${d.id}, 'shortInfo', this.value, this)"
+                               maxlength="500" data-device-id="${d.id}" data-device-field="shortInfo" class="admin-input" />
                     </div>
-                    <div>
+                    <div data-topology-field-group>
                         <label class="admin-label">Public network label <span class="font-normal text-slate-600">(optional)</span></label>
-                        <input value="${escapeHtml(d.ipAddress || '')}" oninput="updateDevice(${d.id}, 'ipAddress', this.value)"
+                        <input value="${escapeHtml(d.ipAddress || '')}" oninput="updateDevice(${d.id}, 'ipAddress', this.value, this)"
+                               maxlength="100" data-device-id="${d.id}" data-device-field="ipAddress"
                                placeholder="Management VLAN or 10.20.x.x"
                                class="admin-input font-mono" />
                         <p class="admin-hint">Raw IP, IPv6, CIDR and MAC values are rejected by the server.</p>
                     </div>
                 </div>
 
-                <div>
+                <div data-topology-field-group>
                     <label class="admin-label">Role in the homelab</label>
-                    <input value="${escapeHtml(d.homelabRole || '')}" oninput="updateDevice(${d.id}, 'homelabRole', this.value)"
+                    <input value="${escapeHtml(d.homelabRole || '')}" oninput="updateDevice(${d.id}, 'homelabRole', this.value, this)"
+                           maxlength="500" data-device-id="${d.id}" data-device-field="homelabRole"
                            placeholder="What does it do on this network?"
                            class="admin-input" />
                 </div>
 
-                <div>
+                <div data-topology-field-group>
                     <label class="admin-label">Public notes</label>
-                    <textarea oninput="updateDevice(${d.id}, 'homelabNotes', this.value)" rows="2"
-                              class="admin-textarea">${escapeHtml(d.homelabNotes || '')}</textarea>
+                    <textarea oninput="updateDevice(${d.id}, 'homelabNotes', this.value, this)" rows="2" maxlength="5000"
+                              data-device-id="${d.id}" data-device-field="homelabNotes" class="admin-textarea">${escapeHtml(d.homelabNotes || '')}</textarea>
                     <p class="admin-hint">Describe purpose and design decisions, not operational access details.</p>
                 </div>
                 ` : ''}
@@ -617,7 +933,8 @@
         renderTopologyLayout();
     }
 
-    function updateConnection(index, field, value) {
+    function updateConnection(index, field, value, sourceElement) {
+        clearTopologyField(sourceElement);
         connections[index][field] = field === 'from' || field === 'to' ? parseInt(value) : value;
         renderTopologyLayout();
     }
@@ -631,25 +948,34 @@
         }
 
         container.innerHTML = connections.map((c, i) => `
-            <div class="grid gap-2 border border-line bg-raised/50 p-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,8rem)_minmax(0,8rem)_auto] sm:items-center">
-                <select onchange="updateConnection(${i}, 'from', this.value)"
-                        class="admin-select text-xs">
+            <div class="grid gap-2 border border-line bg-raised/50 p-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,8rem)_minmax(0,8rem)_auto] sm:items-center" data-topology-card="connection" data-connection-index="${i}">
+                <div data-topology-field-group>
+                <select onchange="updateConnection(${i}, 'from', this.value, this)"
+                        data-connection-index="${i}" data-connection-field="from" class="admin-select text-xs">
                     ${devices.map(d => `<option value="${d.id}" ${c.from === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'Unnamed')}</option>`).join('')}
                 </select>
+                </div>
                 <span class="hidden text-xs text-slate-600 sm:inline">→</span>
-                <select onchange="updateConnection(${i}, 'to', this.value)"
-                        class="admin-select text-xs">
+                <div data-topology-field-group>
+                <select onchange="updateConnection(${i}, 'to', this.value, this)"
+                        data-connection-index="${i}" data-connection-field="to" class="admin-select text-xs">
                     ${devices.map(d => `<option value="${d.id}" ${c.to === d.id ? 'selected' : ''}>${escapeHtml(d.label || 'Unnamed')}</option>`).join('')}
                 </select>
-                <select onchange="updateConnection(${i}, 'connectionType', this.value)"
-                        class="admin-select text-xs">
+                </div>
+                <div data-topology-field-group>
+                <select onchange="updateConnection(${i}, 'connectionType', this.value, this)"
+                        data-connection-index="${i}" data-connection-field="connectionType" class="admin-select text-xs">
                     ${['ethernet','wifi','usb','power','other'].map(t =>
                         `<option value="${t}" ${c.connectionType === t ? 'selected' : ''}>${t}</option>`
                     ).join('')}
                 </select>
-                <input value="${escapeHtml(c.label || '')}" oninput="updateConnection(${i}, 'label', this.value)"
+                </div>
+                <div data-topology-field-group>
+                <input value="${escapeHtml(c.label || '')}" oninput="updateConnection(${i}, 'label', this.value, this)"
+                       maxlength="200" data-connection-index="${i}" data-connection-field="label"
                        placeholder="Label (optional)"
                        class="admin-input text-xs" />
+                </div>
                 <button type="button" onclick="removeConnection(${i})"
                         class="focus-ring px-2 text-xs text-rose-300 transition hover:text-white" aria-label="Remove connection">Remove</button>
             </div>
@@ -667,19 +993,26 @@
     }
 
     document.getElementById('mainForm')?.addEventListener('submit', function(event) {
-        const unsafeDevice = devices.find(device => containsRawNetworkIdentifier(device.ipAddress));
-        if (unsafeDevice) {
+        captureLayoutPositions();
+        if (!validateTopology()) {
             event.preventDefault();
-            unsafeDevice._expanded = true;
-            renderDevices();
-            alert(`Use a redacted public network label for "${unsafeDevice.label || 'Unnamed Device'}". Raw IP, CIDR and MAC values cannot be published.`);
             return;
         }
 
-        captureLayoutPositions();
         const cleanDevices = devices.map(({ _expanded, ...rest }) => rest);
-        const topology = { nodes: cleanDevices, edges: connections };
-        document.getElementById('networkTopologyJson').value = JSON.stringify(topology);
+        const topology = {
+            nodes: cleanDevices,
+            edges: connections,
+            isLayoutLocked: isPublicLayoutLocked
+        };
+        const serializedTopology = JSON.stringify(topology);
+        if (serializedTopology.length > 500000) {
+            event.preventDefault();
+            showTopologyValidationSummary(['The topology exceeds the maximum allowed size.']);
+            return;
+        }
+
+        document.getElementById('networkTopologyJson').value = serializedTopology;
     });
 </script>
 }

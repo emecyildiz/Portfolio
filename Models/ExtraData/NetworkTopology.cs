@@ -8,6 +8,7 @@ public class NetworkTopology
 {
     public List<NetworkNode> Nodes { get; set; } = new();
     public List<NetworkEdge> Edges { get; set; } = new();
+    public bool IsLayoutLocked { get; set; }
 }
 
 public class NetworkNode
@@ -22,7 +23,7 @@ public class NetworkNode
     // When linked to an Electronics project, image and hardware details are loaded automatically.
     public string? LinkedProjectSlug { get; set; }
 
-    // Manually entered fields for devices without a linked project.
+    // Optional uploaded image and manual hardware details for devices without a linked project.
     public string? StandaloneImageUrl { get; set; }
     public string? StandaloneHardware { get; set; }
 

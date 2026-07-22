@@ -7,6 +7,7 @@ public static class TeamMemberJsonService
 {
     private const int MaxJsonLength = 100_000;
     private const int MaxMembers = 50;
+    private const int MaxEditableMembers = 100;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -47,6 +48,35 @@ public static class TeamMemberJsonService
         catch (JsonException)
         {
             members = [];
+            return false;
+        }
+    }
+
+    public static bool TryPrepareForEditing(string? json, out List<TeamMember> members)
+    {
+        members = [];
+
+        if (string.IsNullOrWhiteSpace(json))
+            return true;
+
+        if (json.Length > MaxJsonLength)
+            return false;
+
+        try
+        {
+            var parsedMembers = JsonSerializer.Deserialize<List<TeamMember?>>(json, JsonOptions);
+            if (parsedMembers == null ||
+                parsedMembers.Count > MaxEditableMembers ||
+                parsedMembers.Any(member => member == null))
+            {
+                return false;
+            }
+
+            members = parsedMembers.Select(member => member!).ToList();
+            return true;
+        }
+        catch (JsonException)
+        {
             return false;
         }
     }

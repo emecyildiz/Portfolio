@@ -44,6 +44,9 @@ public class HomelabController : AdminBaseController
         [Bind("Id,Title,Summary,Content,Topic,NetworkDiagramUrl,IsFeatured,IsMainLab,Status")] HomelabPost model,
         string? HardwareUsed, string? SoftwareUsed, List<IFormFile>? Images)
     {
+        ViewBag.HardwareString = HardwareUsed ?? string.Empty;
+        ViewBag.SoftwareString = SoftwareUsed ?? string.Empty;
+
         AdminContentValidator.ValidateHomelab(
             ModelState, model, _slugService, HardwareUsed, SoftwareUsed);
         await AdminContentValidator.ValidateImagesAsync(ModelState, _media, Images);
@@ -146,9 +149,15 @@ public class HomelabController : AdminBaseController
             ViewBag.HardwareString = HardwareUsed ?? string.Empty;
             ViewBag.SoftwareString = SoftwareUsed ?? string.Empty;
             ViewBag.Images = await _media.GetByEntityAsync("homelab_post", id);
-            ViewBag.NetworkTopologyJson = topologyIsValid
-                ? normalizedTopology
-                : existing.NetworkTopology;
+            var editableTopology = normalizedTopology;
+            if (!topologyIsValid &&
+                !NetworkTopologyJsonService.TryPrepareForEditing(NetworkTopologyJson, out editableTopology))
+            {
+                editableTopology = existing.NetworkTopology;
+            }
+
+            ViewBag.NetworkTopologyJson = editableTopology;
+            ViewBag.TopologyValidationError = topologyValidationError;
             return View(model);
         }
 
@@ -275,6 +284,41 @@ public class HomelabController : AdminBaseController
 
         await using var stream = new FileStream(physicalPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
         await icon.CopyToAsync(stream);
+
+        var url = "/" + relativePath.Replace('\\', '/');
+        return Json(new { success = true, url });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadDeviceImage(IFormFile image)
+    {
+        if (image == null || image.Length == 0)
+            return Json(new { success = false, message = "No file was selected." });
+
+        if (image.Length > 5_000_000)
+            return Json(new { success = false, message = "The file is too large (maximum 5 MB)." });
+
+        var validatedUpload = await UploadFileValidator.ValidateImageAsync(
+            image, ".jpg", ".jpeg", ".png", ".webp");
+        if (validatedUpload == null)
+        {
+            return Json(new
+            {
+                success = false,
+                message = "The file must be a valid JPEG, PNG or WebP image."
+            });
+        }
+
+        var uniqueName = $"{Guid.NewGuid()}{validatedUpload.Extension}";
+        var relativePath = Path.Combine("uploads", "network-devices", uniqueName);
+        var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
+
+        await using var stream = new FileStream(
+            physicalPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+        await image.CopyToAsync(stream);
 
         var url = "/" + relativePath.Replace('\\', '/');
         return Json(new { success = true, url });
