@@ -29,29 +29,33 @@ public sealed class PageViewRetentionService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await DeleteExpiredPageViewsAsync(stoppingToken);
+        await DeleteExpiredAnalyticsRecordsAsync(stoppingToken);
 
         using var timer = new PeriodicTimer(CleanupInterval);
         while (await timer.WaitForNextTickAsync(stoppingToken))
-            await DeleteExpiredPageViewsAsync(stoppingToken);
+            await DeleteExpiredAnalyticsRecordsAsync(stoppingToken);
     }
 
-    private async Task DeleteExpiredPageViewsAsync(CancellationToken cancellationToken)
+    private async Task DeleteExpiredAnalyticsRecordsAsync(CancellationToken cancellationToken)
     {
         try
         {
             var cutoff = DateTime.UtcNow.AddDays(-_retentionDays);
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var deletedCount = await db.PageViews
+            var deletedPageViewCount = await db.PageViews
                 .Where(pageView => pageView.ViewedAt < cutoff)
                 .ExecuteDeleteAsync(cancellationToken);
+            var deletedContentViewCount = await db.ContentViewReceipts
+                .Where(receipt => receipt.CreatedAt < cutoff)
+                .ExecuteDeleteAsync(cancellationToken);
 
-            if (deletedCount > 0)
+            if (deletedPageViewCount > 0 || deletedContentViewCount > 0)
             {
                 _logger.LogInformation(
-                    "Deleted {Count} page-view records older than {RetentionDays} days.",
-                    deletedCount,
+                    "Deleted {PageViewCount} visitor records and {ContentViewCount} content-view receipts older than {RetentionDays} days.",
+                    deletedPageViewCount,
+                    deletedContentViewCount,
                     _retentionDays);
             }
         }
@@ -61,7 +65,7 @@ public sealed class PageViewRetentionService : BackgroundService
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "Page-view retention cleanup failed.");
+            _logger.LogWarning(exception, "Analytics retention cleanup failed.");
         }
     }
 }

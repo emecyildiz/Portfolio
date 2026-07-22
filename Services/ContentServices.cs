@@ -1,4 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
 using Portfolio.Models;
@@ -115,32 +118,178 @@ public class ReadingTimeService : IReadingTimeService
 
 public interface IViewCountService
 {
-    Task IncrementAsync(string table, int id);
+    Task<bool> TryIncrementUniqueAsync(
+        string table,
+        int id,
+        HttpContext httpContext,
+        CancellationToken cancellationToken = default);
 }
 
 public class ViewCountService : IViewCountService
 {
+    private const string VisitorCookieName = "portfolio_visitor";
+    private const string VisitorProtectorPurpose = "Portfolio.ContentViews.Visitor.v1";
+
+    private static readonly string[] BotUserAgentMarkers =
+    [
+        "bot", "crawler", "spider", "slurp", "facebookexternalhit", "whatsapp",
+        "telegrambot", "discordbot", "twitterbot", "linkedinbot", "preview"
+    ];
+
     private readonly AppDbContext _db;
+    private readonly IDataProtector _visitorProtector;
+    private readonly ILogger<ViewCountService> _logger;
+    private readonly int _visitorCookieDays;
 
-    public ViewCountService(AppDbContext db) => _db = db;
-
-    public async Task IncrementAsync(string table, int id)
+    public ViewCountService(
+        AppDbContext db,
+        IDataProtectionProvider dataProtectionProvider,
+        IConfiguration configuration,
+        ILogger<ViewCountService> logger)
     {
-        var sql = table switch
+        _db = db;
+        _visitorProtector = dataProtectionProvider.CreateProtector(VisitorProtectorPurpose);
+        _logger = logger;
+        _visitorCookieDays = configuration.GetValue("Privacy:ContentVisitorCookieDays", 90);
+
+        if (_visitorCookieDays is < 30 or > 365)
         {
-            "Project" or "Projects" =>
-                "UPDATE \"Projects\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
-            "SecurityResearch" or "SecurityResearches" =>
-                "UPDATE \"SecurityResearches\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
-            "HomelabPost" or "HomelabPosts" =>
-                "UPDATE \"HomelabPosts\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
-            "BlogPost" or "BlogPosts" =>
-                "UPDATE \"BlogPosts\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
-            "TeamProject" or "TeamProjects" =>
-                "UPDATE \"TeamProjects\" SET \"ViewCount\" = \"ViewCount\" + 1 WHERE \"Id\" = {0}",
+            throw new InvalidOperationException(
+                "Privacy:ContentVisitorCookieDays must be between 30 and 365 days.");
+        }
+    }
+
+    public async Task<bool> TryIncrementUniqueAsync(
+        string table,
+        int id,
+        HttpContext httpContext,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ShouldCountRequest(httpContext))
+        {
+            return false;
+        }
+
+        var (contentType, tableName) = table switch
+        {
+            "Project" or "Projects" => ("project", "Projects"),
+            "SecurityResearch" or "SecurityResearches" => ("security", "SecurityResearches"),
+            "HomelabPost" or "HomelabPosts" => ("homelab", "HomelabPosts"),
+            "BlogPost" or "BlogPosts" => ("blog", "BlogPosts"),
+            "TeamProject" or "TeamProjects" => ("team", "TeamProjects"),
             _ => throw new ArgumentOutOfRangeException(nameof(table), table, "Unsupported content table.")
         };
 
-        await _db.Database.ExecuteSqlRawAsync(sql, id);
+        var visitorId = GetOrCreateVisitorId(httpContext);
+        var visitorHash = Convert.ToHexString(
+            SHA256.HashData(Encoding.UTF8.GetBytes(visitorId)))
+            .ToLowerInvariant();
+        var now = DateTime.UtcNow;
+        var viewDate = DateOnly.FromDateTime(now);
+        var sql = $$"""
+            WITH target AS (
+                SELECT "Id"
+                FROM "{{tableName}}"
+                WHERE "Id" = {1} AND "ViewCount" < 2147483647
+            ),
+            inserted AS (
+                INSERT INTO "ContentViewReceipts"
+                    ("ContentType", "ContentId", "VisitorHash", "ViewDate", "CreatedAt")
+                SELECT {0}, {1}, {2}, {3}, {4}
+                FROM target
+                ON CONFLICT ("ContentType", "ContentId", "VisitorHash", "ViewDate")
+                DO NOTHING
+                RETURNING 1
+            )
+            UPDATE "{{tableName}}" AS content
+            SET "ViewCount" = content."ViewCount" + 1
+            WHERE content."Id" = {1}
+              AND EXISTS (SELECT 1 FROM inserted)
+            """;
+
+        try
+        {
+            var affectedRows = await _db.Database.ExecuteSqlRawAsync(
+                sql,
+                [contentType, id, visitorHash, viewDate, now],
+                cancellationToken);
+            return affectedRows == 1;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "Unique content-view tracking failed for {ContentType} {ContentId}.",
+                contentType,
+                id);
+            return false;
+        }
     }
+
+    private string GetOrCreateVisitorId(HttpContext httpContext)
+    {
+        if (httpContext.Request.Cookies.TryGetValue(VisitorCookieName, out var protectedVisitorId))
+        {
+            try
+            {
+                var visitorId = _visitorProtector.Unprotect(protectedVisitorId);
+                if (Guid.TryParseExact(visitorId, "N", out _))
+                {
+                    return visitorId;
+                }
+            }
+            catch (CryptographicException)
+            {
+                // Invalid or expired identifiers are replaced without trusting client input.
+            }
+        }
+
+        var newVisitorId = Guid.NewGuid().ToString("N");
+        httpContext.Response.Cookies.Append(
+            VisitorCookieName,
+            _visitorProtector.Protect(newVisitorId),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = httpContext.Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddDays(_visitorCookieDays),
+                MaxAge = TimeSpan.FromDays(_visitorCookieDays),
+                IsEssential = false
+            });
+        return newVisitorId;
+    }
+
+    private static bool ShouldCountRequest(HttpContext httpContext)
+    {
+        if (!HttpMethods.IsGet(httpContext.Request.Method) ||
+            httpContext.User.Identity?.IsAuthenticated == true)
+        {
+            return false;
+        }
+
+        var accept = httpContext.Request.Headers.Accept.ToString();
+        if (!accept.Contains("text/html", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var purpose = $"{httpContext.Request.Headers["Purpose"]} {httpContext.Request.Headers["Sec-Purpose"]}";
+        if (purpose.Contains("prefetch", StringComparison.OrdinalIgnoreCase) ||
+            purpose.Contains("preview", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var userAgent = httpContext.Request.Headers.UserAgent.ToString();
+        return !string.IsNullOrWhiteSpace(userAgent) &&
+               !BotUserAgentMarkers.Any(marker =>
+                   userAgent.Contains(marker, StringComparison.OrdinalIgnoreCase));
+    }
+
 }

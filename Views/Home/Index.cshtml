@@ -17,226 +17,108 @@
     }
 }
 
-<!-- Hero -->
-<section class="relative overflow-hidden">
-    <div aria-hidden="true" class="absolute right-[-12rem] top-16 h-[28rem] w-[28rem] rounded-full border border-cyan/10"></div>
-    <div aria-hidden="true" class="absolute right-[-8rem] top-32 h-[20rem] w-[20rem] rounded-full border border-signal/10"></div>
-
-    <div class="mx-auto grid max-w-7xl gap-12 px-4 pb-20 pt-20 sm:px-6 sm:pt-28 lg:grid-cols-[1.15fr_.85fr] lg:items-center lg:gap-16 lg:px-8 lg:pb-28 lg:pt-32">
+<section class="home-lead public-container">
+    <div class="home-lead__grid">
         <div>
-            <div class="mb-7 flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center gap-2 rounded-full border border-signal/20 bg-signal/[0.06] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-signal">
-                    <span class="h-1.5 w-1.5 rounded-full bg-signal shadow-[0_0_10px_rgba(184,243,107,.9)]"></span>
-                    Independent systems lab
-                </span>
-                <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">Security · Hardware · Infrastructure</span>
+            <p class="archive-label">Independent engineering portfolio / work in progress</p>
+            <h1>Security research, hardware experiments, and systems I have built.</h1>
+            <p class="home-lead__summary">
+                This is a working record of reverse engineering, malware analysis, electronics,
+                self-hosted infrastructure, and software—documented with the decisions, failures,
+                and technical details that shaped each result.
+            </p>
+            <div class="public-actions">
+                @if (Model.FeaturedProjects.Any())
+                {
+                    <a href="#selected-work" class="public-button focus-ring">View selected work <span aria-hidden="true">↓</span></a>
+                }
+                else
+                {
+                    <a href="/electronics" class="public-button focus-ring">Browse published projects <span aria-hidden="true">→</span></a>
+                }
+                <a href="/activity" class="public-button--quiet focus-ring">Open chronological archive <span aria-hidden="true">→</span></a>
             </div>
-
-            <h1 class="max-w-4xl text-[clamp(3.15rem,8vw,6.7rem)] font-semibold leading-[.9] tracking-[-0.055em] text-white">
-                I take systems apart<span class="text-signal">.</span>
-                <span class="gradient-text mt-2 block">Then build what comes next.</span>
-            </h1>
-
-            <div class="mt-8 grid gap-6 border-l border-line pl-5 sm:grid-cols-[1fr_auto] sm:items-end sm:gap-8 sm:pl-7">
-                <p class="max-w-2xl text-base leading-7 text-slate-400 sm:text-lg sm:leading-8">
-                    A working archive of malware analysis, reverse engineering, hardware experiments,
-                    self-hosted infrastructure, and software built to understand how real systems behave.
-                </p>
-                <p class="hidden font-mono text-[10px] uppercase leading-5 tracking-[0.18em] text-slate-600 sm:block">Observe<br />Test<br />Document</p>
-            </div>
-
-            <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <a href="/security" class="focus-ring inline-flex items-center justify-center gap-3 rounded-md bg-signal px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white">
-                    Explore the research <span aria-hidden="true">↗</span>
-                </a>
-                <a href="/activity" class="focus-ring inline-flex items-center justify-center gap-3 rounded-md border border-white/10 bg-white/[0.02] px-6 py-3.5 text-sm font-medium text-slate-300 transition hover:border-cyan/40 hover:text-white">
-                    Browse the field log <span aria-hidden="true" class="text-cyan">→</span>
-                </a>
-            </div>
-
-            @if (Model.CurrentFocus != null)
-            {
-                <div class="mt-7 max-w-2xl">
-                    @if (hasSafeCurrentFocusUrl)
-                    {
-                        <a href="@currentFocusUrl" target="_blank" rel="noopener noreferrer" class="focus-ring group inline-flex max-w-full items-center gap-3 rounded-md border border-white/[0.08] bg-panel/70 px-4 py-3 transition hover:border-signal/30">
-                            <span class="relative flex h-2 w-2 shrink-0"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal opacity-60"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-signal"></span></span>
-                            <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">Current focus</span>
-                            <span class="truncate text-sm text-slate-300 transition group-hover:text-white">@Model.CurrentFocus.Title</span>
-                            <span aria-hidden="true" class="text-signal">↗</span>
-                        </a>
-                    }
-                    else
-                    {
-                        <div class="inline-flex max-w-full items-center gap-3 rounded-md border border-white/[0.08] bg-panel/70 px-4 py-3">
-                            <span class="relative flex h-2 w-2 shrink-0"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal opacity-60"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-signal"></span></span>
-                            <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">Current focus</span>
-                            <span class="truncate text-sm text-slate-300">@Model.CurrentFocus.Title</span>
-                        </div>
-                    }
-                </div>
-            }
         </div>
 
-        <aside class="technical-frame surface relative rounded-2xl p-5 sm:p-7">
-            <div class="mb-6 flex items-center justify-between border-b border-white/[0.07] pb-4">
-                <div>
-                    <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600">Field index</p>
-                    <h2 class="mt-1 text-lg font-semibold text-white">Four connected disciplines</h2>
-                </div>
-                <span class="font-mono text-[10px] text-signal">SYS.01</span>
-            </div>
-
-            <div class="space-y-2">
-                <a href="/security" class="focus-ring card-lift group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4 hover:border-rose-400/30 hover:bg-rose-400/[0.04]">
-                    <span class="font-mono text-[10px] text-rose-300">01</span>
-                    <span><strong class="block text-sm font-medium text-white">Security research</strong><small class="mt-1 block text-xs text-slate-500">Malware · reversing · vulnerability analysis</small></span>
-                    <span aria-hidden="true" class="text-slate-700 transition group-hover:text-rose-300">↗</span>
-                </a>
-                <a href="/electronics" class="focus-ring card-lift group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4 hover:border-amber-300/30 hover:bg-amber-300/[0.04]">
-                    <span class="font-mono text-[10px] text-amber-300">02</span>
-                    <span><strong class="block text-sm font-medium text-white">Hardware engineering</strong><small class="mt-1 block text-xs text-slate-500">Circuits · embedded systems · RF</small></span>
-                    <span aria-hidden="true" class="text-slate-700 transition group-hover:text-amber-300">↗</span>
-                </a>
-                <a href="/homelab" class="focus-ring card-lift group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4 hover:border-teal-300/30 hover:bg-teal-300/[0.04]">
-                    <span class="font-mono text-[10px] text-teal-300">03</span>
-                    <span><strong class="block text-sm font-medium text-white">Homelab infrastructure</strong><small class="mt-1 block text-xs text-slate-500">Networks · virtualization · self-hosting</small></span>
-                    <span aria-hidden="true" class="text-slate-700 transition group-hover:text-teal-300">↗</span>
-                </a>
-                <a href="/webapps" class="focus-ring card-lift group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-4 hover:border-cyan/30 hover:bg-cyan/[0.04]">
-                    <span class="font-mono text-[10px] text-cyan">04</span>
-                    <span><strong class="block text-sm font-medium text-white">Software systems</strong><small class="mt-1 block text-xs text-slate-500">C# · Python · ASP.NET Core</small></span>
-                    <span aria-hidden="true" class="text-slate-700 transition group-hover:text-cyan">↗</span>
-                </a>
-            </div>
-
-            <div class="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-white/[0.07] bg-white/[0.07] text-center">
-                <div class="bg-panel px-2 py-3"><span class="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600">Method</span><strong class="mt-1 block text-xs font-medium text-slate-300">Hands-on</strong></div>
-                <div class="bg-panel px-2 py-3"><span class="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600">Output</span><strong class="mt-1 block text-xs font-medium text-slate-300">Documented</strong></div>
-                <div class="bg-panel px-2 py-3"><span class="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600">Status</span><strong class="mt-1 block text-xs font-medium text-signal">Active</strong></div>
-            </div>
+        <aside class="home-lead__aside">
+            @if (Model.CurrentFocus != null)
+            {
+                <p class="archive-label">Current focus</p>
+                <p class="home-lead__aside-title">@Model.CurrentFocus.Title</p>
+                <p class="home-lead__aside-copy">The subject currently on the workbench. This note changes as active research and builds move forward.</p>
+                @if (hasSafeCurrentFocusUrl)
+                {
+                    <a href="@currentFocusUrl" target="_blank" rel="noopener noreferrer" class="home-lead__aside-link focus-ring">Open related record ↗</a>
+                }
+            }
+            else
+            {
+                <p class="archive-label">Archive scope</p>
+                <p class="home-lead__aside-title">Built, inspected, and documented.</p>
+                <p class="home-lead__aside-copy">Projects are published as technical records, not marketing case studies. Evidence and implementation details come first.</p>
+            }
         </aside>
     </div>
 </section>
 
-<!-- Capability strip -->
-<section class="border-y border-white/[0.07] bg-black/20">
-    <div class="mx-auto grid max-w-7xl divide-y divide-white/[0.07] px-4 sm:px-6 md:grid-cols-4 md:divide-x md:divide-y-0 lg:px-8">
-        <div class="py-5 md:pr-6"><p class="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600">Security</p><p class="mt-1 text-sm text-slate-300">Malware · RE · RF security</p></div>
-        <div class="py-5 md:px-6"><p class="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600">Electronics</p><p class="mt-1 text-sm text-slate-300">ESP32 · Arduino · circuit design</p></div>
-        <div class="py-5 md:px-6"><p class="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600">Infrastructure</p><p class="mt-1 text-sm text-slate-300">pfSense · VLAN · Docker · Proxmox</p></div>
-        <div class="py-5 md:pl-6"><p class="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600">Development</p><p class="mt-1 text-sm text-slate-300">C# · Python · ASP.NET Core</p></div>
+<nav aria-label="Portfolio disciplines" class="discipline-index">
+    <div class="discipline-index__inner public-container">
+        <a href="/security" class="discipline-link focus-ring">
+            <span class="discipline-link__number">01 / Research</span>
+            <strong>Security</strong>
+            <small>Malware analysis, reverse engineering, vulnerability research.</small>
+        </a>
+        <a href="/electronics" class="discipline-link focus-ring">
+            <span class="discipline-link__number">02 / Build</span>
+            <strong>Electronics</strong>
+            <small>Embedded devices, circuit work, sensors, and hardware experiments.</small>
+        </a>
+        <a href="/homelab" class="discipline-link focus-ring">
+            <span class="discipline-link__number">03 / Operate</span>
+            <strong>Homelab</strong>
+            <small>Networks, virtualization, services, and defensive infrastructure.</small>
+        </a>
+        <a href="/webapps" class="discipline-link focus-ring">
+            <span class="discipline-link__number">04 / Develop</span>
+            <strong>Software</strong>
+            <small>Web applications, backend services, automation, and tooling.</small>
+        </a>
     </div>
-</section>
-
-@if (activity.Any())
-{
-    <!-- Recent activity -->
-    <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-        <div class="grid gap-10 lg:grid-cols-[.72fr_1.28fr] lg:gap-16">
-            <div>
-                <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-signal">01 / Field log</p>
-                <h2 class="mt-4 text-3xl font-semibold tracking-[-0.03em] text-white sm:text-4xl">Recent activity across the lab.</h2>
-                <p class="mt-4 max-w-md text-sm leading-7 text-slate-500">A chronological stream of research notes, builds, experiments, and infrastructure changes.</p>
-                <a href="/activity" class="focus-ring mt-7 inline-flex items-center gap-2 rounded-sm text-sm font-medium text-slate-300 transition hover:text-signal">Open the full timeline <span aria-hidden="true">→</span></a>
-            </div>
-
-            <div class="surface rounded-2xl p-2 sm:p-3">
-                @foreach (var item in activity)
-                {
-                    <a href="@item.Url" class="focus-ring group grid grid-cols-[auto_1fr] gap-3 rounded-xl border border-transparent px-3 py-4 transition hover:border-white/[0.07] hover:bg-white/[0.03] sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-4 sm:px-4">
-                        <span class="text-[9px] px-2 py-1 rounded border font-mono @item.ColorClass whitespace-nowrap">@item.TypeLabel</span>
-                        <span class="min-w-0 truncate text-sm text-slate-300 transition group-hover:text-white">@item.Title</span>
-                        <span class="col-start-2 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600 sm:col-auto">@(item.Date?.ToString("dd MMM yyyy") ?? "")</span>
-                    </a>
-                }
-            </div>
-        </div>
-    </section>
-}
-
-@if (Model.FeaturedSecurity.Any())
-{
-    <!-- Featured security research -->
-    <section class="border-y border-white/[0.07] bg-black/20">
-        <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-            <div class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-rose-300">02 / Research archive</p>
-                    <h2 class="mt-4 text-3xl font-semibold tracking-[-0.03em] text-white sm:text-4xl">Security under the microscope.</h2>
-                </div>
-                <a href="/security" class="focus-ring inline-flex items-center gap-2 rounded-sm text-sm text-slate-400 transition hover:text-rose-300">View all research <span aria-hidden="true">↗</span></a>
-            </div>
-
-            <div class="grid gap-4 lg:grid-cols-3">
-                @foreach (var research in Model.FeaturedSecurity)
-                {
-                    <a href="/security/@research.Slug" class="focus-ring card-lift technical-frame surface group flex min-h-72 flex-col rounded-2xl p-6 hover:border-rose-400/30">
-                        <div class="flex items-start justify-between gap-4">
-                            @if (!string.IsNullOrEmpty(research.SeverityLevel))
-                            {
-                                var severityColor = research.SeverityLevel switch
-                                {
-                                    "critical" => "border-red-400/30 bg-red-400/10 text-red-300",
-                                    "high" => "border-orange-400/30 bg-orange-400/10 text-orange-300",
-                                    "medium" => "border-amber-400/30 bg-amber-400/10 text-amber-300",
-                                    _ => "border-white/10 bg-white/[0.04] text-slate-400"
-                                };
-                                <span class="rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.16em] @severityColor">@research.SeverityLevel</span>
-                            }
-                            <span class="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-600">@research.ResearchType</span>
-                        </div>
-                        <h3 class="mt-8 text-xl font-semibold tracking-[-0.02em] text-white transition group-hover:text-rose-200">@research.Title</h3>
-                        <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-500">@research.Summary</p>
-                        <div class="mt-auto flex items-end justify-between gap-4 pt-8">
-                            @if (!string.IsNullOrEmpty(research.CveId))
-                            {
-                                <span class="font-mono text-[10px] text-rose-300">@research.CveId</span>
-                            }
-                            else
-                            {
-                                <span class="font-mono text-[10px] text-slate-700">LAB NOTE</span>
-                            }
-                            <span aria-hidden="true" class="text-slate-700 transition group-hover:text-rose-300">↗</span>
-                        </div>
-                    </a>
-                }
-            </div>
-        </div>
-    </section>
-}
+</nav>
 
 @if (Model.FeaturedProjects.Any())
 {
-    <!-- Featured engineering projects -->
-    <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-        <div class="mb-10 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div>
-                <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan">03 / Built systems</p>
-                <h2 class="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.03em] text-white sm:text-4xl">Engineering ideas into working hardware and software.</h2>
-            </div>
-            <a href="/electronics" class="focus-ring inline-flex items-center gap-2 rounded-sm text-sm text-slate-400 transition hover:text-cyan">Browse projects <span aria-hidden="true">↗</span></a>
-        </div>
+    <section id="selected-work" class="editorial-section public-container">
+        <header class="section-heading">
+            <p class="archive-label">01 / Selected work</p>
+            <h2>Projects with the process left visible.</h2>
+            <a href="/activity" class="focus-ring">Full archive →</a>
+        </header>
 
-        <div class="grid gap-5 lg:grid-cols-3">
+        <div class="selected-work">
+            @{ var projectIndex = 0; }
             @foreach (var project in Model.FeaturedProjects)
             {
-                <a href="/@project.Category.Slug/@project.Slug" class="focus-ring card-lift surface group overflow-hidden rounded-2xl hover:border-cyan/30">
-                    <div class="relative h-52 overflow-hidden border-b border-white/[0.07] bg-raised">
+                projectIndex++;
+                <a href="/@project.Category.Slug/@project.Slug" class="selected-work__item focus-ring">
+                    <div class="selected-work__meta">
+                        <span>@projectIndex.ToString("D2")</span><br />
+                        <span>@project.Category.Name</span><br />
+                        <span>@(project.PublishedAt?.ToString("yyyy.MM.dd") ?? "In progress")</span>
+                    </div>
+                    <div>
+                        <h3 class="selected-work__title">@project.Title</h3>
+                        <p class="selected-work__summary">@project.Summary</p>
+                    </div>
+                    <div class="selected-work__visual">
                         @if (!string.IsNullOrEmpty(project.CoverImageUrl))
                         {
-                            <img src="@project.CoverImageUrl" alt="@project.Title" loading="lazy" class="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-[1.03] group-hover:opacity-100" />
+                            <img src="@project.CoverImageUrl" alt="@project.Title" loading="lazy" class="selected-work__image" />
                         }
                         else
                         {
-                            <div class="site-grid grid h-full place-items-center"><span class="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-700">Image pending</span></div>
+                            <div class="selected-work__placeholder">Project image pending</div>
                         }
-                        <span class="absolute left-4 top-4 rounded-full border border-white/10 bg-ink/75 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-cyan backdrop-blur">@project.Category.Name</span>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold tracking-[-0.02em] text-white transition group-hover:text-cyan">@project.Title</h3>
-                        <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-500">@project.Summary</p>
-                        <span class="mt-6 inline-flex items-center gap-2 text-xs font-medium text-slate-400 transition group-hover:text-white">View build notes <span aria-hidden="true">→</span></span>
                     </div>
                 </a>
             }
@@ -244,68 +126,116 @@
     </section>
 }
 
-@if (Model.FeaturedHomelab.Any())
+@if (Model.FeaturedSecurity.Any() || Model.FeaturedHomelab.Any())
 {
-    <!-- Homelab -->
-    <section class="border-y border-white/[0.07] bg-black/20">
-        <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-            <div class="grid gap-10 lg:grid-cols-[.7fr_1.3fr] lg:gap-16">
+    <section class="editorial-section public-container">
+        <div class="editorial-columns">
+            @if (Model.FeaturedSecurity.Any())
+            {
                 <div>
-                    <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-teal-300">04 / Live infrastructure</p>
-                    <h2 class="mt-4 text-3xl font-semibold tracking-[-0.03em] text-white sm:text-4xl">A homelab built to learn by doing.</h2>
-                    <p class="mt-4 text-sm leading-7 text-slate-500">Network architecture, services, experiments, and the decisions behind a continuously evolving home infrastructure.</p>
-                    <a href="/homelab" class="focus-ring mt-7 inline-flex items-center gap-2 rounded-sm text-sm text-slate-300 transition hover:text-teal-300">Enter the homelab <span aria-hidden="true">↗</span></a>
+                    <header class="editorial-column__header">
+                        <div>
+                            <p class="archive-label">02 / Investigation</p>
+                            <h2>Security research</h2>
+                        </div>
+                        <a href="/security" class="focus-ring">All research ↗</a>
+                    </header>
+                    <div class="record-list">
+                        @foreach (var research in Model.FeaturedSecurity)
+                        {
+                            <a href="/security/@research.Slug" class="record-row focus-ring">
+                                <span class="record-row__type">@research.ResearchType<br />@research.SeverityLevel</span>
+                                <span>
+                                    <span class="record-row__title">@research.Title</span>
+                                    <span class="record-row__summary">@research.Summary</span>
+                                </span>
+                                <span aria-hidden="true" class="record-row__arrow">↗</span>
+                            </a>
+                        }
+                    </div>
                 </div>
+            }
 
-                <div class="grid gap-4 sm:grid-cols-2">
-                    @foreach (var lab in Model.FeaturedHomelab)
-                    {
-                        <a href="/homelab/@lab.Slug" class="focus-ring card-lift surface group flex min-h-56 flex-col rounded-2xl p-6 hover:border-teal-300/30">
-                            <div class="flex items-center justify-between gap-4">
-                                <span class="font-mono text-[9px] uppercase tracking-[0.16em] text-teal-300">@lab.Topic</span>
-                                <span class="h-1.5 w-1.5 rounded-full bg-teal-300 shadow-[0_0_10px_rgba(94,234,212,.7)]"></span>
-                            </div>
-                            <h3 class="mt-7 text-lg font-semibold text-white transition group-hover:text-teal-200">@lab.Title</h3>
-                            <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-500">@lab.Summary</p>
-                            <p class="mt-auto pt-6 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-700">@lab.ReadingTimeMinutes min read · node active</p>
-                        </a>
-                    }
+            @if (Model.FeaturedHomelab.Any())
+            {
+                <div>
+                    <header class="editorial-column__header">
+                        <div>
+                            <p class="archive-label">03 / Infrastructure</p>
+                            <h2>Homelab records</h2>
+                        </div>
+                        <a href="/homelab" class="focus-ring">Open the lab ↗</a>
+                    </header>
+                    <div class="record-list">
+                        @foreach (var lab in Model.FeaturedHomelab)
+                        {
+                            <a href="/homelab/@lab.Slug" class="record-row focus-ring">
+                                <span class="record-row__type">@lab.Topic<br />@lab.ReadingTimeMinutes min</span>
+                                <span>
+                                    <span class="record-row__title">@lab.Title</span>
+                                    <span class="record-row__summary">@lab.Summary</span>
+                                </span>
+                                <span aria-hidden="true" class="record-row__arrow">↗</span>
+                            </a>
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     </section>
 }
 
-@if (Model.RecentBlog.Any())
+@if (activity.Any() || Model.RecentBlog.Any())
 {
-    <!-- Recent writing -->
-    <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-        <div class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-violet-300">05 / Notes and writing</p>
-                <h2 class="mt-4 text-3xl font-semibold tracking-[-0.03em] text-white sm:text-4xl">Thinking through the work.</h2>
-            </div>
-            <a href="/blog" class="focus-ring inline-flex items-center gap-2 rounded-sm text-sm text-slate-400 transition hover:text-violet-300">Read all notes <span aria-hidden="true">↗</span></a>
-        </div>
-
-        <div class="grid gap-4 lg:grid-cols-2">
-            @foreach (var post in Model.RecentBlog)
+    <section class="editorial-section public-container">
+        <div class="editorial-columns">
+            @if (activity.Any())
             {
-                <a href="/blog/@post.Slug" class="focus-ring card-lift surface group grid gap-5 rounded-2xl p-5 hover:border-violet-300/30 sm:grid-cols-[8rem_1fr] sm:items-center">
-                    @if (!string.IsNullOrEmpty(post.CoverImageUrl))
-                    {
-                        <img src="@post.CoverImageUrl" alt="@post.Title" loading="lazy" class="h-36 w-full rounded-xl object-cover opacity-80 transition group-hover:opacity-100 sm:h-28" />
-                    }
-                    else
-                    {
-                        <div class="site-grid grid h-28 w-full place-items-center rounded-xl border border-white/[0.07] bg-raised"><span class="font-mono text-[9px] text-slate-700">TXT</span></div>
-                    }
-                    <div class="min-w-0">
-                        <p class="font-mono text-[9px] uppercase tracking-[0.14em] text-violet-300">@(post.PublishedAt?.ToString("dd MMM yyyy") ?? "Draft") · @post.ReadingTimeMinutes min</p>
-                        <h3 class="mt-3 text-lg font-semibold text-white transition group-hover:text-violet-200">@post.Title</h3>
-                        <p class="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">@post.Summary</p>
+                <div>
+                    <header class="editorial-column__header">
+                        <div>
+                            <p class="archive-label">04 / Chronology</p>
+                            <h2>Recent activity</h2>
+                        </div>
+                        <a href="/activity" class="focus-ring">Full timeline →</a>
+                    </header>
+                    <div class="record-list">
+                        @foreach (var item in activity)
+                        {
+                            <a href="@item.Url" class="record-row focus-ring">
+                                <span class="record-row__date">@(item.Date?.ToString("dd MMM") ?? "—")<br />@item.TypeLabel</span>
+                                <span class="record-row__title">@item.Title</span>
+                                <span aria-hidden="true" class="record-row__arrow">→</span>
+                            </a>
+                        }
                     </div>
-                </a>
+                </div>
+            }
+
+            @if (Model.RecentBlog.Any())
+            {
+                <div>
+                    <header class="editorial-column__header">
+                        <div>
+                            <p class="archive-label">05 / Writing</p>
+                            <h2>Technical notes</h2>
+                        </div>
+                        <a href="/blog" class="focus-ring">All notes →</a>
+                    </header>
+                    <div class="record-list">
+                        @foreach (var post in Model.RecentBlog)
+                        {
+                            <a href="/blog/@post.Slug" class="record-row focus-ring">
+                                <span class="record-row__date">@(post.PublishedAt?.ToString("dd MMM") ?? "—")<br />@post.ReadingTimeMinutes min</span>
+                                <span>
+                                    <span class="record-row__title">@post.Title</span>
+                                    <span class="record-row__summary">@post.Summary</span>
+                                </span>
+                                <span aria-hidden="true" class="record-row__arrow">→</span>
+                            </a>
+                        }
+                    </div>
+                </div>
             }
         </div>
     </section>
@@ -313,59 +243,52 @@
 
 @if (certs.Any())
 {
-    <!-- Certifications -->
-    <section class="border-y border-white/[0.07] bg-black/20">
-        <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-            <div class="mb-8 flex items-end justify-between gap-4">
-                <div><p class="font-mono text-[10px] uppercase tracking-[0.24em] text-amber-300">Verified learning</p><h2 class="mt-3 text-2xl font-semibold text-white">Certifications</h2></div>
-                <span class="hidden font-mono text-[9px] uppercase tracking-[0.16em] text-slate-700 sm:block">Credentials / archive</span>
-            </div>
-            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach (var cert in certs)
-                {
-                    var certificateImageUrl = cert.ImageUrl?.Trim();
-                    var credentialUrl = cert.CredentialUrl?.Trim();
-                    var hasSafeCertificateImageUrl = !string.IsNullOrEmpty(certificateImageUrl)
-                        && ((certificateImageUrl.StartsWith('/') && !certificateImageUrl.StartsWith("//") && Uri.TryCreate(certificateImageUrl, UriKind.Relative, out _))
-                            || (Uri.TryCreate(certificateImageUrl, UriKind.Absolute, out var certificateImageUri) && certificateImageUri.Scheme == Uri.UriSchemeHttps));
-                    var hasSafeCredentialUrl = Uri.TryCreate(credentialUrl, UriKind.Absolute, out var credentialUri)
-                        && credentialUri.Scheme == Uri.UriSchemeHttps;
-                    <div class="surface flex items-center gap-4 rounded-xl p-4">
-                        @if (hasSafeCertificateImageUrl)
+    <section class="editorial-section public-container">
+        <header class="section-heading">
+            <p class="archive-label">06 / Credentials</p>
+            <h2>Verified learning and formal training.</h2>
+            <span></span>
+        </header>
+        <div class="credential-strip">
+            @foreach (var cert in certs)
+            {
+                var certificateImageUrl = cert.ImageUrl?.Trim();
+                var credentialUrl = cert.CredentialUrl?.Trim();
+                var hasSafeCertificateImageUrl = !string.IsNullOrEmpty(certificateImageUrl)
+                    && ((certificateImageUrl.StartsWith('/') && !certificateImageUrl.StartsWith("//") && Uri.TryCreate(certificateImageUrl, UriKind.Relative, out _))
+                        || (Uri.TryCreate(certificateImageUrl, UriKind.Absolute, out var certificateImageUri) && certificateImageUri.Scheme == Uri.UriSchemeHttps));
+                var hasSafeCredentialUrl = Uri.TryCreate(credentialUrl, UriKind.Absolute, out var credentialUri)
+                    && credentialUri.Scheme == Uri.UriSchemeHttps;
+                <article class="credential-item">
+                    @if (hasSafeCertificateImageUrl)
+                    {
+                        <img src="@certificateImageUrl" alt="@cert.Title" loading="lazy" />
+                    }
+                    else
+                    {
+                        <span class="credential-item__mark">CERT</span>
+                    }
+                    <div>
+                        <h3>@cert.Title</h3>
+                        <p>@cert.Issuer · @cert.IssuedDate.ToString("MMM yyyy")</p>
+                        @if (hasSafeCredentialUrl)
                         {
-                            <img src="@certificateImageUrl" alt="@cert.Title" loading="lazy" class="h-12 w-12 shrink-0 rounded-lg object-contain" />
+                            <a href="@credentialUrl" target="_blank" rel="noopener noreferrer" class="focus-ring">Verify credential ↗</a>
                         }
-                        else
-                        {
-                            <div class="grid h-12 w-12 shrink-0 place-items-center rounded-lg border border-amber-300/20 bg-amber-300/[0.05] font-mono text-xs text-amber-300">CERT</div>
-                        }
-                        <div class="min-w-0">
-                            <h3 class="truncate text-sm font-medium text-white">@cert.Title</h3>
-                            <p class="mt-1 truncate text-xs text-slate-600">@cert.Issuer · @cert.IssuedDate.ToString("MMM yyyy")</p>
-                            @if (hasSafeCredentialUrl)
-                            {
-                                <a href="@credentialUrl" target="_blank" rel="noopener noreferrer" class="focus-ring mt-2 inline-block rounded-sm font-mono text-[9px] uppercase tracking-[0.14em] text-amber-300 hover:text-white">Verify ↗</a>
-                            }
-                        </div>
                     </div>
-                }
-            </div>
+                </article>
+            }
         </div>
     </section>
 }
 
-<!-- Contact call to action -->
-<section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-    <div class="technical-frame surface relative overflow-hidden rounded-2xl px-6 py-12 sm:px-10 lg:px-14 lg:py-16">
-        <div aria-hidden="true" class="site-grid absolute inset-0 opacity-40"></div>
-        <div aria-hidden="true" class="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-signal/[0.07] blur-3xl"></div>
-        <div class="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div>
-                <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-signal">Open channel</p>
-                <h2 class="mt-5 max-w-3xl text-3xl font-semibold tracking-[-0.035em] text-white sm:text-5xl">Have a system to secure, understand, or build?</h2>
-                <p class="mt-5 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">Tell me what you are working on. The ticket system keeps the conversation traceable from the first message.</p>
-            </div>
-            <a href="/hire" class="focus-ring inline-flex items-center justify-center gap-3 rounded-md bg-signal px-7 py-4 text-sm font-semibold text-ink transition hover:bg-white">Start a conversation <span aria-hidden="true">↗</span></a>
+<section class="editorial-section public-container">
+    <div class="contact-band">
+        <div>
+            <p class="archive-label">Contact / project requests</p>
+            <h2>Need engineering or security work?</h2>
+            <p>Send the scope, constraints, and expected outcome. A ticket number is created so the request can be tracked without losing context.</p>
         </div>
+        <a href="/hire" class="focus-ring">Submit a work request <span aria-hidden="true">↗</span></a>
     </div>
 </section>

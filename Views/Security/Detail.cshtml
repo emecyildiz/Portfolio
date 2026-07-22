@@ -44,7 +44,7 @@
             </div>
             <h1 class="mt-6 max-w-5xl text-4xl font-semibold leading-[1.04] tracking-[-0.045em] text-white sm:text-6xl">@Model.Title</h1>
             <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-400">@Model.Summary</p>
-            <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600"><span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "Undated")</span><span>@Model.ReadingTimeMinutes min read</span><span>@Model.ViewCount @(Model.ViewCount == 1 ? "view" : "views")</span></div>
+            <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600"><span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "Undated")</span><span>@Model.ReadingTimeMinutes min read</span><span>@Model.ViewCount unique @(Model.ViewCount == 1 ? "view" : "views")</span></div>
         </div>
         @if (hasSafeGithubUrl)
         {

@@ -56,7 +56,11 @@ public class TeamController : BaseController
 
         if (project == null) return NotFound();
 
-        await _viewCount.IncrementAsync("TeamProjects", project.Id);
+        if (await _viewCount.TryIncrementUniqueAsync(
+                "TeamProjects", project.Id, HttpContext, HttpContext.RequestAborted))
+        {
+            project.ViewCount++;
+        }
 
         ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(project.Content);
 

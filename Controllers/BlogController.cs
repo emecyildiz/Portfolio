@@ -54,7 +54,11 @@ public class BlogController : BaseController
 
         if (post == null) return NotFound();
 
-        await _viewCount.IncrementAsync("BlogPosts", post.Id);
+        if (await _viewCount.TryIncrementUniqueAsync(
+                "BlogPosts", post.Id, HttpContext, HttpContext.RequestAborted))
+        {
+            post.ViewCount++;
+        }
 
         ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(post.Content);
 

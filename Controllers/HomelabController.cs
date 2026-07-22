@@ -53,7 +53,11 @@ public class HomelabController : BaseController
 
         if (post == null) return NotFound();
 
-        await _viewCount.IncrementAsync("HomelabPosts", post.Id);
+        if (await _viewCount.TryIncrementUniqueAsync(
+                "HomelabPosts", post.Id, HttpContext, HttpContext.RequestAborted))
+        {
+            post.ViewCount++;
+        }
 
         ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(post.Content);
 

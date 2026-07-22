@@ -27,8 +27,9 @@
             outline-offset: 3px;
         }
     </style>
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 </head>
-<body class="min-h-screen font-sans text-slate-100 antialiased">
+<body class="admin-auth admin-login min-h-screen font-sans text-slate-100 antialiased">
     <main class="mx-auto grid min-h-screen w-full max-w-7xl items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.1fr_.9fr] lg:px-12">
         <section class="max-w-2xl" aria-labelledby="access-heading">
             <a href="/" class="focus-ring inline-flex items-center gap-3 rounded-sm text-sm text-slate-400 transition hover:text-white">
@@ -94,7 +95,7 @@
                     <input asp-for="RememberMe"
                            type="checkbox"
                            class="focus-ring h-4 w-4 rounded-sm border-line bg-ink text-signal accent-[#9dff20]" />
-                    <label asp-for="RememberMe" class="cursor-pointer text-sm text-slate-400"></label>
+                    <label asp-for="RememberMe" class="cursor-pointer text-sm text-slate-400">Remember this device</label>
                 </div>
 
                 <button type="submit"

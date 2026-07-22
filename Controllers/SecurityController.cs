@@ -64,8 +64,11 @@ public class SecurityController : BaseController
 
         if (research == null) return NotFound();
 
-        // Increment the public view count without tracking this entity.
-        await _viewCount.IncrementAsync("SecurityResearches", research.Id);
+        if (await _viewCount.TryIncrementUniqueAsync(
+                "SecurityResearches", research.Id, HttpContext, HttpContext.RequestAborted))
+        {
+            research.ViewCount++;
+        }
 
         // Render the stored Markdown through the shared safe renderer.
         ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(research.Content);

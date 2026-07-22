@@ -36,195 +36,88 @@
     <meta name="twitter:image" content="@fullOgImage" />
 
     <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
-
     <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/tailwind.min.css" asp-append-version="true" />
-
-    <style>
-        :root { color-scheme: dark; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Space Grotesk Variable', 'Inter Variable', sans-serif;
-            background:
-                radial-gradient(circle at 12% -8%, rgba(85, 214, 255, .09), transparent 30rem),
-                radial-gradient(circle at 88% 8%, rgba(184, 243, 107, .07), transparent 26rem),
-                #07090D;
-        }
-        ::selection { color: #07090D; background: #B8F36B; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #07090D; }
-        ::-webkit-scrollbar-thumb { background: #273543; border: 2px solid #07090D; border-radius: 999px; }
-        .font-mono { font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace; }
-        .site-grid {
-            background-image:
-                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-            background-size: 48px 48px;
-            mask-image: linear-gradient(to bottom, black, transparent 80%);
-        }
-        .surface {
-            background: linear-gradient(145deg, rgba(18,25,35,.92), rgba(10,14,20,.92));
-            border: 1px solid rgba(148,163,184,.15);
-            box-shadow: 0 24px 80px rgba(0,0,0,.24);
-        }
-        .technical-frame { position: relative; }
-        .technical-frame::before,
-        .technical-frame::after {
-            content: '';
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            pointer-events: none;
-        }
-        .technical-frame::before {
-            top: -1px;
-            left: -1px;
-            border-top: 1px solid #B8F36B;
-            border-left: 1px solid #B8F36B;
-        }
-        .technical-frame::after {
-            right: -1px;
-            bottom: -1px;
-            border-right: 1px solid #55D6FF;
-            border-bottom: 1px solid #55D6FF;
-        }
-        .gradient-text {
-            color: #F8FAFC;
-            background: linear-gradient(105deg, #FFFFFF 18%, #B8F36B 58%, #55D6FF 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .nav-link { position: relative; }
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            bottom: -9px;
-            left: 0;
-            height: 1px;
-            background: #B8F36B;
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform .2s ease;
-        }
-        .nav-link:hover::after,
-        .nav-link:focus-visible::after,
-        .nav-link.is-active::after { transform: scaleX(1); }
-        .card-lift { transition: transform .25s ease, border-color .25s ease, background-color .25s ease; }
-        .card-lift:hover { transform: translateY(-3px); }
-        .focus-ring:focus-visible {
-            outline: 2px solid #B8F36B;
-            outline-offset: 4px;
-        }
-        .page-enter { animation: pageEnter .45s ease both; }
-        @@keyframes pageEnter {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @@media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
-            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/public.css" asp-append-version="true" />
 </head>
 
-<body class="min-h-screen overflow-x-hidden bg-ink text-slate-100 antialiased">
+<body class="public-site min-h-screen overflow-x-hidden antialiased">
     @{
         var currentPath = Context.Request.Path.Value?.ToLowerInvariant() ?? "/";
     }
 
-    <a href="#main-content"
-       class="focus-ring fixed left-4 top-3 z-[120] -translate-y-20 rounded-md bg-signal px-4 py-2 text-sm font-semibold text-ink transition focus:translate-y-0">
-        Skip to content
-    </a>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    <div id="pageLoadBar" class="page-load-bar" style="width: 0%;"></div>
 
-    <div aria-hidden="true" class="site-grid pointer-events-none fixed inset-x-0 top-0 -z-10 h-[48rem] opacity-70"></div>
-    <div aria-hidden="true" class="pointer-events-none fixed left-0 top-0 -z-10 h-px w-full bg-gradient-to-r from-transparent via-signal/50 to-transparent"></div>
-
-    <div id="pageLoadBar" class="fixed left-0 top-0 z-[110] h-0.5 bg-signal shadow-[0_0_18px_rgba(184,243,107,.7)] transition-all duration-300" style="width: 0%;"></div>
-
-    <header class="fixed inset-x-0 top-0 z-50 border-b border-white/[0.07] bg-ink/80 backdrop-blur-xl">
-        <nav aria-label="Primary navigation" class="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            <a href="/" class="focus-ring group inline-flex items-center gap-3 rounded-sm" aria-label="Portfolio home">
-                <span class="grid h-9 w-9 place-items-center border border-signal/40 bg-signal/[0.07] font-mono text-sm font-semibold text-signal transition group-hover:bg-signal group-hover:text-ink">~/</span>
-                <span class="hidden sm:block">
-                    <span class="block font-mono text-sm font-semibold tracking-tight text-white">portfolio</span>
-                    <span class="block font-mono text-[9px] uppercase tracking-[0.24em] text-slate-500">systems / security</span>
-                </span>
+    <header class="public-header">
+        <nav aria-label="Primary navigation" class="public-nav">
+            <a href="/" class="site-identity focus-ring" aria-label="Portfolio home">
+                <span class="site-identity__name">Work index</span>
+                <span class="site-identity__scope">Security · hardware · systems</span>
             </a>
 
-            <div class="hidden items-center gap-7 md:flex">
-                <a href="/" class="nav-link focus-ring rounded-sm text-sm font-medium transition @(currentPath == "/" ? "is-active text-white" : "text-slate-400 hover:text-white")">Home</a>
+            <div class="public-nav__desktop">
+                <a href="/" class="public-nav__link @(currentPath == "/" ? "is-active" : "")">Index</a>
 
-                <div class="group relative">
-                    <button type="button" class="nav-link focus-ring flex items-center gap-1.5 rounded-sm text-sm font-medium text-slate-400 transition hover:text-white group-focus-within:text-white">
-                        Work <span aria-hidden="true" class="text-[10px] text-signal">⌄</span>
+                <div class="public-nav__group">
+                    <button type="button" class="public-nav__link public-nav__trigger">
+                        Work <span aria-hidden="true">↓</span>
                     </button>
-                    <div class="invisible absolute left-1/2 top-full w-60 -translate-x-1/2 translate-y-4 pt-5 opacity-0 transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                        <div class="surface rounded-xl p-2 shadow-panel">
-                            <p class="px-3 pb-2 pt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600">Explore the lab</p>
-                            @if (ViewBag.NavCategories != null)
+                    <div class="public-nav__dropdown">
+                        <p class="public-nav__caption">Browse by discipline</p>
+                        @if (ViewBag.NavCategories != null)
+                        {
+                            @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
                             {
-                                @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
+                                var url = cat.Slug switch
                                 {
-                                    var url = cat.Slug switch
-                                    {
-                                        "security" => "/security",
-                                        "electronics" => "/electronics",
-                                        "webapps" => "/webapps",
-                                        "homelab" => "/homelab",
-                                        "blog" => "/blog",
-                                        "team" => "/team",
-                                        _ => $"/{cat.Slug}"
-                                    };
-                                    var label = cat.Slug switch
-                                    {
-                                        "security" => "Security",
-                                        "electronics" => "Electronics",
-                                        "webapps" => "Web Apps",
-                                        "homelab" => "Homelab",
-                                        "blog" => "Blog",
-                                        "team" => "Team",
-                                        _ => cat.Name
-                                    };
-                                    var isActive = currentPath == url || currentPath.StartsWith($"{url}/");
-                                    <a href="@url" class="focus-ring flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition @(isActive ? "bg-signal/10 text-signal" : "text-slate-300 hover:bg-white/[0.05] hover:text-white")">
-                                        <span>@label</span><span aria-hidden="true" class="font-mono text-[10px] text-slate-600">↗</span>
-                                    </a>
-                                }
+                                    "security" => "/security",
+                                    "electronics" => "/electronics",
+                                    "webapps" => "/webapps",
+                                    "homelab" => "/homelab",
+                                    "blog" => "/blog",
+                                    "team" => "/team",
+                                    _ => $"/{cat.Slug}"
+                                };
+                                var label = cat.Slug switch
+                                {
+                                    "security" => "Security research",
+                                    "electronics" => "Electronics",
+                                    "webapps" => "Software systems",
+                                    "homelab" => "Homelab",
+                                    "blog" => "Writing",
+                                    "team" => "Collaborations",
+                                    _ => cat.Name
+                                };
+                                var isActive = currentPath == url || currentPath.StartsWith($"{url}/");
+                                <a href="@url" class="public-nav__dropdown-link @(isActive ? "is-active" : "")"><span>@label</span><span aria-hidden="true">↗</span></a>
                             }
-                            @if (ViewBag.NavPages != null && ((List<Portfolio.Models.Page>)ViewBag.NavPages).Any())
+                        }
+                        @if (ViewBag.NavPages != null && ((List<Portfolio.Models.Page>)ViewBag.NavPages).Any())
+                        {
+                            <div class="public-nav__divider"></div>
+                            @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
                             {
-                                <div class="my-2 border-t border-white/[0.07]"></div>
-                                @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
-                                {
-                                    <a href="/pages/@navPage.Slug" class="focus-ring block rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-white/[0.05] hover:text-white">@navPage.Title</a>
-                                }
+                                <a href="/pages/@navPage.Slug" class="public-nav__dropdown-link"><span>@navPage.Title</span><span aria-hidden="true">→</span></a>
                             }
-                        </div>
+                        }
                     </div>
                 </div>
 
-                <a href="/activity" class="nav-link focus-ring rounded-sm text-sm font-medium transition @(currentPath.StartsWith("/activity") ? "is-active text-white" : "text-slate-400 hover:text-white")">Activity</a>
-
-                <button type="button" onclick="toggleSearch(true)" aria-label="Open search" class="focus-ring group grid h-9 w-9 place-items-center rounded-full border border-white/10 text-slate-400 transition hover:border-cyan/40 hover:text-cyan">
-                    <span aria-hidden="true" class="relative block h-3.5 w-3.5 rounded-full border border-current after:absolute after:-bottom-1 after:-right-1 after:h-1.5 after:w-px after:-rotate-45 after:bg-current"></span>
-                </button>
-
-                <a href="/hire" class="focus-ring inline-flex items-center gap-2 rounded-md bg-signal px-4 py-2 text-sm font-semibold text-ink transition hover:bg-white">
-                    Work with me <span aria-hidden="true">↗</span>
-                </a>
+                <a href="/blog" class="public-nav__link @(currentPath.StartsWith("/blog") ? "is-active" : "")">Notes</a>
+                <a href="/activity" class="public-nav__link @(currentPath.StartsWith("/activity") ? "is-active" : "")">Activity</a>
+                <button type="button" onclick="toggleSearch(true)" class="public-nav__link public-search-button" aria-label="Open search">Search <span aria-hidden="true">⌕</span></button>
+                <a href="/hire" class="public-contact-link @(currentPath.StartsWith("/hire") ? "is-active" : "")">Contact</a>
             </div>
 
-            <button id="mobileMenuBtn" type="button" aria-label="Toggle navigation" aria-controls="mobileMenu" aria-expanded="false" class="focus-ring grid h-10 w-10 place-items-center rounded-md border border-white/10 text-slate-300 md:hidden">
-                <span aria-hidden="true" class="flex w-4 flex-col gap-1.5"><span class="h-px w-full bg-current"></span><span class="h-px w-full bg-current"></span></span>
+            <button id="mobileMenuBtn" type="button" aria-label="Toggle navigation" aria-controls="mobileMenu" aria-expanded="false" class="mobile-menu-button focus-ring">
+                <span>Menu</span><span aria-hidden="true">＋</span>
             </button>
         </nav>
 
-        <div id="mobileMenu" class="hidden border-t border-white/[0.07] bg-ink/95 px-4 py-5 backdrop-blur-xl md:hidden">
-            <div class="mx-auto max-w-7xl space-y-1">
-                <a href="/" class="focus-ring block rounded-lg px-3 py-3 text-sm @(currentPath == "/" ? "bg-signal/10 text-signal" : "text-slate-300 hover:bg-white/[0.05]")">Home</a>
+        <div id="mobileMenu" class="public-mobile-menu hidden">
+            <div class="public-mobile-menu__inner">
+                <a href="/" class="public-mobile-link @(currentPath == "/" ? "is-active" : "")">Index</a>
                 @if (ViewBag.NavCategories != null)
                 {
                     @foreach (var cat in (List<Portfolio.Models.Category>)ViewBag.NavCategories)
@@ -241,72 +134,64 @@
                         };
                         var label = cat.Slug switch
                         {
-                            "security" => "Security",
+                            "security" => "Security research",
                             "electronics" => "Electronics",
-                            "webapps" => "Web Apps",
+                            "webapps" => "Software systems",
                             "homelab" => "Homelab",
-                            "blog" => "Blog",
-                            "team" => "Team",
+                            "blog" => "Writing",
+                            "team" => "Collaborations",
                             _ => cat.Name
                         };
                         var isActive = currentPath == url || currentPath.StartsWith($"{url}/");
-                        <a href="@url" class="focus-ring flex items-center justify-between rounded-lg px-3 py-3 text-sm @(isActive ? "bg-signal/10 text-signal" : "text-slate-300 hover:bg-white/[0.05]")"><span>@label</span><span aria-hidden="true" class="text-slate-600">↗</span></a>
+                        <a href="@url" class="public-mobile-link @(isActive ? "is-active" : "")">@label <span aria-hidden="true">↗</span></a>
                     }
                 }
                 @if (ViewBag.NavPages != null)
                 {
                     @foreach (var navPage in (List<Portfolio.Models.Page>)ViewBag.NavPages)
                     {
-                        <a href="/pages/@navPage.Slug" class="focus-ring block rounded-lg px-3 py-3 text-sm text-slate-300 hover:bg-white/[0.05]">@navPage.Title</a>
+                        <a href="/pages/@navPage.Slug" class="public-mobile-link">@navPage.Title <span aria-hidden="true">→</span></a>
                     }
                 }
-                <a href="/activity" class="focus-ring block rounded-lg px-3 py-3 text-sm @(currentPath.StartsWith("/activity") ? "bg-signal/10 text-signal" : "text-slate-300 hover:bg-white/[0.05]")">Activity</a>
-                <div class="grid grid-cols-2 gap-2 pt-3">
-                    <button type="button" onclick="toggleSearch(true)" class="focus-ring rounded-md border border-white/10 px-4 py-3 text-left text-sm text-slate-300">Search</button>
-                    <a href="/hire" class="focus-ring rounded-md bg-signal px-4 py-3 text-center text-sm font-semibold text-ink">Work with me</a>
-                </div>
+                <a href="/activity" class="public-mobile-link @(currentPath.StartsWith("/activity") ? "is-active" : "")">Activity</a>
+                <button type="button" onclick="toggleSearch(true)" class="public-mobile-link text-left">Search</button>
+                <a href="/hire" class="public-mobile-contact">Contact / work request</a>
             </div>
         </div>
     </header>
 
-    <div id="searchOverlay" role="dialog" aria-modal="true" aria-labelledby="searchOverlayTitle" aria-hidden="true" class="hidden fixed inset-0 z-[70] items-start justify-center bg-ink/90 px-4 pt-24 backdrop-blur-xl sm:pt-32">
-        <div class="w-full max-w-2xl">
-            <div class="mb-4 flex items-end justify-between">
+    <div id="searchOverlay" role="dialog" aria-modal="true" aria-labelledby="searchOverlayTitle" aria-hidden="true" class="public-search-overlay hidden">
+        <div class="public-search-panel">
+            <div class="public-search-heading">
                 <div>
-                    <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-signal">Query the archive</p>
-                    <h2 id="searchOverlayTitle" class="mt-1 text-xl font-semibold text-white">Search projects and research</h2>
+                    <p class="archive-label">Archive search</p>
+                    <h2 id="searchOverlayTitle">Find projects, research, and notes.</h2>
                 </div>
-                <button type="button" onclick="toggleSearch(false)" aria-label="Close search" class="focus-ring rounded-md border border-white/10 px-3 py-2 font-mono text-xs text-slate-400 hover:text-white">ESC</button>
+                <button type="button" onclick="toggleSearch(false)" aria-label="Close search" class="public-search-close focus-ring">Close / Esc</button>
             </div>
-            <form method="get" action="/search" class="surface technical-frame flex items-center gap-3 rounded-xl p-2">
+            <form method="get" action="/search" class="public-search-form">
                 <label for="searchInput" class="sr-only">Search the portfolio</label>
-                <span aria-hidden="true" class="pl-3 font-mono text-sm text-signal">$</span>
-                <input type="search" name="q" id="searchInput" maxlength="100" autocomplete="off" placeholder="malware analysis, ESP32, homelab..." class="min-w-0 flex-1 bg-transparent px-1 py-3 text-base text-white placeholder:text-slate-600 focus:outline-none sm:text-lg" />
-                <button type="submit" class="focus-ring rounded-md bg-signal px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white">Search</button>
+                <input type="search" name="q" id="searchInput" maxlength="100" autocomplete="off" placeholder="Malware analysis, ESP32, homelab..." />
+                <button type="submit">Search</button>
             </form>
-            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">Press Enter to search · Escape to close</p>
+            <p class="public-search-help">Press Enter to search. Escape closes this window.</p>
         </div>
     </div>
 
-    <main id="main-content" class="page-enter min-h-[70vh] pt-[72px]">
+    <main id="main-content" class="page-enter min-h-[70vh]">
         @RenderBody()
     </main>
 
-    <footer class="mt-24 border-t border-white/[0.07] bg-black/20">
-        <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-            <div class="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-                <div>
-                    <div class="mb-4 flex items-center gap-3">
-                        <span class="h-2 w-2 rounded-full bg-signal shadow-[0_0_14px_rgba(184,243,107,.7)]"></span>
-                        <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">System online · built in public</p>
-                    </div>
-                    <p class="max-w-xl text-sm leading-6 text-slate-500">A working archive of cybersecurity research, electronics, software, and self-hosted infrastructure.</p>
-                </div>
-                @await Component.InvokeAsync("FooterLinks")
+    <footer class="public-footer">
+        <div class="public-footer__inner">
+            <div class="public-footer__intro">
+                <p class="archive-label">Independent technical archive</p>
+                <p>Security research, electronics, software, and self-hosted infrastructure—documented as the work develops.</p>
             </div>
-            <div class="mt-8 flex flex-col gap-2 border-t border-white/[0.07] pt-5 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-700 sm:flex-row sm:items-center sm:justify-between">
-                <p>~/portfolio</p>
-                <p>© @DateTime.UtcNow.Year · All systems documented</p>
+            @await Component.InvokeAsync("FooterLinks")
+            <div class="public-footer__base">
+                <p>Portfolio / work index</p>
+                <p>© @DateTime.UtcNow.Year · Built and documented independently</p>
             </div>
         </div>
     </footer>
@@ -333,9 +218,7 @@
 
         function toggleSearch(forceOpen) {
             const overlay = document.getElementById('searchOverlay');
-            const shouldOpen = typeof forceOpen === 'boolean'
-                ? forceOpen
-                : overlay.classList.contains('hidden');
+            const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : overlay.classList.contains('hidden');
 
             overlay.classList.toggle('hidden', !shouldOpen);
             overlay.classList.toggle('flex', shouldOpen);
@@ -381,21 +264,18 @@
             const mobileMenu = document.getElementById('mobileMenu');
             const isOpen = mobileMenu.classList.toggle('hidden') === false;
             this.setAttribute('aria-expanded', String(isOpen));
+            this.querySelector('[aria-hidden="true"]').textContent = isOpen ? '−' : '＋';
         });
 
         (function () {
             const bar = document.getElementById('pageLoadBar');
-
             document.addEventListener('click', function (event) {
                 const link = event.target.closest('a');
-                if (link && link.href && link.target !== '_blank' &&
-                    link.href.startsWith(window.location.origin) &&
-                    !link.href.includes('#')) {
-                    bar.style.width = '32%';
+                if (link && link.href && link.target !== '_blank' && link.href.startsWith(window.location.origin) && !link.href.includes('#')) {
+                    bar.style.width = '34%';
                     window.setTimeout(() => bar.style.width = '72%', 150);
                 }
             });
-
             window.addEventListener('load', function () {
                 bar.style.width = '100%';
                 window.setTimeout(() => bar.style.width = '0%', 300);

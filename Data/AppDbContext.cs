@@ -27,6 +27,7 @@ namespace Portfolio.Data
         public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
         public DbSet<Certificate> Certificates => Set<Certificate>();
         public DbSet<PageView> PageViews => Set<PageView>();
+        public DbSet<ContentViewReceipt> ContentViewReceipts => Set<ContentViewReceipt>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -235,6 +236,26 @@ namespace Portfolio.Data
             modelBuilder.Entity<PageView>()
                 .HasIndex(p => p.ViewedAt)
                 .HasDatabaseName("idx_pageviews_date");
+
+            modelBuilder.Entity<ContentViewReceipt>(entity =>
+            {
+                entity.Property(receipt => receipt.ContentType)
+                    .HasMaxLength(32);
+                entity.Property(receipt => receipt.VisitorHash)
+                    .HasMaxLength(64)
+                    .IsFixedLength();
+                entity.HasIndex(receipt => new
+                    {
+                        receipt.ContentType,
+                        receipt.ContentId,
+                        receipt.VisitorHash,
+                        receipt.ViewDate
+                    })
+                    .IsUnique()
+                    .HasDatabaseName("ux_content_view_daily");
+                entity.HasIndex(receipt => receipt.CreatedAt)
+                    .HasDatabaseName("idx_content_view_receipts_created");
+            });
 
         }
 

@@ -81,8 +81,9 @@
         ::-webkit-scrollbar-track { background: #07090D; }
         ::-webkit-scrollbar-thumb { background: #273543; border: 2px solid #07090D; border-radius: 999px; }
     </style>
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 </head>
-<body class="min-h-screen overflow-x-hidden bg-ink text-slate-100 antialiased">
+<body class="admin-site min-h-screen overflow-x-hidden bg-ink text-slate-100 antialiased">
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
         Func<string, bool> isActive = controller => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase);

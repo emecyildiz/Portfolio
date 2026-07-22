@@ -57,7 +57,11 @@ public class ElectronicsController : BaseController
 
         if (project == null) return NotFound();
 
-        await _viewCount.IncrementAsync("Projects", project.Id);
+        if (await _viewCount.TryIncrementUniqueAsync(
+                "Projects", project.Id, HttpContext, HttpContext.RequestAborted))
+        {
+            project.ViewCount++;
+        }
 
         ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(project.Content);
 

@@ -79,7 +79,7 @@
                             <p class="font-mono text-[9px] uppercase tracking-[0.15em] text-teal-300">@topicLabel(post.Topic)</p>
                             <h2 class="mt-3 text-lg font-semibold text-white transition group-hover:text-teal-200">@post.Title</h2>
                             <p class="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">@post.Summary</p>
-                            <div class="mt-4 flex flex-wrap gap-3 font-mono text-[9px] uppercase tracking-[0.1em] text-slate-700"><span>@(post.PublishedAt?.ToString("dd MMM yyyy") ?? "Undated")</span><span>@post.ReadingTimeMinutes min</span><span>@post.ViewCount @(post.ViewCount == 1 ? "view" : "views")</span></div>
+                            <div class="mt-4 flex flex-wrap gap-3 font-mono text-[9px] uppercase tracking-[0.1em] text-slate-700"><span>@(post.PublishedAt?.ToString("dd MMM yyyy") ?? "Undated")</span><span>@post.ReadingTimeMinutes min</span><span>@post.ViewCount unique @(post.ViewCount == 1 ? "view" : "views")</span></div>
                         </div>
                     </a>
                 }
