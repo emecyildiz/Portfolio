@@ -57,6 +57,11 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    networks:
+      default:
+      edge:
+        aliases:
+          - emecworks-gateway
 
 volumes:
   pgdata:
@@ -64,3 +69,8 @@ volumes:
   dataprotection:
   caddy_data:
   caddy_config:
+
+networks:
+  edge:
+    name: emecworks-edge
+    external: true
