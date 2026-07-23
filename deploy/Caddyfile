@@ -15,11 +15,22 @@ http://:8080 {
 		redir https://emecworks.com{uri} permanent
 	}
 
-	@tunnel_test host tunnel-test.emecworks.com
-	handle @tunnel_test {
-		reverse_proxy web:8080 {
-			header_up Host emecworks.com
-		}
+	@n8n_editor host n8n.emecworks.com
+	handle @n8n_editor {
+		reverse_proxy n8n-app:5678
+	}
+
+	@n8n_hooks {
+		host hooks.emecworks.com
+		path /webhook /webhook/* /webhook-test /webhook-test/* /webhook-waiting /webhook-waiting/* /form /form/* /form-test /form-test/*
+	}
+	handle @n8n_hooks {
+		reverse_proxy n8n-app:5678
+	}
+
+	@hooks_host host hooks.emecworks.com
+	handle @hooks_host {
+		respond "Not Found" 404
 	}
 
 	@portfolio host emecworks.com

@@ -1,0 +1,65 @@
+services:
+  db:
+    image: postgres:16-alpine@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777
+    env_file:
+      - /etc/emecworks/n8n-db.env
+    volumes:
+      - n8n_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.30.5@sha256:450853cd21a2ce36587c4c860eb26927c1ceba9496bf55f4c213b5d3a6dc8c6f
+    env_file:
+      - /etc/emecworks/n8n-app.env
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+    stop_grace_period: 60s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider --timeout=5 http://127.0.0.1:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      default:
+      edge:
+        aliases:
+          - n8n-app
+
+volumes:
+  n8n_pgdata:
+  n8n_data:
+
+networks:
+  default:
+    internal: true
+  edge:
+    name: emecworks-edge
+    external: true
