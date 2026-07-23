@@ -20,10 +20,29 @@ if [[ ! -r "$env_file" ]]; then
     exit 1
 fi
 
-# shellcheck disable=SC1090
-source "$env_file"
-: "${POSTGRES_USER:?POSTGRES_USER is required}"
-: "${POSTGRES_DB:?POSTGRES_DB is required}"
+read_env_value() {
+    local key="$1"
+    local line
+
+    line="$(grep -m1 -E "^${key}=" "$env_file" || true)"
+    if [[ -z "$line" ]]; then
+        echo "${key} is required in ${env_file}." >&2
+        return 1
+    fi
+
+    line="${line#*=}"
+    printf '%s' "${line%$'\r'}"
+}
+
+POSTGRES_USER="$(read_env_value POSTGRES_USER)"
+POSTGRES_DB="$(read_env_value POSTGRES_DB)"
+readonly POSTGRES_USER POSTGRES_DB
+
+if [[ ! "$POSTGRES_USER" =~ ^[A-Za-z_][A-Za-z0-9_-]{0,62}$ ]] ||
+    [[ ! "$POSTGRES_DB" =~ ^[A-Za-z_][A-Za-z0-9_-]{0,62}$ ]]; then
+    echo "POSTGRES_USER or POSTGRES_DB contains unsupported characters." >&2
+    exit 1
+fi
 
 exec 9>/run/lock/emecworks-backup.lock
 if ! flock -n 9; then
