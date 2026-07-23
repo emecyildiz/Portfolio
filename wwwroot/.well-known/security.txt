@@ -1,5 +1,4 @@
-﻿Contact: mailto:senin@email.com
-Contact: https://siteadi.com/hire
-Preferred-Languages: tr, en
-Canonical: https://siteadi.com/.well-known/security.txt
-Expires: 2027-01-01T00:00:00.000Z
+Contact: https://emecworks.com/hire
+Preferred-Languages: en, tr
+Canonical: https://emecworks.com/.well-known/security.txt
+Expires: 2027-07-23T00:00:00.000Z

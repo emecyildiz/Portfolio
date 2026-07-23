@@ -8,7 +8,7 @@ namespace Portfolio.Services;
 
 public interface IGeoLocationService
 {
-    Task<(string? Country, string? City)> LookupAsync(
+    Task<string?> LookupCountryAsync(
         string ip,
         CancellationToken cancellationToken = default);
 }
@@ -41,7 +41,7 @@ public sealed class GeoLocationService : IGeoLocationService, IDisposable
         if (!File.Exists(databasePath))
         {
             _logger.LogWarning(
-                "Local GeoIP database was not found at {DatabasePath}. Location fields will remain empty.",
+                "Local GeoIP database was not found at {DatabasePath}. The visitor country will remain empty.",
                 databasePath);
             return;
         }
@@ -55,23 +55,23 @@ public sealed class GeoLocationService : IGeoLocationService, IDisposable
         {
             _logger.LogError(
                 exception,
-                "The local GeoIP database is invalid. Location fields will remain empty.");
+                "The local GeoIP database is invalid. The visitor country will remain empty.");
         }
         catch (IOException exception)
         {
             _logger.LogError(
                 exception,
-                "The local GeoIP database could not be opened. Location fields will remain empty.");
+                "The local GeoIP database could not be opened. The visitor country will remain empty.");
         }
         catch (Exception exception)
         {
             _logger.LogError(
                 exception,
-                "Local GeoIP initialization failed. Location fields will remain empty.");
+                "Local GeoIP initialization failed. The visitor country will remain empty.");
         }
     }
 
-    public Task<(string? Country, string? City)> LookupAsync(
+    public Task<string?> LookupCountryAsync(
         string ip,
         CancellationToken cancellationToken = default)
     {
@@ -81,32 +81,31 @@ public sealed class GeoLocationService : IGeoLocationService, IDisposable
             !IPAddress.TryParse(ip, out var address) ||
             IsPrivateOrLocal(address))
         {
-            return Task.FromResult<(string? Country, string? City)>((null, null));
+            return Task.FromResult<string?>(null);
         }
 
         try
         {
             var response = _reader.City(address);
-            return Task.FromResult<(string? Country, string? City)>(
-                (response.Country.Name, response.City.Name));
+            return Task.FromResult(response.Country.Name);
         }
         catch (AddressNotFoundException)
         {
-            return Task.FromResult<(string? Country, string? City)>((null, null));
+            return Task.FromResult<string?>(null);
         }
         catch (InvalidDatabaseException exception)
         {
             _logger.LogWarning(
                 exception,
                 "The local GeoIP database could not complete a lookup.");
-            return Task.FromResult<(string? Country, string? City)>((null, null));
+            return Task.FromResult<string?>(null);
         }
         catch (Exception exception)
         {
             _logger.LogWarning(
                 exception,
                 "Local GeoIP lookup failed. Location fields will remain empty.");
-            return Task.FromResult<(string? Country, string? City)>((null, null));
+            return Task.FromResult<string?>(null);
         }
     }
 

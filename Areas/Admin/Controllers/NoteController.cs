@@ -20,6 +20,19 @@ public class NoteController : AdminBaseController
         return View(notes);
     }
 
+    public async Task<IActionResult> Details(int id)
+    {
+        var note = await _db.Notes
+            .AsNoTracking()
+            .SingleOrDefaultAsync(n => n.Id == id);
+
+        if (note == null)
+            return NotFound();
+
+        ViewBag.ContentHtml = MarkdownContentRenderer.ToHtml(note.Content);
+        return View(note);
+    }
+
     public IActionResult Create() => View(new Note());
 
     [HttpPost]

@@ -9,10 +9,15 @@ namespace Portfolio.Controllers;
 public class HomeController : BaseController
 {
     private readonly IActivityService _activity;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(AppDbContext db, IActivityService activity) : base(db)
+    public HomeController(
+        AppDbContext db,
+        IActivityService activity,
+        IConfiguration configuration) : base(db)
     {
         _activity = activity;
+        _configuration = configuration;
     }
 
     public async Task<IActionResult> Index()
@@ -69,4 +74,48 @@ public class HomeController : BaseController
 
     [HttpGet("/privacy")]
     public IActionResult Privacy() => View();
+
+    [HttpPost("/privacy/consent")]
+    [ValidateAntiForgeryToken]
+    public IActionResult SaveAnalyticsConsent(string decision, string? returnUrl)
+    {
+        if (decision is not (AnalyticsConsent.GrantedValue or AnalyticsConsent.DeniedValue))
+            return BadRequest();
+
+        var consentCookieDays = _configuration.GetValue("Privacy:ConsentCookieDays", 180);
+        if (consentCookieDays is < 30 or > 365)
+            consentCookieDays = 180;
+
+        Response.Cookies.Append(
+            AnalyticsConsent.CookieName,
+            decision,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddDays(consentCookieDays),
+                MaxAge = TimeSpan.FromDays(consentCookieDays),
+                IsEssential = true
+            });
+
+        if (decision == AnalyticsConsent.DeniedValue)
+        {
+            Response.Cookies.Delete(
+                AnalyticsConsent.VisitorCookieName,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = Request.IsHttps,
+                    SameSite = SameSiteMode.Lax,
+                    Path = "/",
+                    IsEssential = false
+                });
+        }
+
+        return !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+            ? LocalRedirect(returnUrl)
+            : RedirectToAction(nameof(Privacy));
+    }
 }

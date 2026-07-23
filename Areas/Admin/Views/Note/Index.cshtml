@@ -23,8 +23,8 @@
     </div>
 </div>
 
-<aside class="mb-8 border border-amber-300/20 bg-amber-300/[0.05] px-4 py-3.5 text-sm leading-6 text-amber-100/80" aria-label="Privacy reminder">
-    <span class="font-medium text-amber-100">Privacy reminder:</span>
+<aside class="admin-notice admin-notice-warning mb-8" aria-label="Privacy reminder">
+    <strong>Privacy reminder:</strong>
     High-priority task titles may be selected for the public Now widget. Keep confidential details out of task titles.
 </aside>
 
@@ -74,6 +74,7 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                         <span class="inline-flex border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.11em] @priorityClass">@todo.Priority</span>
+                        <a href="@Url.Action("Details", "Note", new { area = "Admin", id = todo.Id })" class="focus-ring border border-line px-3 py-1.5 text-xs text-slate-400 transition hover:border-slate-500 hover:text-white">Read</a>
                         <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = todo.Id })" class="focus-ring border border-line px-3 py-1.5 text-xs text-slate-400 transition hover:border-slate-500 hover:text-white">Edit</a>
                         <form method="post" action="@Url.Action("Delete", "Note", new { area = "Admin", id = todo.Id })" onsubmit="return confirm('Delete this task? This action cannot be undone.');">
                             @Html.AntiForgeryToken()
@@ -110,10 +111,13 @@
                 <article class="admin-surface flex min-h-48 flex-col p-5">
                     <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0">
-                            <h4 class="break-words text-sm font-medium text-white">@note.Title</h4>
+                            <h4 class="break-words text-sm font-medium text-white">
+                                <a href="@Url.Action("Details", "Note", new { area = "Admin", id = note.Id })" class="focus-ring transition hover:text-cyan">@note.Title</a>
+                            </h4>
                             <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan">@note.NoteType</p>
                         </div>
                         <div class="flex shrink-0 items-center gap-2">
+                            <a href="@Url.Action("Details", "Note", new { area = "Admin", id = note.Id })" class="focus-ring text-xs text-slate-500 transition hover:text-cyan">Read</a>
                             <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = note.Id })" class="focus-ring text-xs text-slate-500 transition hover:text-white">Edit</a>
                             <form method="post" action="@Url.Action("Delete", "Note", new { area = "Admin", id = note.Id })" onsubmit="return confirm('Delete this note? This action cannot be undone.');">
                                 @Html.AntiForgeryToken()

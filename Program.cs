@@ -167,7 +167,9 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddSingleton<IGeoLocationService, GeoLocationService>();
+builder.Services.AddSingleton<IAnalyticsIpHasher, AnalyticsIpHasher>();
 builder.Services.AddHostedService<PageViewRetentionService>();
+builder.Services.AddHostedService<ContactMessageRetentionService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"));
@@ -186,6 +188,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     _ = scope.ServiceProvider.GetRequiredService<IGeoLocationService>();
+    _ = scope.ServiceProvider.GetRequiredService<IAnalyticsIpHasher>();
     db.Database.Migrate();
 
     // Seed the initial admin only when explicit credentials are configured.
@@ -288,6 +291,7 @@ app.Use(async (context, next) =>
 
     if (!HttpMethods.IsGet(context.Request.Method) ||
         shouldSkip ||
+        !AnalyticsConsent.IsGranted(context) ||
         context.Response.StatusCode >= StatusCodes.Status400BadRequest)
     {
         return;
@@ -308,30 +312,30 @@ app.Use(async (context, next) =>
 
         var ip = remoteIp.ToString();
         var viewedAt = DateTime.UtcNow;
-        var today = viewedAt.Date;
-        var tomorrow = today.AddDays(1);
+        var viewDate = DateOnly.FromDateTime(viewedAt);
 
         using var scope = context.RequestServices.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var ipHasher = scope.ServiceProvider.GetRequiredService<IAnalyticsIpHasher>();
+        var visitorHash = ipHasher.CreateDailyHash(remoteIp, viewDate);
 
         var alreadyVisitedToday = await db.PageViews
             .AnyAsync(
-                pageView => pageView.IpAddress == ip &&
-                            pageView.ViewedAt >= today &&
-                            pageView.ViewedAt < tomorrow,
+                pageView => pageView.VisitorHash == visitorHash &&
+                            pageView.ViewDate == viewDate,
                 context.RequestAborted);
 
         if (!alreadyVisitedToday)
         {
             var geoService = scope.ServiceProvider.GetRequiredService<IGeoLocationService>();
-            var (country, city) = await geoService.LookupAsync(ip, context.RequestAborted);
+            var country = await geoService.LookupCountryAsync(ip, context.RequestAborted);
 
             db.PageViews.Add(new Portfolio.Models.PageView
             {
                 Path = context.Request.Path.Value ?? "/",
-                IpAddress = ip,
+                VisitorHash = visitorHash,
+                ViewDate = viewDate,
                 Country = country,
-                City = city,
                 ViewedAt = viewedAt
             });
             await db.SaveChangesAsync(context.RequestAborted);

@@ -191,10 +191,18 @@
             @await Component.InvokeAsync("FooterLinks")
             <div class="public-footer__base">
                 <p>Portfolio / work index</p>
+                <nav aria-label="Privacy controls" class="public-footer__privacy">
+                    <a href="/privacy">Privacy notice</a>
+                    <button id="cookiePreferencesButton" type="button" aria-controls="analyticsConsent">
+                        Cookie preferences
+                    </button>
+                </nav>
                 <p>© @DateTime.UtcNow.Year · Built and documented independently</p>
             </div>
         </div>
     </footer>
+
+    <partial name="_AnalyticsConsent" />
 
     <script>
         let searchPreviousFocus = null;
@@ -279,6 +287,19 @@
             window.addEventListener('load', function () {
                 bar.style.width = '100%';
                 window.setTimeout(() => bar.style.width = '0%', 300);
+            });
+        })();
+
+        (function () {
+            const preferencesButton = document.getElementById('cookiePreferencesButton');
+            const consentPanel = document.getElementById('analyticsConsent');
+            if (!preferencesButton || !consentPanel) return;
+
+            preferencesButton.addEventListener('click', function () {
+                consentPanel.classList.remove('cookie-consent--hidden');
+                consentPanel.setAttribute('aria-hidden', 'false');
+                const firstAction = consentPanel.querySelector('button');
+                if (firstAction) firstAction.focus();
             });
         })();
     </script>

@@ -33,6 +33,7 @@ services:
       - AdminPath=${ADMIN_PATH:?ADMIN_PATH is required}
       - AdminEmail=${ADMIN_EMAIL:?ADMIN_EMAIL is required}
       - AdminPassword=${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+      - Privacy__AnalyticsHashKey=${ANALYTICS_HASH_KEY:?ANALYTICS_HASH_KEY is required}
     volumes:
       - uploads:/app/wwwroot/uploads
       - dataprotection:/app/dataprotection-keys

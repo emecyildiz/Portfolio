@@ -4,6 +4,10 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
+@section Head {
+    <link rel="stylesheet" href="~/vendor/easymde/easymde.min.css" asp-append-version="true" />
+}
+
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
         <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">Private workspace</p>
@@ -31,8 +35,9 @@
                 </div>
 
                 <div>
-                    <label asp-for="Content" class="admin-label">Content</label>
-                    <textarea asp-for="Content" rows="16" class="admin-textarea font-mono"></textarea>
+                    <label asp-for="Content" class="admin-label">Content <span class="font-normal text-slate-600">(Markdown)</span></label>
+                    <textarea asp-for="Content" id="content-editor" rows="16"></textarea>
+                    <p class="admin-hint">Use the toolbar or live preview to review the rendered note.</p>
                     <span asp-validation-for="Content"></span>
                 </div>
             </div>
@@ -99,7 +104,20 @@
 </form>
 
 @section Scripts {
+    <script src="~/vendor/easymde/easymde.min.js" asp-append-version="true"></script>
     <script>
+        window.createPortfolioMarkdownEditor({
+            element: document.getElementById('content-editor'),
+            spellChecker: false,
+            autoDownloadFontAwesome: false,
+            toolbar: [
+                'bold', 'italic', 'strikethrough', 'heading', '|',
+                'quote', 'code', 'unordered-list', 'ordered-list', '|',
+                'link', 'table', 'horizontal-rule', '|',
+                'preview', 'side-by-side', 'fullscreen'
+            ]
+        });
+
         const isTodoCheck = document.getElementById('isTodoCheck');
         const todoFields = document.getElementById('todoFields');
 

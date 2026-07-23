@@ -188,6 +188,132 @@
     border-color: var(--admin-rule-strong) !important;
 }
 
+.admin-site .admin-notice {
+    border: 1px solid var(--admin-rule-strong);
+    border-left: 4px solid var(--admin-accent);
+    background: #f6eadf;
+    color: #4b352c;
+    padding: .95rem 1.1rem;
+    font-size: .875rem;
+    line-height: 1.65;
+}
+
+.admin-site .admin-notice strong {
+    color: #712f22;
+}
+
+.admin-site .admin-note-content {
+    color: #35403a;
+    font-size: 1rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.admin-site .admin-note-content > :first-child {
+    margin-top: 0;
+}
+
+.admin-site .admin-note-content > :last-child {
+    margin-bottom: 0;
+}
+
+.admin-site .admin-note-content :is(h1, h2, h3, h4) {
+    margin: 1.7em 0 .65em;
+    color: var(--admin-ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 550;
+    line-height: 1.18;
+    letter-spacing: -.025em;
+}
+
+.admin-site .admin-note-content h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+}
+
+.admin-site .admin-note-content h2 {
+    border-bottom: 1px solid var(--admin-rule);
+    padding-bottom: .35em;
+    font-size: clamp(1.55rem, 3vw, 2.15rem);
+}
+
+.admin-site .admin-note-content h3 {
+    font-size: 1.35rem;
+}
+
+.admin-site .admin-note-content :is(p, ul, ol, blockquote, pre, table) {
+    margin: 1em 0;
+}
+
+.admin-site .admin-note-content :is(ul, ol) {
+    padding-left: 1.5rem;
+}
+
+.admin-site .admin-note-content ul {
+    list-style: disc;
+}
+
+.admin-site .admin-note-content ol {
+    list-style: decimal;
+}
+
+.admin-site .admin-note-content li + li {
+    margin-top: .3rem;
+}
+
+.admin-site .admin-note-content a {
+    color: var(--admin-accent-dark);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .2em;
+}
+
+.admin-site .admin-note-content blockquote {
+    border-left: 3px solid var(--admin-accent);
+    background: var(--admin-paper-deep);
+    color: var(--admin-muted);
+    padding: .8rem 1rem;
+}
+
+.admin-site .admin-note-content code {
+    background: var(--admin-paper-deep);
+    color: #712f22;
+    padding: .12rem .32rem;
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: .88em;
+}
+
+.admin-site .admin-note-content pre {
+    overflow-x: auto;
+    background: #14201c;
+    color: #e8ece9;
+    padding: 1rem;
+}
+
+.admin-site .admin-note-content pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+}
+
+.admin-site .admin-note-content table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+}
+
+.admin-site .admin-note-content :is(th, td) {
+    border: 1px solid var(--admin-rule);
+    padding: .6rem .75rem;
+    text-align: left;
+}
+
+.admin-site .admin-note-content hr {
+    margin: 2rem 0;
+    border: 0;
+    border-top: 1px solid var(--admin-rule);
+}
+
 .admin-site .admin-label {
     color: #35403a !important;
     font-size: .8rem !important;

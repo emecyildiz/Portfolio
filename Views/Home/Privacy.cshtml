@@ -1,43 +1,179 @@
+@using Portfolio.Services
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Privacy Notice";
-    ViewData["Description"] = "How this portfolio collects and uses visitor and contact-request information.";
+    ViewData["Description"] = "How this portfolio collects, uses, retains, and protects visitor and work-request information.";
+
+    var controllerName = Configuration["Privacy:ControllerName"]?.Trim();
+    var contactEmail = Configuration["Privacy:ContactEmail"]?.Trim();
+    var hostingProvider = Configuration["Privacy:HostingProvider"]?.Trim();
+    var hostingCountry = Configuration["Privacy:HostingCountry"]?.Trim();
+    var configurationPending =
+        string.IsNullOrWhiteSpace(controllerName) ||
+        string.IsNullOrWhiteSpace(contactEmail) ||
+        string.IsNullOrWhiteSpace(hostingProvider) ||
+        string.IsNullOrWhiteSpace(hostingCountry);
+    var analyticsDecision = AnalyticsConsent.GetDecision(Context);
 }
 
 <article class="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
     <header class="border-b border-white/[0.07] pb-10">
-        <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan">System policy / Privacy</p>
+        <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan">Legal / Privacy</p>
         <h1 class="mt-5 text-4xl font-semibold tracking-[-0.045em] text-white sm:text-6xl">Privacy notice.</h1>
-        <p class="mt-5 max-w-3xl text-base leading-7 text-slate-400">This notice explains what this portfolio records when you browse the site, submit a work request, or track an existing ticket.</p>
-        <p class="mt-4 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-700">Last updated / July 2026</p>
+        <p class="mt-5 max-w-3xl text-base leading-7 text-slate-400">
+            This notice explains what this independent portfolio records when you browse the site,
+            choose optional analytics, submit a work request, or track a ticket.
+        </p>
+        <p class="mt-4 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-700">Draft updated / July 2026</p>
     </header>
 
+    @if (configurationPending)
+    {
+        <aside class="mt-8 border border-amber-300/40 bg-white/40 p-5 text-sm leading-7 text-slate-500" role="note">
+            <strong class="text-white">Launch configuration is incomplete.</strong>
+            The operator's legal name, privacy email, hosting provider, and hosting country must be added before this site is made public.
+            This warning is intentional and prevents an unfinished legal notice from being mistaken for a launch-ready document.
+        </aside>
+    }
+
     <div class="mt-10 space-y-5">
-        <section class="technical-frame surface rounded-2xl p-6 sm:p-8">
-            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">01 / Visitor analytics</p>
-            <h2 class="mt-3 text-2xl font-semibold text-white">Minimal, self-hosted traffic records</h2>
-            <p class="mt-4 text-sm leading-7 text-slate-400">The site records one visitor entry per IP address per day. That record can contain the requested path, IP address, visit time, country, and city. Location is resolved locally with a GeoIP database; the address is not sent to an external geolocation API.</p>
-            <p class="mt-3 text-sm leading-7 text-slate-500">Content popularity is counted separately as one unique view per anonymous browser, content item, and UTC day. The server stores a one-way hash of a random visitor identifier with the content type, content ID, and date. These records support aggregate counts, operational monitoring, abuse prevention, and weekly reports. Google Analytics and advertising trackers are not used.</p>
+        <section class="technical-frame surface p-6 sm:p-8">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">01 / Data controller</p>
+            <h2 class="mt-3 text-2xl font-semibold text-white">Who is responsible for the data</h2>
+            <dl class="mt-5 grid gap-4 text-sm leading-7 sm:grid-cols-2">
+                <div>
+                    <dt class="font-semibold text-white">Operator</dt>
+                    <dd class="text-slate-500">@(string.IsNullOrWhiteSpace(controllerName) ? "To be configured before launch" : controllerName)</dd>
+                </div>
+                <div>
+                    <dt class="font-semibold text-white">Privacy contact</dt>
+                    <dd class="text-slate-500">
+                        @if (string.IsNullOrWhiteSpace(contactEmail))
+                        {
+                            <span>To be configured before launch</span>
+                        }
+                        else
+                        {
+                            <a href="mailto:@contactEmail" class="text-cyan underline underline-offset-4">@contactEmail</a>
+                        }
+                    </dd>
+                </div>
+            </dl>
         </section>
 
-        <section class="technical-frame surface rounded-2xl p-6 sm:p-8">
-            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-signal">02 / Contact and ticket data</p>
+        <section class="technical-frame surface p-6 sm:p-8">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">02 / Optional analytics</p>
+            <h2 class="mt-3 text-2xl font-semibold text-white">No analytics before you choose</h2>
+            <p class="mt-4 text-sm leading-7 text-slate-400">
+                Optional analytics runs only after you select “Accept analytics.” When enabled, the site records at most one
+                visitor entry per UTC day. The IP address is used briefly in memory to calculate a keyed, daily-changing
+                pseudonymous identifier and resolve the visitor's country. The raw IP address and city are not stored in
+                analytics. Country lookup is performed locally with a GeoIP database and is not sent to an external geolocation API.
+            </p>
+            <p class="mt-3 text-sm leading-7 text-slate-500">
+                Content popularity is counted separately as one view per anonymous browser, content item, and UTC day.
+                A protected first-party cookie contains a random identifier; the database receives a one-way hash of that identifier,
+                not the identifier itself. Google Analytics, advertising trackers, and cross-site profiling are not used.
+            </p>
+            <p class="mt-4 text-sm font-medium text-white">
+                Current choice:
+                @(analyticsDecision == AnalyticsConsent.GrantedValue
+                    ? "optional analytics accepted"
+                    : analyticsDecision == AnalyticsConsent.DeniedValue
+                        ? "optional analytics rejected"
+                        : "no choice saved")
+            </p>
+            <button type="button" onclick="document.getElementById('cookiePreferencesButton')?.click()" class="mt-4 border border-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-cyan/40">
+                Review cookie preferences
+            </button>
+        </section>
+
+        <section class="technical-frame surface p-6 sm:p-8">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-signal">03 / Work requests and tickets</p>
             <h2 class="mt-3 text-2xl font-semibold text-white">Information you submit intentionally</h2>
-            <p class="mt-4 text-sm leading-7 text-slate-400">A work request stores the name, email address, optional subject, message, selected service, submission time, IP address, browser user-agent, generated ticket number, and request status.</p>
-            <p class="mt-3 text-sm leading-7 text-slate-500">This information is used only to review the request, respond to it, track its status, and protect the form from abuse. Do not include passwords, access tokens, private keys, confidential datasets, or other secrets in the message.</p>
+            <p class="mt-4 text-sm leading-7 text-slate-400">
+                A work request stores the name, email address, optional subject, message, selected service, submission time,
+                IP address, browser user-agent, generated ticket number, and request status. These fields are used to review
+                and answer the request, provide ticket tracking, and protect the form from spam or abuse.
+            </p>
+            <p class="mt-3 text-sm leading-7 text-slate-500">
+                Ticket processing is separate from optional analytics. Rejecting analytics does not prevent you from submitting
+                a request. Do not send passwords, access tokens, private keys, confidential datasets, or other secrets.
+            </p>
         </section>
 
         <section class="grid gap-5 md:grid-cols-2">
-            <div class="surface rounded-2xl p-6 sm:p-8"><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-violet-300">03 / Cookies</p><h2 class="mt-3 text-xl font-semibold text-white">First-party security and counting</h2><p class="mt-4 text-sm leading-7 text-slate-500">A protected, HttpOnly first-party cookie stores a random anonymous visitor identifier for up to 90 days. It prevents repeated refreshes from inflating content-view totals and contains no name, email address, or advertising identifier. Essential cookies may also be created for form security and anti-forgery protection. The private admin area uses a secure authentication cookie.</p></div>
-            <div class="surface rounded-2xl p-6 sm:p-8"><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-orange-300">04 / Interface resources</p><h2 class="mt-3 text-xl font-semibold text-white">Locally served site assets</h2><p class="mt-4 text-sm leading-7 text-slate-500">Fonts, interface styles, the Markdown editor, and the network-map library are served by this site instead of third-party delivery networks. External links or project images that you choose to open may still be hosted by their respective providers.</p></div>
+            <div class="surface p-6 sm:p-8">
+                <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-violet-300">04 / Cookies</p>
+                <h2 class="mt-3 text-xl font-semibold text-white">Essential and optional cookies</h2>
+                <p class="mt-4 text-sm leading-7 text-slate-500">
+                    The consent-preference cookie remembers accept or reject for up to 180 days and is necessary to respect your choice.
+                    Form-security, anti-forgery, and private-admin authentication cookies are essential. The anonymous
+                    <code>portfolio_visitor</code> cookie is optional, lasts up to 90 days, and is created only after analytics consent.
+                </p>
+            </div>
+            <div class="surface p-6 sm:p-8">
+                <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-orange-300">05 / Local resources</p>
+                <h2 class="mt-3 text-xl font-semibold text-white">No interface CDN tracking</h2>
+                <p class="mt-4 text-sm leading-7 text-slate-500">
+                    Fonts, styles, the Markdown editor, icons, and the network-map library are served by this site.
+                    External links or project images that you choose to open can still connect to their respective providers.
+                </p>
+            </div>
         </section>
 
-        <section class="surface rounded-2xl p-6 sm:p-8">
-            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">05 / Retention and control</p>
-            <h2 class="mt-3 text-2xl font-semibold text-white">Operational retention</h2>
-            <p class="mt-4 text-sm leading-7 text-slate-400">Visitor analytics records, including stored IP addresses and anonymous content-view receipts, are deleted automatically after 30 days. Aggregate content counters remain, but the records used to prevent duplicate daily views do not. Contact and ticket records are retained while they are needed to review, answer, or document a submitted request, then removed manually.</p>
-            <p class="mt-3 text-sm leading-7 text-slate-500">To ask about a submitted request or request deletion of contact information, use the work-request form and include the relevant ticket number when available.</p>
+        <section class="technical-frame surface p-6 sm:p-8">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">06 / Retention</p>
+            <h2 class="mt-3 text-2xl font-semibold text-white">Data is not kept indefinitely</h2>
+            <p class="mt-4 text-sm leading-7 text-slate-400">
+                Page-view records, including the daily pseudonymous visitor identifier, path, country, timestamp, and
+                duplicate-view receipts, are deleted automatically after 30 days. Raw IP addresses and cities are not
+                stored in analytics. Aggregate counters can remain after the underlying records are deleted.
+                The optional visitor cookie lasts up to 90 days and the consent choice lasts up to 180 days.
+            </p>
+            <p class="mt-3 text-sm leading-7 text-slate-500">
+                Ticket IP addresses and browser metadata are removed automatically after 30 days. Work-request and ticket
+                records are deleted automatically after 365 days and can be deleted earlier when there is no continuing
+                operational or legal reason to retain them. Records for accepted work should be moved to the appropriate
+                contractual or accounting system instead of using the portfolio inbox as a permanent archive.
+            </p>
+        </section>
+
+        <section class="grid gap-5 md:grid-cols-2">
+            <div class="surface p-6 sm:p-8">
+                <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">07 / Hosting and transfers</p>
+                <h2 class="mt-3 text-xl font-semibold text-white">Service providers</h2>
+                <p class="mt-4 text-sm leading-7 text-slate-500">
+                    Hosting provider:
+                    <strong class="text-white">@(string.IsNullOrWhiteSpace(hostingProvider) ? "to be configured" : hostingProvider)</strong>.
+                    Hosting country:
+                    <strong class="text-white">@(string.IsNullOrWhiteSpace(hostingCountry) ? "to be configured" : hostingCountry)</strong>.
+                    Email delivery, monitoring, and backup providers will be listed here if they process personal data.
+                </p>
+            </div>
+            <div class="surface p-6 sm:p-8">
+                <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">08 / Your choices and rights</p>
+                <h2 class="mt-3 text-xl font-semibold text-white">Access, correction, and deletion</h2>
+                <p class="mt-4 text-sm leading-7 text-slate-500">
+                    You can reject or later withdraw optional analytics through Cookie preferences. You can also ask whether
+                    personal data is processed, request access or correction, request deletion where applicable, and object to
+                    certain processing. Include the ticket number when asking about a work request.
+                </p>
+            </div>
+        </section>
+
+        <section class="surface p-6 sm:p-8">
+            <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600">09 / Security and changes</p>
+            <h2 class="mt-3 text-2xl font-semibold text-white">Protection without a false guarantee</h2>
+            <p class="mt-4 text-sm leading-7 text-slate-400">
+                Reasonable technical and organisational safeguards are used, including access control, rate limiting,
+                local asset hosting, retention limits, and server-side validation. No internet service can promise absolute security.
+                Material changes to processing will be reflected in this notice and its update date.
+            </p>
         </section>
     </div>
 
-    <footer class="mt-12 flex flex-col gap-3 border-t border-white/[0.07] pt-8 sm:flex-row"><a href="/" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-5 py-3 text-sm text-slate-300 transition hover:border-cyan/30 hover:text-white">← Return home</a><a href="/hire" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md bg-signal px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white">Open a request <span aria-hidden="true">↗</span></a></footer>
+    <footer class="mt-12 border-t border-white/[0.07] pt-8">
+        <a href="/" class="focus-ring inline-flex items-center justify-center border border-white/10 px-5 py-3 text-sm text-slate-300 transition hover:border-cyan/30 hover:text-white">Return home</a>
+    </footer>
 </article>

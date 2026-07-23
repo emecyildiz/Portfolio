@@ -1,0 +1,32 @@
+@using Portfolio.Services
+@{
+    var analyticsDecision = AnalyticsConsent.GetDecision(Context);
+    var showConsentPanel = analyticsDecision is null;
+    var returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+}
+
+<aside id="analyticsConsent"
+       class="cookie-consent @(showConsentPanel ? "" : "cookie-consent--hidden")"
+       role="region"
+       aria-label="Analytics preferences"
+       aria-hidden="@(!showConsentPanel).ToString().ToLowerInvariant()">
+    <div class="cookie-consent__copy">
+        <p class="archive-label">Privacy choice</p>
+        <h2>Optional, self-hosted analytics</h2>
+        <p>
+            If you accept, this site briefly uses your IP address to calculate a daily pseudonymous identifier and
+            approximate country. The raw IP is not stored in analytics; limited records are kept for up to 30 days.
+            Rejecting does not affect the site. Security and request-form processing remain active.
+            <a href="/privacy">Read the privacy notice</a>.
+        </p>
+    </div>
+    <form method="post" asp-controller="Home" asp-action="SaveAnalyticsConsent" asp-route-area="" class="cookie-consent__actions">
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        <button type="submit" name="decision" value="@AnalyticsConsent.DeniedValue" class="cookie-consent__reject">
+            Reject optional analytics
+        </button>
+        <button type="submit" name="decision" value="@AnalyticsConsent.GrantedValue" class="cookie-consent__accept">
+            Accept analytics
+        </button>
+    </form>
+</aside>

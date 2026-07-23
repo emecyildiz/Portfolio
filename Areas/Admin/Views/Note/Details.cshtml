@@ -1,0 +1,83 @@
+@model Portfolio.Models.Note
+@using Portfolio.Services
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    var safeRelatedUrl = SafeUrlPolicy.IsSafeHttpsOrRootRelativeUrl(Model.RelatedUrl)
+        ? Model.RelatedUrl
+        : null;
+}
+
+<div class="mb-8 flex flex-col gap-5 border-b border-line pb-7 lg:flex-row lg:items-end lg:justify-between">
+    <div class="min-w-0">
+        <p class="font-mono text-xs uppercase tracking-[0.22em] text-cyan">
+            Private workspace / @(Model.IsTodo ? "Task" : "Note")
+        </p>
+        <h2 class="mt-3 break-words text-3xl font-semibold tracking-[-0.035em] text-white sm:text-5xl">@Model.Title</h2>
+        <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">
+            <span>@Model.NoteType</span>
+            <span>@Model.Priority priority</span>
+            @if (Model.IsTodo)
+            {
+                <span>@(Model.IsCompleted ? "Completed" : "Open")</span>
+                <span>@(Model.DueDate.HasValue ? $"Due {Model.DueDate.Value:dd MMM yyyy}" : "No due date")</span>
+            }
+        </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+        <a href="@Url.Action("Index", "Note", new { area = "Admin" })" class="focus-ring border border-line px-4 py-2.5 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">Back to notes</a>
+        <a href="@Url.Action("Edit", "Note", new { area = "Admin", id = Model.Id })" class="focus-ring bg-signal px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white">Edit note</a>
+    </div>
+</div>
+
+<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
+    <article class="admin-surface min-w-0 p-6 sm:p-9 lg:p-12" aria-label="Rendered note content">
+        @if (string.IsNullOrWhiteSpace(Model.Content))
+        {
+            <p class="text-sm text-slate-600">This note has no content.</p>
+        }
+        else
+        {
+            <div class="admin-note-content">
+                @Html.Raw(ViewBag.ContentHtml)
+            </div>
+        }
+    </article>
+
+    <aside class="h-fit space-y-4 xl:sticky xl:top-6" aria-label="Note metadata">
+        <section class="admin-surface p-5">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Record details</p>
+            <dl class="mt-5 space-y-4 text-sm">
+                <div>
+                    <dt class="font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600">Created</dt>
+                    <dd class="mt-1 text-slate-400">@Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</dd>
+                </div>
+                <div>
+                    <dt class="font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600">Updated</dt>
+                    <dd class="mt-1 text-slate-400">@Model.UpdatedAt.ToString("dd MMM yyyy HH:mm")</dd>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(safeRelatedUrl))
+                {
+                    <div>
+                        <dt class="font-mono text-[9px] uppercase tracking-[0.12em] text-slate-600">Related reference</dt>
+                        <dd class="mt-1">
+                            <a href="@safeRelatedUrl" target="_blank" rel="noopener noreferrer" class="focus-ring break-all text-cyan underline underline-offset-4">Open reference <span aria-hidden="true">↗</span></a>
+                        </dd>
+                    </div>
+                }
+            </dl>
+        </section>
+
+        @if (Model.IsTodo)
+        {
+            <form method="post" action="@Url.Action("ToggleComplete", "Note", new { area = "Admin", id = Model.Id })">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="focus-ring w-full border border-line px-4 py-3 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white">
+                    @(Model.IsCompleted ? "Reopen task" : "Mark task complete")
+                </button>
+            </form>
+        }
+    </aside>
+</div>

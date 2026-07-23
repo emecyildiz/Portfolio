@@ -233,9 +233,25 @@ namespace Portfolio.Data
             modelBuilder.Entity<ContactMessage>()
                 .Property(c => c.IpAddress).HasMaxLength(45); // IPv6 max
 
-            modelBuilder.Entity<PageView>()
-                .HasIndex(p => p.ViewedAt)
-                .HasDatabaseName("idx_pageviews_date");
+            modelBuilder.Entity<PageView>(entity =>
+            {
+                entity.Property(pageView => pageView.Path)
+                    .HasMaxLength(2048);
+                entity.Property(pageView => pageView.VisitorHash)
+                    .HasMaxLength(64)
+                    .IsFixedLength();
+                entity.Property(pageView => pageView.Country)
+                    .HasMaxLength(100);
+                entity.HasIndex(pageView => pageView.ViewedAt)
+                    .HasDatabaseName("idx_pageviews_date");
+                entity.HasIndex(pageView => new
+                    {
+                        pageView.VisitorHash,
+                        pageView.ViewDate
+                    })
+                    .IsUnique()
+                    .HasDatabaseName("ux_pageviews_visitor_date");
+            });
 
             modelBuilder.Entity<ContentViewReceipt>(entity =>
             {

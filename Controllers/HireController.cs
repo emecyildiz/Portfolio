@@ -51,6 +51,14 @@ public class HireController : BaseController
             return RedirectToAction("Index", "Hire", new { area = "" });
         }
 
+        var remoteIp = HttpContext.Connection.RemoteIpAddress;
+        if (remoteIp?.IsIPv4MappedToIPv6 == true)
+            remoteIp = remoteIp.MapToIPv4();
+
+        var userAgent = Request.Headers.UserAgent.ToString().Trim();
+        if (userAgent.Length > 512)
+            userAgent = userAgent[..512];
+
         var message = new ContactMessage
         {
             TicketNumber = Guid.NewGuid(),
@@ -59,8 +67,8 @@ public class HireController : BaseController
             Subject = string.IsNullOrWhiteSpace(request.Subject) ? null : request.Subject.Trim(),
             Message = request.Message.Trim(),
             ServiceId = request.ServiceId,
-            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-            UserAgent = Request.Headers["User-Agent"].ToString(),
+            IpAddress = remoteIp?.ToString(),
+            UserAgent = string.IsNullOrEmpty(userAgent) ? null : userAgent,
             IsRead = false,
             Status = ContactStatus.New,
             CreatedAt = DateTime.UtcNow

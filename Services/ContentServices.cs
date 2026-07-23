@@ -127,7 +127,6 @@ public interface IViewCountService
 
 public class ViewCountService : IViewCountService
 {
-    private const string VisitorCookieName = "portfolio_visitor";
     private const string VisitorProtectorPurpose = "Portfolio.ContentViews.Visitor.v1";
 
     private static readonly string[] BotUserAgentMarkers =
@@ -232,7 +231,7 @@ public class ViewCountService : IViewCountService
 
     private string GetOrCreateVisitorId(HttpContext httpContext)
     {
-        if (httpContext.Request.Cookies.TryGetValue(VisitorCookieName, out var protectedVisitorId))
+        if (httpContext.Request.Cookies.TryGetValue(AnalyticsConsent.VisitorCookieName, out var protectedVisitorId))
         {
             try
             {
@@ -250,7 +249,7 @@ public class ViewCountService : IViewCountService
 
         var newVisitorId = Guid.NewGuid().ToString("N");
         httpContext.Response.Cookies.Append(
-            VisitorCookieName,
+            AnalyticsConsent.VisitorCookieName,
             _visitorProtector.Protect(newVisitorId),
             new CookieOptions
             {
@@ -267,7 +266,8 @@ public class ViewCountService : IViewCountService
 
     private static bool ShouldCountRequest(HttpContext httpContext)
     {
-        if (!HttpMethods.IsGet(httpContext.Request.Method) ||
+        if (!AnalyticsConsent.IsGranted(httpContext) ||
+            !HttpMethods.IsGet(httpContext.Request.Method) ||
             httpContext.User.Identity?.IsAuthenticated == true)
         {
             return false;
