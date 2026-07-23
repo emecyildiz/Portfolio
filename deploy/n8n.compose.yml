@@ -28,8 +28,10 @@ services:
         condition: service_healthy
     expose:
       - "5678"
+      - "5679"
     volumes:
       - n8n_data:/home/node/.n8n
+      - /var/lib/emecworks/n8n-files:/home/node/.n8n-files
     restart: unless-stopped
     stop_grace_period: 60s
     healthcheck:
@@ -52,6 +54,31 @@ services:
       edge:
         aliases:
           - n8n-app
+
+  task-runners:
+    image: docker.io/n8nio/runners:2.30.5-distroless@sha256:54a20704fc1812b69bead6f3259bea04cd99b8cc466277d44c33a5a08bd2e0a5
+    env_file:
+      - /etc/emecworks/n8n-runners.env
+    depends_on:
+      n8n:
+        condition: service_healthy
+    user: "65532:65532"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777,uid=65532,gid=65532
+    pids_limit: 256
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - default
 
 volumes:
   n8n_pgdata:
