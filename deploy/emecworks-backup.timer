@@ -1,5 +1,5 @@
 [Unit]
-Description=Run the Emecworks portfolio backup daily
+Description=Run the Emecworks portfolio and n8n backup daily
 
 [Timer]
 OnCalendar=*-*-* 03:15:00 UTC
