@@ -1,0 +1,17 @@
+{
+	admin off
+}
+
+www.emecworks.com {
+	redir https://emecworks.com{uri} permanent
+}
+
+emecworks.com {
+	encode zstd gzip
+	reverse_proxy web:8080
+
+	log {
+		output stdout
+		format json
+	}
+}

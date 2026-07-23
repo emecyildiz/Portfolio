@@ -40,7 +40,27 @@ services:
       - ./geoip:/app/geoip:ro
     restart: unless-stopped
 
+  proxy:
+    image: caddy:2.11.4-alpine
+    profiles:
+      - public
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
 volumes:
   pgdata:
   uploads:
   dataprotection:
+  caddy_data:
+  caddy_config:

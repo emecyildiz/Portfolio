@@ -1,0 +1,21 @@
+[Unit]
+Description=Back up the Emecworks portfolio data
+Requires=docker.service
+After=docker.service
+ConditionPathExists=/etc/emecworks/portfolio.env
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/emecworks-backup
+Environment=BACKUP_RETENTION_DAYS=7
+UMask=0077
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadOnlyPaths=/etc/emecworks/portfolio.env
+ReadWritePaths=/var/backups/emecworks /run/lock
+TimeoutStartSec=30min
