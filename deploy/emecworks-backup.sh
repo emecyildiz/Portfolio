@@ -124,6 +124,7 @@ archive_volume() {
         --network none \
         --read-only \
         --cap-drop ALL \
+        --cap-add DAC_READ_SEARCH \
         --security-opt no-new-privileges:true \
         -v "${volume}:/data:ro" \
         "$helper_image" \
@@ -138,6 +139,7 @@ archive_directory() {
         --network none \
         --read-only \
         --cap-drop ALL \
+        --cap-add DAC_READ_SEARCH \
         --security-opt no-new-privileges:true \
         -v "${source}:/data:ro" \
         "$helper_image" \
