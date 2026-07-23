@@ -363,8 +363,9 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .env
+emecworks-recovery-*.7z
 
 wwwroot/uploads/
 
-# Docker override dosyalarý
+# Docker override files
 docker-compose.override.yml
