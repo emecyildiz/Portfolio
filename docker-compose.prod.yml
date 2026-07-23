@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "127.0.0.1:5000:8080" # Nginx connects to this port through localhost only
+      - "127.0.0.1:5000:8080" # Optional localhost-only diagnostic access
     depends_on:
       db:
         condition: service_healthy
@@ -42,14 +42,10 @@ services:
 
   proxy:
     image: caddy:2.11.4-alpine
-    profiles:
-      - public
     depends_on:
       - web
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+    expose:
+      - "8080"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
