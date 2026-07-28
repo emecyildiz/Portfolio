@@ -1,7 +1,7 @@
 @model Portfolio.Models.ViewModels.HomepageViewModel
 @{
-    ViewData["Title"] = "Home";
-    ViewData["Description"] = "Cybersecurity research, electronics projects, homelab work, and software development.";
+    ViewData["Title"] = "Emecworks — Emeç Yıldız | Cybersecurity & Engineering";
+    ViewData["Description"] = "Emecworks is Emeç Yıldız's engineering and cybersecurity portfolio, featuring security research, reverse engineering, electronics, homelab systems, and software projects.";
     var activity = ViewBag.RecentActivity as List<Portfolio.Models.ViewModels.ActivityItem> ?? new();
     var certs = ViewBag.Certificates as List<Portfolio.Models.Certificate> ?? new();
     var currentFocusUrl = Model.CurrentFocus?.Url?.Trim();
@@ -20,7 +20,7 @@
 <section class="home-lead public-container">
     <div class="home-lead__grid">
         <div>
-            <p class="archive-label">Independent engineering portfolio / work in progress</p>
+            <p class="archive-label">Emecworks / independent engineering portfolio</p>
             <h1>Security research, hardware experiments, and systems I have built.</h1>
             <p class="home-lead__summary">
                 This is a working record of reverse engineering, malware analysis, electronics,

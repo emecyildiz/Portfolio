@@ -3,11 +3,22 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] is string pageTitle && !string.IsNullOrWhiteSpace(pageTitle) ? $"{pageTitle} — Portfolio" : "Portfolio")</title>
-    <meta name="description" content="@ViewData["Description"]" />
-
     @{
+        const string siteName = "Emecworks";
+        var currentPath = Context.Request.Path.Value?.ToLowerInvariant() ?? "/";
+        var isHomePage = currentPath == "/";
+        var pageTitle = (ViewData["Title"] as string)?.Trim();
+        var documentTitle = string.IsNullOrWhiteSpace(pageTitle)
+            ? siteName
+            : isHomePage
+                ? pageTitle
+                : $"{pageTitle} — {siteName}";
+        var pageDescription = (ViewData["Description"] as string)?.Trim();
+        if (string.IsNullOrWhiteSpace(pageDescription))
+            pageDescription = "Emecworks engineering and cybersecurity portfolio.";
+
         var requestOrigin = $"{Context.Request.Scheme}://{Context.Request.Host}";
+        var canonicalUrl = $"{requestOrigin}{Context.Request.Path}";
         var ogImage = (ViewBag.OgImage as string)?.Trim();
         var fullOgImage = $"{requestOrigin}/og-default.png";
         if (!string.IsNullOrWhiteSpace(ogImage))
@@ -23,19 +34,53 @@
                 fullOgImage = ogImage;
         }
     }
-    <meta property="og:title" content="@ViewData["Title"] — Portfolio" />
-    <meta property="og:description" content="@ViewData["Description"]" />
+    <title>@documentTitle</title>
+    <meta name="description" content="@pageDescription" />
+    <meta name="application-name" content="@siteName" />
+
+    <meta property="og:title" content="@documentTitle" />
+    <meta property="og:description" content="@pageDescription" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    <meta property="og:url" content="@canonicalUrl" />
     <meta property="og:image" content="@fullOgImage" />
     <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="@siteName" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="@ViewData["Title"] — Portfolio" />
-    <meta name="twitter:description" content="@ViewData["Description"]" />
+    <meta name="twitter:title" content="@documentTitle" />
+    <meta name="twitter:description" content="@pageDescription" />
     <meta name="twitter:image" content="@fullOgImage" />
 
-    <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    <link rel="canonical" href="@canonicalUrl" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="/favicon.ico" />
+
+    @if (isHomePage)
+    {
+        <script type="application/ld+json">
+            {
+                "@@context": "https://schema.org",
+                "@@graph": [
+                    {
+                        "@@type": "WebSite",
+                        "@@id": "https://emecworks.com/#website",
+                        "url": "https://emecworks.com/",
+                        "name": "Emecworks",
+                        "alternateName": "Emec Works",
+                        "inLanguage": "en"
+                    },
+                    {
+                        "@@type": "Person",
+                        "@@id": "https://emecworks.com/#person",
+                        "name": "Emeç Yıldız",
+                        "url": "https://emecworks.com/",
+                        "description": "Independent engineering and cybersecurity portfolio author."
+                    }
+                ]
+            }
+        </script>
+    }
+
     <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/tailwind.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/public.css" asp-append-version="true" />
@@ -51,9 +96,9 @@
 
     <header class="public-header">
         <nav aria-label="Primary navigation" class="public-nav">
-            <a href="/" class="site-identity focus-ring" aria-label="Portfolio home">
-                <span class="site-identity__name">Work index</span>
-                <span class="site-identity__scope">Security · hardware · systems</span>
+            <a href="/" class="site-identity focus-ring" aria-label="Emecworks home">
+                <span class="site-identity__name">Emecworks</span>
+                <span class="site-identity__scope">Engineering · security · systems</span>
             </a>
 
             <div class="public-nav__desktop">
@@ -190,14 +235,14 @@
             </div>
             @await Component.InvokeAsync("FooterLinks")
             <div class="public-footer__base">
-                <p>Portfolio / work index</p>
+                <p>Emecworks / independent work index</p>
                 <nav aria-label="Privacy controls" class="public-footer__privacy">
                     <a href="/privacy">Privacy notice</a>
                     <button id="cookiePreferencesButton" type="button" aria-controls="analyticsConsent">
                         Cookie preferences
                     </button>
                 </nav>
-                <p>© @DateTime.UtcNow.Year · Built and documented independently</p>
+                <p>© @DateTime.UtcNow.Year Emeç Yıldız · Built and documented independently</p>
             </div>
         </div>
     </footer>
