@@ -15,6 +15,14 @@ http://:8080 {
 		redir https://emecworks.com{uri} permanent
 	}
 
+	@portfolio_http {
+		host emecworks.com
+		header X-Forwarded-Proto http
+	}
+	handle @portfolio_http {
+		redir https://emecworks.com{uri} permanent
+	}
+
 	@n8n_editor host n8n.emecworks.com
 	handle @n8n_editor {
 		reverse_proxy n8n-app:5678
