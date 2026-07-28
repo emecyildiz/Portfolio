@@ -275,6 +275,7 @@ var pageViewSkipPrefixes = new[]
     new PathString("/uploads"),
     new PathString("/icons"),
     new PathString("/.well-known"),
+    new PathString("/health"),
     new PathString("/blog/rss.xml"),
     new PathString("/favicon.ico"),
     new PathString("/robots.txt"),
@@ -359,6 +360,44 @@ app.UseAuthorization();
 app.UseRateLimiter();
 
 app.MapControllers();
+
+app.MapGet("/health/live", (HttpContext context) =>
+{
+    SetHealthResponseHeaders(context);
+    return Results.Text("Healthy", "text/plain", System.Text.Encoding.UTF8);
+}).ExcludeFromDescription();
+
+app.MapGet("/health/ready", async (
+    HttpContext context,
+    AppDbContext db,
+    CancellationToken cancellationToken) =>
+{
+    SetHealthResponseHeaders(context);
+
+    try
+    {
+        var canConnect = await db.Database.CanConnectAsync(cancellationToken);
+        return Results.Text(
+            canConnect ? "Healthy" : "Unhealthy",
+            "text/plain",
+            System.Text.Encoding.UTF8,
+            canConnect
+                ? StatusCodes.Status200OK
+                : StatusCodes.Status503ServiceUnavailable);
+    }
+    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+    {
+        throw;
+    }
+    catch
+    {
+        return Results.Text(
+            "Unhealthy",
+            "text/plain",
+            System.Text.Encoding.UTF8,
+            StatusCodes.Status503ServiceUnavailable);
+    }
+}).ExcludeFromDescription();
 
 app.MapGet("/robots.txt", (HttpContext context) =>
 {
@@ -492,3 +531,9 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+static void SetHealthResponseHeaders(HttpContext context)
+{
+    context.Response.Headers.CacheControl = "no-store";
+    context.Response.Headers["X-Robots-Tag"] = "noindex, nofollow, noarchive";
+}

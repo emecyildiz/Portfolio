@@ -41,11 +41,18 @@ services:
       - dataprotection:/app/dataprotection-keys
       - ./geoip:/app/geoip:ro
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://127.0.0.1:8080/health/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   proxy:
     image: caddy:2.11.4-alpine
     depends_on:
-      - web
+      web:
+        condition: service_healthy
     expose:
       - "8080"
     volumes:
