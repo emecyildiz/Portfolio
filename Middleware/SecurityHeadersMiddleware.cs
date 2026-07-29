@@ -2,26 +2,18 @@ namespace Portfolio.Middleware;
 
 public sealed class SecurityHeadersMiddleware
 {
-    private const string ContentSecurityPolicy =
-        "default-src 'self'; " +
-        "base-uri 'none'; " +
-        "connect-src 'self'; " +
-        "font-src 'self'; " +
-        "form-action 'self'; " +
-        "frame-ancestors 'none'; " +
-        "frame-src 'none'; " +
-        "img-src 'self' https: data:; " +
-        "object-src 'none'; " +
-        "script-src 'self' 'unsafe-inline'; " +
-        "style-src 'self' 'unsafe-inline'";
-
     private readonly RequestDelegate _next;
     private readonly PathString _adminPrefix;
+    private readonly string _contentSecurityPolicy;
 
-    public SecurityHeadersMiddleware(RequestDelegate next, string adminPath)
+    public SecurityHeadersMiddleware(
+        RequestDelegate next,
+        string adminPath,
+        bool turnstileEnabled)
     {
         _next = next;
         _adminPrefix = new PathString($"/{adminPath}");
+        _contentSecurityPolicy = BuildContentSecurityPolicy(turnstileEnabled);
     }
 
     public Task InvokeAsync(HttpContext context)
@@ -34,7 +26,7 @@ public sealed class SecurityHeadersMiddleware
         {
             var headers = context.Response.Headers;
 
-            headers.ContentSecurityPolicy = ContentSecurityPolicy;
+            headers.ContentSecurityPolicy = _contentSecurityPolicy;
             headers.XContentTypeOptions = "nosniff";
             headers.XFrameOptions = "DENY";
             headers["X-XSS-Protection"] = "0";
@@ -55,14 +47,37 @@ public sealed class SecurityHeadersMiddleware
 
         return _next(context);
     }
+
+    private static string BuildContentSecurityPolicy(bool turnstileEnabled)
+    {
+        var turnstileOrigin = turnstileEnabled
+            ? " https://challenges.cloudflare.com"
+            : string.Empty;
+
+        return
+            "default-src 'self'; " +
+            "base-uri 'none'; " +
+            $"connect-src 'self'{turnstileOrigin}; " +
+            "font-src 'self'; " +
+            "form-action 'self'; " +
+            "frame-ancestors 'none'; " +
+            $"frame-src {(turnstileEnabled ? "https://challenges.cloudflare.com" : "'none'")}; " +
+            "img-src 'self' https: data:; " +
+            "object-src 'none'; " +
+            $"script-src 'self' 'unsafe-inline'{turnstileOrigin}; " +
+            "style-src 'self' 'unsafe-inline'";
+    }
 }
 
 public static class SecurityHeadersMiddlewareExtensions
 {
     public static IApplicationBuilder UsePortfolioSecurityHeaders(
         this IApplicationBuilder app,
-        string adminPath)
+        string adminPath,
+        bool turnstileEnabled)
     {
-        return app.UseMiddleware<SecurityHeadersMiddleware>(adminPath);
+        return app.UseMiddleware<SecurityHeadersMiddleware>(
+            adminPath,
+            turnstileEnabled);
     }
 }

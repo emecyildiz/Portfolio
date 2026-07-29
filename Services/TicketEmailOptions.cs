@@ -15,6 +15,7 @@ public sealed class TicketEmailOptions
     public int PollIntervalSeconds { get; set; } = 30;
     public int MaxAttempts { get; set; } = 8;
     public int DailySendLimit { get; set; } = 80;
+    public int MaxPendingItems { get; set; } = 120;
 
     public void Validate()
     {
@@ -34,6 +35,12 @@ public sealed class TicketEmailOptions
         {
             throw new InvalidOperationException(
                 "TicketEmail:DailySendLimit must be between 10 and 500.");
+        }
+
+        if (MaxPendingItems is < 10 or > 1000)
+        {
+            throw new InvalidOperationException(
+                "TicketEmail:MaxPendingItems must be between 10 and 1000.");
         }
 
         if (!Enabled)

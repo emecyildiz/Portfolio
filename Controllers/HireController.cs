@@ -5,15 +5,26 @@ using Portfolio.Data;
 using Portfolio.Models;
 using Portfolio.Models.Enums;
 using Portfolio.Models.ViewModels;
+using Portfolio.Services;
 
 namespace Portfolio.Controllers;
 
 public class HireController : BaseController
 {
     private const int DailyPerIpSubmissionLimit = 8;
+    private const int DailyPerEmailSubmissionLimit = 3;
     private const int DailyGlobalSubmissionLimit = 60;
+    private readonly ITurnstileValidator _turnstileValidator;
+    private readonly TicketEmailOptions _ticketEmailOptions;
 
-    public HireController(AppDbContext db) : base(db) { }
+    public HireController(
+        AppDbContext db,
+        ITurnstileValidator turnstileValidator,
+        Microsoft.Extensions.Options.IOptions<TicketEmailOptions> ticketEmailOptions) : base(db)
+    {
+        _turnstileValidator = turnstileValidator;
+        _ticketEmailOptions = ticketEmailOptions.Value;
+    }
 
     public async Task<IActionResult> Index()
     {
@@ -33,7 +44,9 @@ public class HireController : BaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("ContactFormLimit")]
-    public async Task<IActionResult> Contact(ContactRequestViewModel request)
+    public async Task<IActionResult> Contact(
+        ContactRequestViewModel request,
+        [FromForm(Name = "cf-turnstile-response")] string? turnstileToken)
     {
         if (!string.IsNullOrEmpty(request.Website))
         {
@@ -62,6 +75,16 @@ public class HireController : BaseController
         var requestWindowStart = now.AddHours(-24);
         var ipAddress = remoteIp?.ToString();
 
+        if (!await _turnstileValidator.ValidateAsync(
+                turnstileToken,
+                ipAddress,
+                HttpContext.RequestAborted))
+        {
+            TempData["Error"] =
+                "The anti-spam verification could not be completed. Please try again.";
+            return RedirectToAction("Index", "Hire", new { area = "" });
+        }
+
         var recentGlobalSubmissions = await _db.ContactMessages.CountAsync(
             message => message.CreatedAt >= requestWindowStart);
         if (recentGlobalSubmissions >= DailyGlobalSubmissionLimit)
@@ -86,6 +109,19 @@ public class HireController : BaseController
             }
         }
 
+        var normalizedEmail = request.Email.Trim();
+        var normalizedEmailLower = normalizedEmail.ToLowerInvariant();
+        var recentEmailSubmissions = await _db.ContactMessages.CountAsync(
+            message =>
+                message.CreatedAt >= requestWindowStart &&
+                message.Email.ToLower() == normalizedEmailLower);
+        if (recentEmailSubmissions >= DailyPerEmailSubmissionLimit)
+        {
+            TempData["Error"] =
+                "Too many requests have been submitted for this email address. Please try again later.";
+            return RedirectToAction("Index", "Hire", new { area = "" });
+        }
+
         var userAgent = Request.Headers.UserAgent.ToString().Trim();
         if (userAgent.Length > 512)
             userAgent = userAgent[..512];
@@ -94,7 +130,7 @@ public class HireController : BaseController
         {
             TicketNumber = Guid.NewGuid(),
             Name = request.Name.Trim(),
-            Email = request.Email.Trim(),
+            Email = normalizedEmail,
             Subject = string.IsNullOrWhiteSpace(request.Subject) ? null : request.Subject.Trim(),
             Message = request.Message.Trim(),
             ServiceId = request.ServiceId,
@@ -106,18 +142,28 @@ public class HireController : BaseController
         };
 
         _db.ContactMessages.Add(message);
-        _db.TicketEmailOutboxes.Add(new TicketEmailOutbox
+        var pendingEmailCount = await _db.TicketEmailOutboxes.CountAsync(
+            outbox => outbox.SentAt == null && outbox.FailedAt == null);
+        var confirmationEmailQueued =
+            pendingEmailCount < _ticketEmailOptions.MaxPendingItems;
+
+        if (confirmationEmailQueued)
         {
-            ContactMessage = message,
-            Kind = TicketEmailKinds.TicketReceived,
-            NextAttemptAt = now,
-            CreatedAt = now
-        });
+            _db.TicketEmailOutboxes.Add(new TicketEmailOutbox
+            {
+                ContactMessage = message,
+                Kind = TicketEmailKinds.TicketReceived,
+                NextAttemptAt = now,
+                CreatedAt = now
+            });
+        }
+
         await _db.SaveChangesAsync();
 
         TempData["Success"] = "Your request has been received!";
         TempData["TicketNumber"] = message.TicketNumber.ToString();
-        TempData["ConfirmationEmailQueued"] = true;
+        TempData["ConfirmationEmailQueued"] = confirmationEmailQueued;
+        TempData["ConfirmationEmailUnavailable"] = !confirmationEmailQueued;
         return RedirectToAction("Index", "Hire", new { area = "" });
     }
 

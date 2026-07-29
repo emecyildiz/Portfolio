@@ -40,6 +40,12 @@ services:
       - TicketEmail__ReplyToAddress=${TICKET_EMAIL_REPLY_TO_ADDRESS:-}
       - TicketEmail__PublicBaseUrl=${TICKET_EMAIL_PUBLIC_BASE_URL:-https://emecworks.com}
       - TicketEmail__DailySendLimit=${TICKET_EMAIL_DAILY_SEND_LIMIT:-80}
+      - TicketEmail__MaxPendingItems=${TICKET_EMAIL_MAX_PENDING_ITEMS:-120}
+      - Turnstile__Enabled=${TURNSTILE_ENABLED:-false}
+      - Turnstile__SiteKey=${TURNSTILE_SITE_KEY:-}
+      - Turnstile__SecretKey=${TURNSTILE_SECRET_KEY:-}
+      - Turnstile__ExpectedHostname=${TURNSTILE_EXPECTED_HOSTNAME:-emecworks.com}
+      - Turnstile__ExpectedAction=${TURNSTILE_EXPECTED_ACTION:-contact}
     volumes:
       # Persist uploaded media outside the container so rebuilds do not remove it
       - uploads:/app/wwwroot/uploads

@@ -1,3 +1,6 @@
+@using Microsoft.Extensions.Options
+@using Portfolio.Services
+@inject IOptions<TurnstileOptions> TurnstileOptionsAccessor
 @{
     ViewData["Title"] = "Hire Me";
     ViewData["Description"] = "Cybersecurity, network infrastructure, software, and electronics project consulting.";
@@ -13,9 +16,14 @@
         TempData["ConfirmationEmailQueued"]?.ToString(),
         bool.TrueString,
         StringComparison.OrdinalIgnoreCase);
+    var confirmationEmailUnavailable = string.Equals(
+        TempData["ConfirmationEmailUnavailable"]?.ToString(),
+        bool.TrueString,
+        StringComparison.OrdinalIgnoreCase);
     var trackError = TempData["TrackError"]?.ToString();
     var hasProtectedTicket = !string.IsNullOrWhiteSpace(ticketNumber);
     var trackingInputValue = ticketNumber ?? ViewBag.TrackedTicketNumber as string;
+    var turnstile = TurnstileOptionsAccessor.Value;
 }
 
 <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
@@ -94,6 +102,19 @@
 
                 <div><label for="contactMessage" class="mb-2 block font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">Project brief</label><textarea id="contactMessage" name="Message" rows="6" required maxlength="5000" placeholder="Describe the work, expected outcome, timeline, and constraints..." class="w-full resize-y rounded-lg border border-white/10 bg-ink/60 px-4 py-3 text-sm leading-6 text-white placeholder:text-slate-700 transition focus:border-cyan/40 focus:outline-none"></textarea><p class="mt-2 text-xs text-slate-700">Avoid including passwords, access tokens, private keys, or confidential datasets.</p></div>
 
+                @if (turnstile.Enabled)
+                {
+                    <div class="rounded-xl border border-white/10 bg-ink/30 p-3">
+                        <div class="cf-turnstile"
+                             data-sitekey="@turnstile.SiteKey"
+                             data-action="@turnstile.ExpectedAction"
+                             data-theme="auto"
+                             data-size="flexible"
+                             data-retry="auto"
+                             data-refresh-expired="auto"></div>
+                    </div>
+                }
+
                 <div class="border-t border-white/10 pt-5 text-xs leading-6 text-slate-500">
                     Submitting this form stores the details above, your IP address, and browser information so the request can be answered and protected from abuse.
                     This is separate from optional analytics. See the <a href="/privacy" class="font-medium text-cyan underline underline-offset-4">privacy notice</a>.
@@ -131,6 +152,12 @@
                     @if (confirmationEmailQueued)
                     {
                         <p class="mt-2 text-xs text-slate-600">A confirmation email containing the tracking link has been queued.</p>
+                    }
+                    else if (confirmationEmailUnavailable)
+                    {
+                        <p class="mt-2 text-xs font-medium text-rose-200">
+                            Confirmation email is temporarily unavailable. Copy the ticket number before continuing.
+                        </p>
                     }
                 </div>
             }
@@ -293,3 +320,7 @@
         else if (modalIsOpen && event.key === 'Tab') trapTrackModalFocus(event);
     });
 </script>
+@if (turnstile.Enabled)
+{
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+}

@@ -105,16 +105,20 @@ The public request channel uses several independent limits:
 - ASP.NET permits at most 3 form submissions per source IP per hour.
 - PostgreSQL permits at most 8 stored requests per source IP in a rolling
   24-hour window.
+- PostgreSQL permits at most 3 stored requests for one email address in a
+  rolling 24-hour window.
 - PostgreSQL permits at most 60 stored requests across the site in a rolling
   24-hour window.
 - The delivery worker sends at most 80 successful ticket confirmations per UTC
   day. Additional outbox items remain queued.
+- At most 120 unsent email jobs can remain pending. When that ceiling is
+  reached, the ticket is still created and displayed, but no additional email
+  job is queued.
 
 The database-backed limits survive application restarts. The delivery ceiling
 is intentionally lower than the provider quota so retries and operational
-testing retain some headroom. If sustained automated abuse appears despite
-these controls, add Cloudflare Turnstile rather than continually lowering the
-limits for legitimate visitors.
+testing retain some headroom. Cloudflare Turnstile provides the first
+anti-automation gate when enabled; the limits remain as defense in depth.
 
 ## Safe production test
 

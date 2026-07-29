@@ -22,6 +22,11 @@ builder.Configuration
     .GetSection(TicketEmailOptions.SectionName)
     .Bind(ticketEmailOptions);
 ticketEmailOptions.Validate();
+var turnstileOptions = new TurnstileOptions();
+builder.Configuration
+    .GetSection(TurnstileOptions.SectionName)
+    .Bind(turnstileOptions);
+turnstileOptions.Validate(builder.Environment.IsProduction());
 var adminPath = string.IsNullOrWhiteSpace(configuredAdminPath)
     ? builder.Environment.IsDevelopment()
         ? "panel"
@@ -175,8 +180,9 @@ if (builder.Environment.IsProduction())
             ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
         options.ForwardLimit = 1;
 
-        // Production Compose exposes Kestrel only on 127.0.0.1, so Nginx is the
-        // sole source allowed to supply forwarded headers.
+        // Production Compose exposes Kestrel only on 127.0.0.1 and the
+        // internal Docker network. Caddy supplies a sanitized, single-hop
+        // X-Forwarded-For value based on its trusted-proxy configuration.
         options.KnownNetworks.Clear();
         options.KnownProxies.Clear();
     });
@@ -192,9 +198,16 @@ builder.Services.AddSingleton<IGeoLocationService, GeoLocationService>();
 builder.Services.AddSingleton<IAnalyticsIpHasher, AnalyticsIpHasher>();
 builder.Services.AddSingleton(
     Microsoft.Extensions.Options.Options.Create(ticketEmailOptions));
+builder.Services.AddSingleton(
+    Microsoft.Extensions.Options.Options.Create(turnstileOptions));
 builder.Services.AddHttpClient<ITicketEmailSender, ResendTicketEmailSender>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(15);
+});
+builder.Services.AddHttpClient<ITurnstileValidator, TurnstileValidator>(client =>
+{
+    client.BaseAddress = new Uri("https://challenges.cloudflare.com/");
+    client.Timeout = TimeSpan.FromSeconds(10);
 });
 builder.Services.AddHostedService<PageViewRetentionService>();
 builder.Services.AddHostedService<ContactMessageRetentionService>();
@@ -211,7 +224,7 @@ if (app.Environment.IsProduction())
     app.UseForwardedHeaders();
 }
 
-app.UsePortfolioSecurityHeaders(adminPath);
+app.UsePortfolioSecurityHeaders(adminPath, turnstileOptions.Enabled);
 
 using (var scope = app.Services.CreateScope())
 {
