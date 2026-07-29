@@ -18,8 +18,10 @@ Delivery is disabled by default and uses the Resend HTTPS API when enabled.
 
 The confirmation contains only the ticket number and tracking link. It
 deliberately does not repeat the visitor's name, subject, or submitted message.
-An admin reply contains the operator-written response, ticket number, and
-tracking link, but does not repeat the original submitted message.
+An admin reply contains only the operator-written response, a subject derived
+from the request subject, and a short direct-reply note. It does not repeat the
+original submitted message, ticket number, or tracking link. Those details
+remain available through the initial confirmation and the database record.
 
 The tracking link uses a URL fragment:
 
@@ -136,8 +138,9 @@ anti-automation gate when enabled; the limits remain as defense in depth.
 4. Open the tracking link and confirm the ticket modal is populated.
 5. In the admin message detail page, queue a short reply.
 6. Confirm the reply arrives and the request changes to `Replied`.
-7. Confirm the reply history shows `Sent` and the original submitted message
-   was not copied into the email.
+7. Confirm the reply history shows `Sent`, the email subject is appropriate,
+   and the original message, ticket number, and tracking link were not copied
+   into the reply.
 6. Check logs without exposing configuration:
 
 ```bash

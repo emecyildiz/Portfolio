@@ -130,28 +130,15 @@ public sealed class ResendTicketEmailSender : ITicketEmailSender
         }
 
         var ticket = outbox.ContactMessage;
-        var ticketNumber = ticket.TicketNumber.ToString("D");
-        var publicBaseUrl = _options.PublicBaseUrl.TrimEnd('/');
-        var trackingUrl = $"{publicBaseUrl}/hire#ticket={Uri.EscapeDataString(ticketNumber)}";
-
         var safeReplyBody = HtmlEncoder.Default
             .Encode(replyBody)
             .Replace("\r\n", "<br />", StringComparison.Ordinal)
             .Replace("\n", "<br />", StringComparison.Ordinal);
-        var safeTicketNumber = HtmlEncoder.Default.Encode(ticketNumber);
-        var safeTrackingUrl = HtmlEncoder.Default.Encode(trackingUrl);
 
         var textBody = $"""
-            Emecworks replied to your request:
-
             {replyBody}
 
-            Ticket number: {ticketNumber}
-
-            Track the request:
-            {trackingUrl}
-
-            You can reply to this email if you need to continue the conversation.
+            You can reply directly to this email.
             """;
 
         var htmlBody = $"""
@@ -160,12 +147,9 @@ public sealed class ResendTicketEmailSender : ITicketEmailSender
             <body style="margin:0;background:#f4f5f7;color:#16181d;font-family:Arial,sans-serif;">
               <div style="max-width:620px;margin:0 auto;padding:40px 20px;">
                 <div style="background:#ffffff;border:1px solid #dfe3e8;border-radius:14px;padding:32px;">
-                  <p style="margin:0 0 10px;color:#5d6673;font-size:12px;letter-spacing:.12em;text-transform:uppercase;">Emecworks request channel</p>
-                  <h1 style="margin:0 0 18px;font-size:26px;line-height:1.25;">A reply to your request</h1>
-                  <div style="margin:0 0 24px;color:#303743;font-size:15px;line-height:1.75;">{safeReplyBody}</div>
-                  <div style="margin:0 0 24px;padding:16px;background:#f6f8fa;border:1px solid #e2e6ea;border-radius:9px;font-family:Consolas,monospace;font-size:15px;word-break:break-all;">{safeTicketNumber}</div>
-                  <a href="{safeTrackingUrl}" style="display:inline-block;padding:12px 18px;background:#15181d;color:#ffffff;text-decoration:none;border-radius:7px;font-weight:600;">Track request</a>
-                  <p style="margin:24px 0 0;color:#6a7380;font-size:13px;line-height:1.6;">You can reply to this email if you need to continue the conversation.</p>
+                  <p style="margin:0 0 22px;color:#5d6673;font-size:12px;letter-spacing:.12em;text-transform:uppercase;">Emecworks</p>
+                  <div style="color:#303743;font-size:15px;line-height:1.75;">{safeReplyBody}</div>
+                  <p style="margin:28px 0 0;padding-top:18px;border-top:1px solid #e2e6ea;color:#6a7380;font-size:13px;line-height:1.6;">You can reply directly to this email.</p>
                 </div>
               </div>
             </body>
@@ -176,7 +160,7 @@ public sealed class ResendTicketEmailSender : ITicketEmailSender
         {
             ["from"] = $"{_options.FromName} <{_options.FromAddress}>",
             ["to"] = new[] { ticket.Email },
-            ["subject"] = "A reply to your Emecworks request",
+            ["subject"] = BuildReplySubject(ticket.Subject),
             ["text"] = textBody,
             ["html"] = htmlBody
         };
@@ -190,6 +174,25 @@ public sealed class ResendTicketEmailSender : ITicketEmailSender
             payload,
             $"ticket-reply-{outbox.Id}",
             cancellationToken);
+    }
+
+    private static string BuildReplySubject(string? originalSubject)
+    {
+        if (string.IsNullOrWhiteSpace(originalSubject))
+        {
+            return "Reply from Emecworks";
+        }
+
+        var safeSubject = new string(
+            originalSubject
+                .Trim()
+                .Where(character => !char.IsControl(character))
+                .Take(180)
+                .ToArray());
+
+        return string.IsNullOrWhiteSpace(safeSubject)
+            ? "Reply from Emecworks"
+            : $"Re: {safeSubject}";
     }
 
     private async Task<TicketEmailSendResult> SendPayloadAsync(
