@@ -7,6 +7,8 @@ using Portfolio.Data;
 using Portfolio.Middleware;
 using Portfolio.Services;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.RateLimiting;
 
@@ -14,6 +16,7 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuredAdminPath = builder.Configuration["AdminPath"]?.Trim().Trim('/');
+var weeklyReportToken = builder.Configuration["Monitoring:WeeklyReportToken"]?.Trim();
 var adminPath = string.IsNullOrWhiteSpace(configuredAdminPath)
     ? builder.Environment.IsDevelopment()
         ? "panel"
@@ -24,6 +27,20 @@ if (!Regex.IsMatch(adminPath, "^[A-Za-z0-9][A-Za-z0-9_-]{2,63}$"))
 {
     throw new InvalidOperationException(
         "AdminPath must be 3-64 characters and contain only letters, numbers, hyphens, or underscores.");
+}
+
+if (!string.IsNullOrWhiteSpace(weeklyReportToken) &&
+    !Regex.IsMatch(weeklyReportToken, "^[A-Fa-f0-9]{64,128}$"))
+{
+    throw new InvalidOperationException(
+        "Monitoring:WeeklyReportToken must contain 64 to 128 hexadecimal characters.");
+}
+
+if (builder.Environment.IsProduction() &&
+    string.IsNullOrWhiteSpace(weeklyReportToken))
+{
+    throw new InvalidOperationException(
+        "Monitoring:WeeklyReportToken must be configured in production.");
 }
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -399,6 +416,94 @@ app.MapGet("/health/ready", async (
     }
 }).ExcludeFromDescription();
 
+app.MapGet("/internal/analytics/weekly", async (
+    HttpContext context,
+    AppDbContext db,
+    CancellationToken cancellationToken) =>
+{
+    SetPrivateResponseHeaders(context);
+
+    if (!HasValidInternalToken(context, weeklyReportToken))
+    {
+        return Results.NotFound();
+    }
+
+    var periodEnd = DateOnly.FromDateTime(DateTime.UtcNow);
+    var periodStart = periodEnd.AddDays(-7);
+    var rows = await db.PageViews
+        .AsNoTracking()
+        .Where(pageView =>
+            pageView.ViewDate >= periodStart &&
+            pageView.ViewDate < periodEnd)
+        .Select(pageView => new
+        {
+            pageView.ViewDate,
+            pageView.Country,
+            pageView.Path
+        })
+        .ToListAsync(cancellationToken);
+
+    var daily = Enumerable.Range(0, 7)
+        .Select(offset =>
+        {
+            var date = periodStart.AddDays(offset);
+            return new
+            {
+                Date = date,
+                Count = rows.Count(row => row.ViewDate == date)
+            };
+        })
+        .ToArray();
+
+    var countries = rows
+        .Where(row => !string.IsNullOrWhiteSpace(row.Country))
+        .GroupBy(
+            row => row.Country!.Trim(),
+            StringComparer.OrdinalIgnoreCase)
+        .Select(group => new
+        {
+            Country = group.Key,
+            Count = group.Count()
+        })
+        .OrderByDescending(item => item.Count)
+        .ThenBy(item => item.Country)
+        .ToArray();
+    var reportedCountries = countries
+        .Where(item => item.Count >= 2)
+        .Take(5)
+        .ToArray();
+
+    var entryPaths = rows
+        .GroupBy(row => string.IsNullOrWhiteSpace(row.Path) ? "/" : row.Path)
+        .Select(group => new
+        {
+            Path = group.Key,
+            Count = group.Count()
+        })
+        .OrderByDescending(item => item.Count)
+        .ThenBy(item => item.Path)
+        .ToArray();
+    var reportedEntryPaths = entryPaths
+        .Where(item => item.Count >= 2)
+        .Take(5)
+        .ToArray();
+
+    return Results.Json(new
+    {
+        PeriodStart = periodStart,
+        PeriodEndExclusive = periodEnd,
+        TotalDailyUniqueVisits = rows.Count,
+        AverageDailyUniqueVisits = Math.Round(rows.Count / 7d, 1),
+        Daily = daily,
+        Countries = reportedCountries,
+        OtherOrLowVolumeCountryVisits =
+            rows.Count - reportedCountries.Sum(item => item.Count),
+        EntryPaths = reportedEntryPaths,
+        OtherOrLowVolumeEntryPathVisits =
+            rows.Count - reportedEntryPaths.Sum(item => item.Count)
+    });
+}).ExcludeFromDescription();
+
 app.MapGet("/robots.txt", (HttpContext context) =>
 {
     var baseUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase}";
@@ -534,6 +639,34 @@ app.Run();
 
 static void SetHealthResponseHeaders(HttpContext context)
 {
+    SetPrivateResponseHeaders(context);
+}
+
+static void SetPrivateResponseHeaders(HttpContext context)
+{
     context.Response.Headers.CacheControl = "no-store";
     context.Response.Headers["X-Robots-Tag"] = "noindex, nofollow, noarchive";
+}
+
+static bool HasValidInternalToken(
+    HttpContext context,
+    string? expectedToken)
+{
+    if (string.IsNullOrWhiteSpace(expectedToken) ||
+        !context.Request.Headers.TryGetValue(
+            "X-Emecworks-Report-Token",
+            out var providedValues))
+    {
+        return false;
+    }
+
+    var providedToken = providedValues.ToString().Trim();
+    if (providedToken.Length != expectedToken.Length)
+    {
+        return false;
+    }
+
+    return CryptographicOperations.FixedTimeEquals(
+        Encoding.UTF8.GetBytes(providedToken),
+        Encoding.UTF8.GetBytes(expectedToken));
 }

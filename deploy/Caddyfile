@@ -41,6 +41,21 @@ http://:8080 {
 		respond "Not Found" 404
 	}
 
+	@portfolio_internal host emecworks-internal
+	handle @portfolio_internal {
+		reverse_proxy web:8080 {
+			header_up Host emecworks.com
+		}
+	}
+
+	@portfolio_private_paths {
+		host emecworks.com
+		path /internal/*
+	}
+	handle @portfolio_private_paths {
+		respond "Not Found" 404
+	}
+
 	@portfolio host emecworks.com
 	handle @portfolio {
 		reverse_proxy web:8080

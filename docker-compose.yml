@@ -32,6 +32,7 @@ services:
       - AdminPath=${ADMIN_PATH:?ADMIN_PATH is required}
       - AdminEmail=${ADMIN_EMAIL:?ADMIN_EMAIL is required}
       - AdminPassword=${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+      - Monitoring__WeeklyReportToken=${WEEKLY_REPORT_TOKEN:-}
     volumes:
       # Persist uploaded media outside the container so rebuilds do not remove it
       - uploads:/app/wwwroot/uploads
