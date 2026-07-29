@@ -1,0 +1,27 @@
+[Unit]
+Description=Scan sanitized Emecworks application errors for n8n
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/emecworks/log-monitor.env
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/emecworks-log-monitor
+Environment=LOG_MONITOR_LOOKBACK=6m
+Environment=LOG_MONITOR_SUPPRESSION_MINUTES=60
+UMask=0077
+Nice=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+StateDirectory=emecworks/log-monitor
+StateDirectoryMode=0700
+ReadOnlyPaths=/etc/emecworks/log-monitor.env
+ReadWritePaths=/run/lock /var/run/docker.sock
+TimeoutStartSec=1min
