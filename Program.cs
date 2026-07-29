@@ -17,6 +17,11 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 var builder = WebApplication.CreateBuilder(args);
 var configuredAdminPath = builder.Configuration["AdminPath"]?.Trim().Trim('/');
 var weeklyReportToken = builder.Configuration["Monitoring:WeeklyReportToken"]?.Trim();
+var ticketEmailOptions = new TicketEmailOptions();
+builder.Configuration
+    .GetSection(TicketEmailOptions.SectionName)
+    .Bind(ticketEmailOptions);
+ticketEmailOptions.Validate();
 var adminPath = string.IsNullOrWhiteSpace(configuredAdminPath)
     ? builder.Environment.IsDevelopment()
         ? "panel"
@@ -185,8 +190,15 @@ builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddSingleton<IGeoLocationService, GeoLocationService>();
 builder.Services.AddSingleton<IAnalyticsIpHasher, AnalyticsIpHasher>();
+builder.Services.AddSingleton(
+    Microsoft.Extensions.Options.Options.Create(ticketEmailOptions));
+builder.Services.AddHttpClient<ITicketEmailSender, ResendTicketEmailSender>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
 builder.Services.AddHostedService<PageViewRetentionService>();
 builder.Services.AddHostedService<ContactMessageRetentionService>();
+builder.Services.AddHostedService<TicketEmailDeliveryService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/dataprotection-keys"));

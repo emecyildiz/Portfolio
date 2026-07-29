@@ -33,6 +33,12 @@ services:
       - AdminEmail=${ADMIN_EMAIL:?ADMIN_EMAIL is required}
       - AdminPassword=${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
       - Monitoring__WeeklyReportToken=${WEEKLY_REPORT_TOKEN:-}
+      - TicketEmail__Enabled=${TICKET_EMAIL_ENABLED:-false}
+      - TicketEmail__ApiKey=${TICKET_EMAIL_API_KEY:-}
+      - TicketEmail__FromName=${TICKET_EMAIL_FROM_NAME:-Emecworks}
+      - TicketEmail__FromAddress=${TICKET_EMAIL_FROM_ADDRESS:-}
+      - TicketEmail__ReplyToAddress=${TICKET_EMAIL_REPLY_TO_ADDRESS:-}
+      - TicketEmail__PublicBaseUrl=${TICKET_EMAIL_PUBLIC_BASE_URL:-https://emecworks.com}
     volumes:
       # Persist uploaded media outside the container so rebuilds do not remove it
       - uploads:/app/wwwroot/uploads

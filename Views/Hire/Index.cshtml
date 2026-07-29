@@ -104,7 +104,7 @@
 
             @if (TempData["Success"] != null && TempData["TicketNumber"] != null)
             {
-                <div class="mt-6 rounded-xl border border-signal/20 bg-signal/[0.06] p-5"><p class="text-sm font-medium text-signal">Your request has been received.</p><p class="mt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Ticket number</p><p class="mt-2 select-all break-all rounded-lg border border-white/[0.07] bg-ink/60 px-3 py-2.5 font-mono text-sm text-white">@TempData["TicketNumber"]</p><p class="mt-2 text-xs text-slate-600">Store this number somewhere safe; it is required for tracking.</p></div>
+                <div class="mt-6 rounded-xl border border-signal/20 bg-signal/[0.06] p-5"><p class="text-sm font-medium text-signal">Your request has been received.</p><p class="mt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">Ticket number</p><p class="mt-2 select-all break-all rounded-lg border border-white/[0.07] bg-ink/60 px-3 py-2.5 font-mono text-sm text-white">@TempData["TicketNumber"]</p><p class="mt-2 text-xs text-slate-600">Store this number somewhere safe; it is required for tracking.</p>@if (TempData["ConfirmationEmailQueued"] != null) { <p class="mt-2 text-xs text-slate-600">A confirmation email containing the tracking link has been queued.</p> }</div>
             }
 
             @if (TempData["TrackError"] != null)
@@ -190,10 +190,23 @@
         }
     }
 
-    @if (TempData["Success"] != null || TempData["TrackError"] != null || ViewBag.TrackedMessage != null)
-    {
-        <text>document.addEventListener('DOMContentLoaded', openTrackModal);</text>
+    function openTicketFromFragment() {
+        const match = window.location.hash.match(/^#ticket=([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i);
+        if (!match) return false;
+
+        document.getElementById('ticketNumber').value = match[1];
+        history.replaceState(null, document.title, `${window.location.pathname}${window.location.search}`);
+        openTrackModal();
+        return true;
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const openedFromFragment = openTicketFromFragment();
+        @if (TempData["Success"] != null || TempData["TrackError"] != null || ViewBag.TrackedMessage != null)
+        {
+            <text>if (!openedFromFragment) openTrackModal();</text>
+        }
+    });
 
     document.getElementById('trackModalOverlay').addEventListener('click', closeTrackModal);
     document.addEventListener('keydown', function (event) {

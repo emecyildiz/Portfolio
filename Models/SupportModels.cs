@@ -105,6 +105,9 @@ namespace Portfolio.Models
         public ContactStatus Status { get; set; } = ContactStatus.New;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<TicketEmailOutbox> EmailOutboxItems { get; set; } =
+            new List<TicketEmailOutbox>();
     }
 
     // ── Audit Log ─────────────────────────────────────────────────────────────

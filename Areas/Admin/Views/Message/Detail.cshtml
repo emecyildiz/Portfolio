@@ -12,6 +12,16 @@
         Portfolio.Models.Enums.ContactStatus.Spam => "border-rose-300/20 bg-rose-300/[0.06] text-rose-300",
         _ => "border-line text-slate-400"
     };
+    var confirmationEmail = Model.EmailOutboxItems
+        .FirstOrDefault(item =>
+            item.Kind == Portfolio.Models.TicketEmailKinds.TicketReceived);
+    var confirmationEmailState = confirmationEmail switch
+    {
+        { SentAt: not null } => "Sent",
+        { FailedAt: not null } => "Failed",
+        not null => "Queued",
+        _ => "Not queued"
+    };
 }
 
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -101,6 +111,46 @@
                     <dd class="mt-1 break-all text-xs leading-5 text-slate-500">@(Model.UserAgent ?? "Not recorded")</dd>
                 </div>
             </dl>
+        </section>
+
+        <section class="admin-surface p-5" aria-labelledby="confirmation-email-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Delivery</p>
+            <h3 id="confirmation-email-heading" class="mt-2 text-lg font-semibold text-white">Confirmation email</h3>
+            <dl class="mt-5 space-y-4">
+                <div>
+                    <dt class="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">State</dt>
+                    <dd class="mt-1 text-sm text-slate-300">@confirmationEmailState</dd>
+                </div>
+                @if (confirmationEmail != null)
+                {
+                    <div>
+                        <dt class="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">Attempts</dt>
+                        <dd class="mt-1 font-mono text-[11px] text-slate-400">@confirmationEmail.AttemptCount</dd>
+                    </div>
+                    @if (confirmationEmail.SentAt != null)
+                    {
+                        <div>
+                            <dt class="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">Sent</dt>
+                            <dd class="mt-1 font-mono text-[11px] text-slate-400">@confirmationEmail.SentAt.Value.ToString("dd MMM yyyy HH:mm") UTC</dd>
+                        </div>
+                    }
+                    @if (confirmationEmail.FailedAt != null)
+                    {
+                        <div>
+                            <dt class="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">Last error</dt>
+                            <dd class="mt-1 font-mono text-[11px] text-rose-300">@(confirmationEmail.LastErrorCode ?? "unknown_error")</dd>
+                        </div>
+                    }
+                }
+            </dl>
+            @if (confirmationEmail is { SentAt: null, FailedAt: not null })
+            {
+                <form method="post" action="@Url.Action("RetryConfirmationEmail", "Message", new { area = "Admin" })" class="mt-5">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="focus-ring w-full border border-cyan/20 px-4 py-2.5 text-sm text-cyan transition hover:bg-cyan/[0.06]">Retry confirmation email</button>
+                </form>
+            }
         </section>
 
         <form method="post" action="@Url.Action("Delete", "Message", new { area = "Admin", id = Model.Id })" onsubmit="return confirm('Delete this message permanently? This action cannot be undone.');">

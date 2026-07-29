@@ -75,10 +75,18 @@ public class HireController : BaseController
         };
 
         _db.ContactMessages.Add(message);
+        _db.TicketEmailOutboxes.Add(new TicketEmailOutbox
+        {
+            ContactMessage = message,
+            Kind = TicketEmailKinds.TicketReceived,
+            NextAttemptAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
+        });
         await _db.SaveChangesAsync();
 
         TempData["Success"] = "Your request has been received!";
         TempData["TicketNumber"] = message.TicketNumber.ToString();
+        TempData["ConfirmationEmailQueued"] = true;
         return RedirectToAction("Index", "Hire", new { area = "" });
     }
 

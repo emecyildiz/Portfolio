@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.Data;
+using Portfolio.Models;
 using Portfolio.Models.Enums;
 
 namespace Portfolio.Areas.Admin.Controllers;
@@ -23,6 +24,7 @@ public class MessageController : AdminBaseController
     {
         var message = await _db.ContactMessages
             .Include(m => m.Service)
+            .Include(m => m.EmailOutboxItems)
             .FirstOrDefaultAsync(m => m.Id == id);
 
         if (message == null) return NotFound();
@@ -54,6 +56,31 @@ public class MessageController : AdminBaseController
 
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RetryConfirmationEmail(int id)
+    {
+        var outbox = await _db.TicketEmailOutboxes
+            .FirstOrDefaultAsync(item =>
+                item.ContactMessageId == id &&
+                item.Kind == TicketEmailKinds.TicketReceived);
+
+        if (outbox == null)
+            return NotFound();
+
+        if (outbox.SentAt != null)
+            return BadRequest();
+
+        outbox.AttemptCount = 0;
+        outbox.NextAttemptAt = DateTime.UtcNow;
+        outbox.FailedAt = null;
+        outbox.LastErrorCode = null;
+        outbox.ProviderMessageId = null;
+
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Detail), new { id });
     }
 
     [HttpPost]

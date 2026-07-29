@@ -22,6 +22,7 @@ namespace Portfolio.Data
         public DbSet<Service> Services => Set<Service>();
         public DbSet<ServiceReference> ServiceReferences => Set<ServiceReference>();
         public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+        public DbSet<TicketEmailOutbox> TicketEmailOutboxes => Set<TicketEmailOutbox>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<Page> Pages => Set<Page>();
         public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
@@ -232,6 +233,34 @@ namespace Portfolio.Data
 
             modelBuilder.Entity<ContactMessage>()
                 .Property(c => c.IpAddress).HasMaxLength(45); // IPv6 max
+
+            modelBuilder.Entity<TicketEmailOutbox>(entity =>
+            {
+                entity.Property(outbox => outbox.Kind)
+                    .HasMaxLength(32);
+                entity.Property(outbox => outbox.ProviderMessageId)
+                    .HasMaxLength(100);
+                entity.Property(outbox => outbox.LastErrorCode)
+                    .HasMaxLength(64);
+                entity.HasIndex(outbox => new
+                    {
+                        outbox.SentAt,
+                        outbox.FailedAt,
+                        outbox.NextAttemptAt
+                    })
+                    .HasDatabaseName("idx_ticket_email_outbox_pending");
+                entity.HasIndex(outbox => new
+                    {
+                        outbox.ContactMessageId,
+                        outbox.Kind
+                    })
+                    .IsUnique()
+                    .HasDatabaseName("ux_ticket_email_outbox_message_kind");
+                entity.HasOne(outbox => outbox.ContactMessage)
+                    .WithMany(message => message.EmailOutboxItems)
+                    .HasForeignKey(outbox => outbox.ContactMessageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<PageView>(entity =>
             {
