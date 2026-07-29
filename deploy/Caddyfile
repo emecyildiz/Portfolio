@@ -67,6 +67,11 @@ http://:8080 {
 
 	log {
 		output stdout
-		format json
+		format filter {
+			wrap json
+			fields {
+				request>headers>X-Emecworks-Report-Token delete
+			}
+		}
 	}
 }
