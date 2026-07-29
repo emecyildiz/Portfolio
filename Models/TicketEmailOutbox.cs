@@ -8,6 +8,7 @@ public sealed class TicketEmailOutbox
     public ContactMessage ContactMessage { get; set; } = null!;
 
     public string Kind { get; set; } = TicketEmailKinds.TicketReceived;
+    public string? Body { get; set; }
     public int AttemptCount { get; set; }
     public DateTime NextAttemptAt { get; set; } = DateTime.UtcNow;
 
@@ -22,4 +23,5 @@ public sealed class TicketEmailOutbox
 public static class TicketEmailKinds
 {
     public const string TicketReceived = "TicketReceived";
+    public const string TicketReply = "TicketReply";
 }

@@ -250,6 +250,8 @@ namespace Portfolio.Data
             {
                 entity.Property(outbox => outbox.Kind)
                     .HasMaxLength(32);
+                entity.Property(outbox => outbox.Body)
+                    .HasMaxLength(5000);
                 entity.Property(outbox => outbox.ProviderMessageId)
                     .HasMaxLength(100);
                 entity.Property(outbox => outbox.LastErrorCode)
@@ -266,8 +268,7 @@ namespace Portfolio.Data
                         outbox.ContactMessageId,
                         outbox.Kind
                     })
-                    .IsUnique()
-                    .HasDatabaseName("ux_ticket_email_outbox_message_kind");
+                    .HasDatabaseName("idx_ticket_email_outbox_message_kind");
                 entity.HasOne(outbox => outbox.ContactMessage)
                     .WithMany(message => message.EmailOutboxItems)
                     .HasForeignKey(outbox => outbox.ContactMessageId)

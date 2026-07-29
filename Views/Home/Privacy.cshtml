@@ -109,6 +109,9 @@
                 When a confirmation email is requested, the recipient address, ticket number, tracking link, and delivery
                 metadata are processed by Resend for transactional email delivery through its EU (Ireland) sending region.
                 The submitted name, subject, service selection, and message are deliberately excluded from that email.
+                If the operator replies through the private admin panel, the recipient address, operator-written reply,
+                ticket number, tracking link, and delivery metadata are processed by Resend. The original submitted message
+                is not copied into the reply email.
             </p>
         </section>
 
@@ -143,9 +146,10 @@
             </p>
             <p class="mt-3 text-sm leading-7 text-slate-500">
                 Ticket IP addresses and browser metadata are removed automatically after 30 days. Work-request and ticket
-                records are deleted automatically after 365 days and can be deleted earlier when there is no continuing
-                operational or legal reason to retain them. Records for accepted work should be moved to the appropriate
-                contractual or accounting system instead of using the portfolio inbox as a permanent archive.
+                records, including operator replies and their delivery history, are deleted automatically after 365 days
+                and can be deleted earlier when there is no continuing operational or legal reason to retain them. Records
+                for accepted work should be moved to the appropriate contractual or accounting system instead of using the
+                portfolio inbox as a permanent archive.
             </p>
         </section>
 

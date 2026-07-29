@@ -10,7 +10,7 @@ namespace Portfolio.Services;
 
 public interface ITicketEmailSender
 {
-    Task<TicketEmailSendResult> SendTicketReceivedAsync(
+    Task<TicketEmailSendResult> SendAsync(
         TicketEmailOutbox outbox,
         CancellationToken cancellationToken);
 }
@@ -43,7 +43,21 @@ public sealed class ResendTicketEmailSender : ITicketEmailSender
         _options = options.Value;
     }
 
-    public async Task<TicketEmailSendResult> SendTicketReceivedAsync(
+    public async Task<TicketEmailSendResult> SendAsync(
+        TicketEmailOutbox outbox,
+        CancellationToken cancellationToken)
+    {
+        return outbox.Kind switch
+        {
+            TicketEmailKinds.TicketReceived =>
+                await SendTicketReceivedAsync(outbox, cancellationToken),
+            TicketEmailKinds.TicketReply =>
+                await SendTicketReplyAsync(outbox, cancellationToken),
+            _ => TicketEmailSendResult.Failure(false, "unsupported_email_kind")
+        };
+    }
+
+    private async Task<TicketEmailSendResult> SendTicketReceivedAsync(
         TicketEmailOutbox outbox,
         CancellationToken cancellationToken)
     {
@@ -99,15 +113,97 @@ public sealed class ResendTicketEmailSender : ITicketEmailSender
             payload["reply_to"] = _options.ReplyToAddress;
         }
 
+        return await SendPayloadAsync(
+            payload,
+            $"ticket-received-{ticket.TicketNumber:N}",
+            cancellationToken);
+    }
+
+    private async Task<TicketEmailSendResult> SendTicketReplyAsync(
+        TicketEmailOutbox outbox,
+        CancellationToken cancellationToken)
+    {
+        var replyBody = outbox.Body?.Trim();
+        if (string.IsNullOrWhiteSpace(replyBody) || replyBody.Length > 5000)
+        {
+            return TicketEmailSendResult.Failure(false, "invalid_reply_body");
+        }
+
+        var ticket = outbox.ContactMessage;
+        var ticketNumber = ticket.TicketNumber.ToString("D");
+        var publicBaseUrl = _options.PublicBaseUrl.TrimEnd('/');
+        var trackingUrl = $"{publicBaseUrl}/hire#ticket={Uri.EscapeDataString(ticketNumber)}";
+
+        var safeReplyBody = HtmlEncoder.Default
+            .Encode(replyBody)
+            .Replace("\r\n", "<br />", StringComparison.Ordinal)
+            .Replace("\n", "<br />", StringComparison.Ordinal);
+        var safeTicketNumber = HtmlEncoder.Default.Encode(ticketNumber);
+        var safeTrackingUrl = HtmlEncoder.Default.Encode(trackingUrl);
+
+        var textBody = $"""
+            Emecworks replied to your request:
+
+            {replyBody}
+
+            Ticket number: {ticketNumber}
+
+            Track the request:
+            {trackingUrl}
+
+            You can reply to this email if you need to continue the conversation.
+            """;
+
+        var htmlBody = $"""
+            <!doctype html>
+            <html lang="en">
+            <body style="margin:0;background:#f4f5f7;color:#16181d;font-family:Arial,sans-serif;">
+              <div style="max-width:620px;margin:0 auto;padding:40px 20px;">
+                <div style="background:#ffffff;border:1px solid #dfe3e8;border-radius:14px;padding:32px;">
+                  <p style="margin:0 0 10px;color:#5d6673;font-size:12px;letter-spacing:.12em;text-transform:uppercase;">Emecworks request channel</p>
+                  <h1 style="margin:0 0 18px;font-size:26px;line-height:1.25;">A reply to your request</h1>
+                  <div style="margin:0 0 24px;color:#303743;font-size:15px;line-height:1.75;">{safeReplyBody}</div>
+                  <div style="margin:0 0 24px;padding:16px;background:#f6f8fa;border:1px solid #e2e6ea;border-radius:9px;font-family:Consolas,monospace;font-size:15px;word-break:break-all;">{safeTicketNumber}</div>
+                  <a href="{safeTrackingUrl}" style="display:inline-block;padding:12px 18px;background:#15181d;color:#ffffff;text-decoration:none;border-radius:7px;font-weight:600;">Track request</a>
+                  <p style="margin:24px 0 0;color:#6a7380;font-size:13px;line-height:1.6;">You can reply to this email if you need to continue the conversation.</p>
+                </div>
+              </div>
+            </body>
+            </html>
+            """;
+
+        var payload = new Dictionary<string, object?>
+        {
+            ["from"] = $"{_options.FromName} <{_options.FromAddress}>",
+            ["to"] = new[] { ticket.Email },
+            ["subject"] = "A reply to your Emecworks request",
+            ["text"] = textBody,
+            ["html"] = htmlBody
+        };
+
+        if (!string.IsNullOrWhiteSpace(_options.ReplyToAddress))
+        {
+            payload["reply_to"] = _options.ReplyToAddress;
+        }
+
+        return await SendPayloadAsync(
+            payload,
+            $"ticket-reply-{outbox.Id}",
+            cancellationToken);
+    }
+
+    private async Task<TicketEmailSendResult> SendPayloadAsync(
+        Dictionary<string, object?> payload,
+        string idempotencyKey,
+        CancellationToken cancellationToken)
+    {
         using var request = new HttpRequestMessage(HttpMethod.Post, SendEmailEndpoint)
         {
             Content = JsonContent.Create(payload)
         };
         request.Headers.Authorization =
             new AuthenticationHeaderValue("Bearer", _options.ApiKey);
-        request.Headers.TryAddWithoutValidation(
-            "Idempotency-Key",
-            $"ticket-received-{ticket.TicketNumber:N}");
+        request.Headers.TryAddWithoutValidation("Idempotency-Key", idempotencyKey);
 
         try
         {

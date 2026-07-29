@@ -123,9 +123,23 @@ public sealed class TicketEmailDeliveryService : BackgroundService
         TicketEmailOutbox outbox,
         CancellationToken cancellationToken)
     {
+        if (outbox.Kind == TicketEmailKinds.TicketReply &&
+            outbox.ContactMessage.Status ==
+                Portfolio.Models.Enums.ContactStatus.Spam)
+        {
+            outbox.FailedAt = DateTime.UtcNow;
+            outbox.LastErrorCode = "reply_blocked_ticket_status";
+            await db.SaveChangesAsync(cancellationToken);
+
+            _logger.LogWarning(
+                "Ticket reply outbox item {OutboxId} was blocked because the request is marked as spam.",
+                outbox.Id);
+            return;
+        }
+
         outbox.AttemptCount++;
 
-        var result = await _sender.SendTicketReceivedAsync(
+        var result = await _sender.SendAsync(
             outbox,
             cancellationToken);
 
@@ -134,6 +148,13 @@ public sealed class TicketEmailDeliveryService : BackgroundService
             outbox.SentAt = DateTime.UtcNow;
             outbox.ProviderMessageId = result.ProviderMessageId;
             outbox.LastErrorCode = null;
+
+            if (outbox.Kind == TicketEmailKinds.TicketReply)
+            {
+                outbox.ContactMessage.Status =
+                    Portfolio.Models.Enums.ContactStatus.Replied;
+                outbox.ContactMessage.IsRead = true;
+            }
 
             await db.SaveChangesAsync(cancellationToken);
 

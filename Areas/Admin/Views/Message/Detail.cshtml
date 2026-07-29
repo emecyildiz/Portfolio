@@ -22,6 +22,11 @@
         not null => "Queued",
         _ => "Not queued"
     };
+    var replyEmails = Model.EmailOutboxItems
+        .Where(item => item.Kind == Portfolio.Models.TicketEmailKinds.TicketReply)
+        .OrderByDescending(item => item.CreatedAt)
+        .ToList();
+    var replyBody = ViewData["ReplyBody"] as string ?? string.Empty;
 }
 
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -74,6 +79,109 @@
             <h3 id="message-content-heading" class="mt-2 text-lg font-semibold text-white">Message</h3>
             <div class="mt-5 whitespace-pre-wrap break-words border border-line bg-ink/60 p-4 text-sm leading-7 text-slate-300 sm:p-5">@Model.Message</div>
         </section>
+
+        <section class="admin-surface p-5 sm:p-6" aria-labelledby="reply-heading">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-cyan">Reply channel</p>
+            <h3 id="reply-heading" class="mt-2 text-lg font-semibold text-white">Send an email reply</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                The reply is queued for delivery from <span class="font-mono text-slate-300">tickets@notify.emecworks.com</span>.
+                The request changes to Replied only after Resend accepts the email.
+            </p>
+
+            <form method="post" action="@Url.Action("SendReply", "Message", new { area = "Admin" })" class="mt-5">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="mb-4 border border-rose-300/20 bg-rose-300/[0.06] px-4 py-3 text-sm text-rose-200" role="alert">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(value => value.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+
+                <label for="replyBody" class="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">Reply</label>
+                <textarea id="replyBody"
+                          name="replyBody"
+                          rows="9"
+                          maxlength="5000"
+                          required
+                          disabled="@(Model.Status == Portfolio.Models.Enums.ContactStatus.Spam ? "disabled" : null)"
+                          class="focus-ring mt-2 w-full resize-y border border-line bg-ink/60 px-4 py-3 text-sm leading-7 text-slate-200 placeholder:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          placeholder="Write the response that the requester should receive.">@replyBody</textarea>
+                <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs leading-5 text-slate-600">
+                        Do not include passwords, private keys, API tokens, or other secrets.
+                    </p>
+                    <button type="submit"
+                            disabled="@(Model.Status == Portfolio.Models.Enums.ContactStatus.Spam ? "disabled" : null)"
+                            class="focus-ring shrink-0 border border-cyan/20 bg-cyan/[0.05] px-5 py-2.5 text-sm font-medium text-cyan transition hover:bg-cyan/[0.1] disabled:cursor-not-allowed disabled:opacity-50">
+                        Queue reply
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        @if (replyEmails.Count > 0)
+        {
+            <section class="admin-surface p-5 sm:p-6" aria-labelledby="reply-history-heading">
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Delivery history</p>
+                <h3 id="reply-history-heading" class="mt-2 text-lg font-semibold text-white">Replies</h3>
+                <div class="mt-5 space-y-4">
+                    @foreach (var reply in replyEmails)
+                    {
+                        var replyState = reply.SentAt != null
+                            ? "Sent"
+                            : reply.FailedAt != null
+                                ? "Failed"
+                                : "Queued";
+                        var replyStateClass = reply.SentAt != null
+                            ? "border-signal/20 text-signal"
+                            : reply.FailedAt != null
+                                ? "border-rose-300/20 text-rose-300"
+                                : "border-cyan/20 text-cyan";
+
+                        <article class="border border-line bg-ink/40 p-4 sm:p-5">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                    <p class="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">
+                                        Queued @reply.CreatedAt.ToString("dd MMM yyyy HH:mm") UTC
+                                    </p>
+                                    @if (reply.SentAt != null)
+                                    {
+                                        <p class="mt-1 font-mono text-[10px] text-slate-500">
+                                            Sent @reply.SentAt.Value.ToString("dd MMM yyyy HH:mm") UTC
+                                        </p>
+                                    }
+                                </div>
+                                <span class="inline-flex w-fit border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] @replyStateClass">@replyState</span>
+                            </div>
+                            <div class="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-slate-300">@reply.Body</div>
+                            <p class="mt-4 font-mono text-[10px] text-slate-600">
+                                Attempts: @reply.AttemptCount
+                                @if (reply.FailedAt != null)
+                                {
+                                    <span> · Error: @(reply.LastErrorCode ?? "unknown_error")</span>
+                                }
+                            </p>
+                            @if (reply is { SentAt: null, FailedAt: not null })
+                            {
+                                <form method="post" action="@Url.Action("RetryReplyEmail", "Message", new { area = "Admin" })" class="mt-4">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <input type="hidden" name="outboxId" value="@reply.Id" />
+                                    <button type="submit" class="focus-ring border border-cyan/20 px-4 py-2 text-xs text-cyan transition hover:bg-cyan/[0.06]">
+                                        Retry reply
+                                    </button>
+                                </form>
+                            }
+                        </article>
+                    }
+                </div>
+            </section>
+        }
     </main>
 
     <aside class="h-fit space-y-6 xl:sticky xl:top-6">
@@ -83,6 +191,10 @@
             <div class="mt-5 grid grid-cols-2 gap-2">
                 @foreach (var status in Enum.GetValues<Portfolio.Models.Enums.ContactStatus>())
                 {
+                    if (status == Portfolio.Models.Enums.ContactStatus.Replied)
+                    {
+                        continue;
+                    }
                     var isCurrent = Model.Status == status;
                     <form method="post" action="@Url.Action("MarkStatus", "Message", new { area = "Admin" })">
                         @Html.AntiForgeryToken()

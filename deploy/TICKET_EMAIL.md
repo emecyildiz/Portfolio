@@ -1,8 +1,8 @@
-# Ticket confirmation email
+# Ticket email delivery
 
 The portfolio can send a short confirmation email after a visitor creates a
-request on `/hire`. Delivery is disabled by default and uses the Resend HTTPS
-API when enabled.
+request on `/hire` and an operator-written reply from the private admin panel.
+Delivery is disabled by default and uses the Resend HTTPS API when enabled.
 
 ## Data flow
 
@@ -10,13 +10,16 @@ API when enabled.
    the same database transaction.
 2. The HTTP response succeeds without waiting for the email provider.
 3. `TicketEmailDeliveryService` reads pending outbox rows in small batches.
-4. `ResendTicketEmailSender` sends the confirmation with a stable idempotency
-   key.
+4. `ResendTicketEmailSender` sends the confirmation or admin reply with a
+   stable idempotency key.
 5. The outbox row records the provider ID, delivery time, attempt count, and a
    sanitized error code.
+6. A request changes to `Replied` only after Resend accepts an admin reply.
 
-The email contains only the ticket number and tracking link. It deliberately
-does not repeat the visitor's name, subject, or submitted message.
+The confirmation contains only the ticket number and tracking link. It
+deliberately does not repeat the visitor's name, subject, or submitted message.
+An admin reply contains the operator-written response, ticket number, and
+tracking link, but does not repeat the original submitted message.
 
 The tracking link uses a URL fragment:
 
@@ -56,13 +59,13 @@ TICKET_EMAIL_ENABLED=true
 TICKET_EMAIL_API_KEY=replace-with-the-secret-resend-key
 TICKET_EMAIL_FROM_NAME=Emecworks
 TICKET_EMAIL_FROM_ADDRESS=tickets@notify.emecworks.com
-TICKET_EMAIL_REPLY_TO_ADDRESS=contact@emecworks.com
+TICKET_EMAIL_REPLY_TO_ADDRESS=emecworks.1@gmail.com
 TICKET_EMAIL_PUBLIC_BASE_URL=https://emecworks.com
 TICKET_EMAIL_DAILY_SEND_LIMIT=80
 ```
 
-Confirm that `contact@emecworks.com` receives forwarded mail before using it as
-the reply-to address.
+The reply-to address is visible to the recipient when they answer the email.
+Use only the dedicated brand mailbox, not a personal mailbox.
 
 Recreate only the web service after changing the environment:
 
@@ -91,8 +94,12 @@ would expand its secrets into terminal logs.
   responses are retried.
 - Other provider 4xx responses fail permanently.
 - A failed item can be queued again from the admin message detail page.
-- The stable Resend idempotency key prevents duplicate provider submissions
-  during uncertain retries.
+- Stable Resend idempotency keys prevent duplicate provider submissions during
+  uncertain retries.
+- Each admin reply is stored as a separate outbox item, so multiple replies can
+  be sent for one ticket without overwriting delivery history.
+- A failed reply remains visible in the admin message detail page and can be
+  queued again.
 
 When delivery is disabled, newly created outbox rows remain pending. Enabling
 the service later processes those rows; they are not discarded.
@@ -109,8 +116,9 @@ The public request channel uses several independent limits:
   rolling 24-hour window.
 - PostgreSQL permits at most 60 stored requests across the site in a rolling
   24-hour window.
-- The delivery worker sends at most 80 successful ticket confirmations per UTC
-  day. Additional outbox items remain queued.
+- The delivery worker sends at most 80 successful ticket emails per UTC day.
+  Confirmations and admin replies share this ceiling; additional items remain
+  queued.
 - At most 120 unsent email jobs can remain pending. When that ceiling is
   reached, the ticket is still created and displayed, but no additional email
   job is queued.
@@ -126,7 +134,10 @@ anti-automation gate when enabled; the limits remain as defense in depth.
 2. Confirm the public success message appears immediately.
 3. Wait up to one poll interval and confirm the email arrives.
 4. Open the tracking link and confirm the ticket modal is populated.
-5. In the admin message detail page, confirm the status is `Sent`.
+5. In the admin message detail page, queue a short reply.
+6. Confirm the reply arrives and the request changes to `Replied`.
+7. Confirm the reply history shows `Sent` and the original submitted message
+   was not copied into the email.
 6. Check logs without exposing configuration:
 
 ```bash
@@ -151,6 +162,11 @@ response body.
   response; the service retries.
 - `unexpected_sender_error`: an unclassified sender failure; review application
   logs without exposing secrets.
+- `invalid_reply_body`: the stored reply is empty or exceeds the server limit.
+- `unsupported_email_kind`: the queued record uses an unknown email type.
+- `reply_blocked_ticket_status`: the request was marked as spam before its
+  queued reply was delivered; reclassify it and retry only if the sender is
+  trusted.
 
 After enabling the provider, update the public privacy text to identify the
 email delivery provider and create a new encrypted recovery bundle.
