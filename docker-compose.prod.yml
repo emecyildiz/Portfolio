@@ -36,6 +36,10 @@ services:
       - AdminEmail=${ADMIN_EMAIL:?ADMIN_EMAIL is required}
       - AdminPassword=${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
       - Privacy__AnalyticsHashKey=${ANALYTICS_HASH_KEY:?ANALYTICS_HASH_KEY is required}
+      - Privacy__ControllerName=${PRIVACY_CONTROLLER_NAME:-}
+      - Privacy__ContactEmail=${PRIVACY_CONTACT_EMAIL:-}
+      - Privacy__HostingProvider=${PRIVACY_HOSTING_PROVIDER:-}
+      - Privacy__HostingCountry=${PRIVACY_HOSTING_COUNTRY:-}
       - Monitoring__WeeklyReportToken=${WEEKLY_REPORT_TOKEN:?WEEKLY_REPORT_TOKEN is required}
       - TicketEmail__Enabled=${TICKET_EMAIL_ENABLED:-false}
       - TicketEmail__ApiKey=${TICKET_EMAIL_API_KEY:-}
