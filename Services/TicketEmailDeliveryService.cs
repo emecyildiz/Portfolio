@@ -65,7 +65,17 @@ public sealed class TicketEmailDeliveryService : BackgroundService
                 .Take(BatchSize)
                 .ToListAsync(cancellationToken);
 
-            foreach (var outbox in pending)
+            if (pending.Count == 0)
+            {
+                return;
+            }
+
+            var sentToday = await db.TicketEmailOutboxes.CountAsync(
+                outbox => outbox.SentAt >= now.Date,
+                cancellationToken);
+            var remainingDailyCapacity = _options.DailySendLimit - sentToday;
+
+            foreach (var outbox in pending.Take(Math.Max(0, remainingDailyCapacity)))
             {
                 try
                 {

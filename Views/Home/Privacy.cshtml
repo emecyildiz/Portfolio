@@ -100,6 +100,11 @@
                 Ticket processing is separate from optional analytics. Rejecting analytics does not prevent you from submitting
                 a request. Do not send passwords, access tokens, private keys, confidential datasets, or other secrets.
             </p>
+            <p class="mt-3 text-sm leading-7 text-slate-500">
+                When a confirmation email is requested, the recipient address, ticket number, tracking link, and delivery
+                metadata are processed by Resend for transactional email delivery through its EU (Ireland) sending region.
+                The submitted name, subject, service selection, and message are deliberately excluded from that email.
+            </p>
         </section>
 
         <section class="grid gap-5 md:grid-cols-2">
@@ -148,7 +153,10 @@
                     <strong class="text-white">@(string.IsNullOrWhiteSpace(hostingProvider) ? "to be configured" : hostingProvider)</strong>.
                     Hosting country:
                     <strong class="text-white">@(string.IsNullOrWhiteSpace(hostingCountry) ? "to be configured" : hostingCountry)</strong>.
-                    Email delivery, monitoring, and backup providers will be listed here if they process personal data.
+                    Transactional ticket email provider:
+                    <strong class="text-white">Resend (EU / Ireland sending region)</strong>.
+                    Monitoring and backup providers will be listed here if their processing introduces an additional recipient
+                    of personal data beyond the hosting environment.
                 </p>
             </div>
             <div class="surface p-6 sm:p-8">

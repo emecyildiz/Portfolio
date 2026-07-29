@@ -14,6 +14,7 @@ public sealed class TicketEmailOptions
     public string PublicBaseUrl { get; set; } = "https://emecworks.com";
     public int PollIntervalSeconds { get; set; } = 30;
     public int MaxAttempts { get; set; } = 8;
+    public int DailySendLimit { get; set; } = 80;
 
     public void Validate()
     {
@@ -27,6 +28,12 @@ public sealed class TicketEmailOptions
         {
             throw new InvalidOperationException(
                 "TicketEmail:MaxAttempts must be between 3 and 12.");
+        }
+
+        if (DailySendLimit is < 10 or > 500)
+        {
+            throw new InvalidOperationException(
+                "TicketEmail:DailySendLimit must be between 10 and 500.");
         }
 
         if (!Enabled)

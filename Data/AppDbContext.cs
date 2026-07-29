@@ -234,6 +234,18 @@ namespace Portfolio.Data
             modelBuilder.Entity<ContactMessage>()
                 .Property(c => c.IpAddress).HasMaxLength(45); // IPv6 max
 
+            modelBuilder.Entity<ContactMessage>()
+                .HasIndex(message => message.CreatedAt)
+                .HasDatabaseName("idx_contact_messages_created_at");
+
+            modelBuilder.Entity<ContactMessage>()
+                .HasIndex(message => new
+                {
+                    message.IpAddress,
+                    message.CreatedAt
+                })
+                .HasDatabaseName("idx_contact_messages_ip_created_at");
+
             modelBuilder.Entity<TicketEmailOutbox>(entity =>
             {
                 entity.Property(outbox => outbox.Kind)

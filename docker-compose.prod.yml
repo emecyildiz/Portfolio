@@ -43,6 +43,7 @@ services:
       - TicketEmail__FromAddress=${TICKET_EMAIL_FROM_ADDRESS:-}
       - TicketEmail__ReplyToAddress=${TICKET_EMAIL_REPLY_TO_ADDRESS:-}
       - TicketEmail__PublicBaseUrl=${TICKET_EMAIL_PUBLIC_BASE_URL:-https://emecworks.com}
+      - TicketEmail__DailySendLimit=${TICKET_EMAIL_DAILY_SEND_LIMIT:-80}
     volumes:
       - uploads:/app/wwwroot/uploads
       - dataprotection:/app/dataprotection-keys

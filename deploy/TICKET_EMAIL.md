@@ -58,6 +58,7 @@ TICKET_EMAIL_FROM_NAME=Emecworks
 TICKET_EMAIL_FROM_ADDRESS=tickets@notify.emecworks.com
 TICKET_EMAIL_REPLY_TO_ADDRESS=contact@emecworks.com
 TICKET_EMAIL_PUBLIC_BASE_URL=https://emecworks.com
+TICKET_EMAIL_DAILY_SEND_LIMIT=80
 ```
 
 Confirm that `contact@emecworks.com` receives forwarded mail before using it as
@@ -83,6 +84,9 @@ would expand its secrets into terminal logs.
 - Retry delays: 1 minute, 5 minutes, 15 minutes, 1 hour, 6 hours, then
   24 hours.
 - Maximum attempts: 8 by default.
+- Daily delivery ceiling: 80 successful ticket emails per UTC day by
+  default. Additional messages remain queued for a later day rather than
+  consuming the provider quota.
 - HTTP 408, 429, 5xx, timeouts, network failures, and invalid provider
   responses are retried.
 - Other provider 4xx responses fail permanently.
@@ -92,6 +96,25 @@ would expand its secrets into terminal logs.
 
 When delivery is disabled, newly created outbox rows remain pending. Enabling
 the service later processes those rows; they are not discarded.
+
+## Abuse and quota protection
+
+The public request channel uses several independent limits:
+
+- Honeypot submissions receive a generic success response but are not stored.
+- ASP.NET permits at most 3 form submissions per source IP per hour.
+- PostgreSQL permits at most 8 stored requests per source IP in a rolling
+  24-hour window.
+- PostgreSQL permits at most 60 stored requests across the site in a rolling
+  24-hour window.
+- The delivery worker sends at most 80 successful ticket confirmations per UTC
+  day. Additional outbox items remain queued.
+
+The database-backed limits survive application restarts. The delivery ceiling
+is intentionally lower than the provider quota so retries and operational
+testing retain some headroom. If sustained automated abuse appears despite
+these controls, add Cloudflare Turnstile rather than continually lowering the
+limits for legitimate visitors.
 
 ## Safe production test
 

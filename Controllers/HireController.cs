@@ -10,6 +10,9 @@ namespace Portfolio.Controllers;
 
 public class HireController : BaseController
 {
+    private const int DailyPerIpSubmissionLimit = 8;
+    private const int DailyGlobalSubmissionLimit = 60;
+
     public HireController(AppDbContext db) : base(db) { }
 
     public async Task<IActionResult> Index()
@@ -55,6 +58,34 @@ public class HireController : BaseController
         if (remoteIp?.IsIPv4MappedToIPv6 == true)
             remoteIp = remoteIp.MapToIPv4();
 
+        var now = DateTime.UtcNow;
+        var requestWindowStart = now.AddHours(-24);
+        var ipAddress = remoteIp?.ToString();
+
+        var recentGlobalSubmissions = await _db.ContactMessages.CountAsync(
+            message => message.CreatedAt >= requestWindowStart);
+        if (recentGlobalSubmissions >= DailyGlobalSubmissionLimit)
+        {
+            TempData["Error"] =
+                "The request channel is temporarily at capacity. Please try again later.";
+            return RedirectToAction("Index", "Hire", new { area = "" });
+        }
+
+        if (ipAddress is not null)
+        {
+            var recentIpSubmissions = await _db.ContactMessages.CountAsync(
+                message =>
+                    message.IpAddress == ipAddress &&
+                    message.CreatedAt >= requestWindowStart);
+
+            if (recentIpSubmissions >= DailyPerIpSubmissionLimit)
+            {
+                TempData["Error"] =
+                    "Too many requests have been submitted from this connection. Please try again later.";
+                return RedirectToAction("Index", "Hire", new { area = "" });
+            }
+        }
+
         var userAgent = Request.Headers.UserAgent.ToString().Trim();
         if (userAgent.Length > 512)
             userAgent = userAgent[..512];
@@ -67,11 +98,11 @@ public class HireController : BaseController
             Subject = string.IsNullOrWhiteSpace(request.Subject) ? null : request.Subject.Trim(),
             Message = request.Message.Trim(),
             ServiceId = request.ServiceId,
-            IpAddress = remoteIp?.ToString(),
+            IpAddress = ipAddress,
             UserAgent = string.IsNullOrEmpty(userAgent) ? null : userAgent,
             IsRead = false,
             Status = ContactStatus.New,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = now
         };
 
         _db.ContactMessages.Add(message);
@@ -79,8 +110,8 @@ public class HireController : BaseController
         {
             ContactMessage = message,
             Kind = TicketEmailKinds.TicketReceived,
-            NextAttemptAt = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow
+            NextAttemptAt = now,
+            CreatedAt = now
         });
         await _db.SaveChangesAsync();
 
@@ -119,6 +150,7 @@ public class HireController : BaseController
 
         ViewBag.Services = services;
         ViewBag.TrackedMessage = message;
+        ViewBag.TrackedTicketNumber = guid.ToString("D");
         return View("Index");
     }
 }
