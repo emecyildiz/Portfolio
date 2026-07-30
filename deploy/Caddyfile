@@ -47,6 +47,14 @@ http://:8080 {
 		respond "Not Found" 404
 	}
 
+	@knowledge host knowledge.emecworks.com
+	handle @knowledge {
+		reverse_proxy emecworks-knowledge:8080 {
+			header_up X-Forwarded-For {client_ip}
+			header_up X-Forwarded-Proto https
+		}
+	}
+
 	@portfolio_internal host emecworks-internal
 	handle @portfolio_internal {
 		reverse_proxy web:8080 {
