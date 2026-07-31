@@ -30,10 +30,12 @@ public static partial class AdminContentValidator
         model.Content = NormalizeRequired(model.Content);
         model.GithubUrl = NormalizeOptional(model.GithubUrl);
         model.LiveDemoUrl = NormalizeOptional(model.LiveDemoUrl);
+        model.KnowledgeUrl = NormalizeOptional(model.KnowledgeUrl);
 
         ValidateContentCore(modelState, model.Title, model.Summary, model.Content, slugService);
         ValidateHttpsUrl(modelState, nameof(model.GithubUrl), model.GithubUrl);
         ValidateHttpsUrl(modelState, nameof(model.LiveDemoUrl), model.LiveDemoUrl);
+        ValidateKnowledgeUrl(modelState, nameof(model.KnowledgeUrl), model.KnowledgeUrl);
         ValidateEnum(modelState, nameof(model.Status), model.Status);
     }
 
@@ -85,6 +87,7 @@ public static partial class AdminContentValidator
         model.CveId = NormalizeOptional(model.CveId)?.ToUpperInvariant();
         model.SeverityLevel = NormalizeOptional(model.SeverityLevel)?.ToLowerInvariant();
         model.GithubUrl = NormalizeOptional(model.GithubUrl);
+        model.KnowledgeUrl = NormalizeOptional(model.KnowledgeUrl);
 
         ValidateContentCore(modelState, model.Title, model.Summary, model.Content, slugService);
         ValidateOptionalText(modelState, nameof(model.TargetCategory), model.TargetCategory, 200);
@@ -98,6 +101,7 @@ public static partial class AdminContentValidator
 
         ValidateCommaSeparatedList(modelState, toolsUsed, "tool");
         ValidateHttpsUrl(modelState, nameof(model.GithubUrl), model.GithubUrl);
+        ValidateKnowledgeUrl(modelState, nameof(model.KnowledgeUrl), model.KnowledgeUrl);
         ValidateEnum(modelState, nameof(model.ResearchType), model.ResearchType);
         ValidateEnum(modelState, nameof(model.DisclosureStatus), model.DisclosureStatus);
         ValidateEnum(modelState, nameof(model.Status), model.Status);
@@ -122,11 +126,13 @@ public static partial class AdminContentValidator
         model.Summary = NormalizeRequired(model.Summary);
         model.Content = NormalizeRequired(model.Content);
         model.NetworkDiagramUrl = NormalizeOptional(model.NetworkDiagramUrl);
+        model.KnowledgeUrl = NormalizeOptional(model.KnowledgeUrl);
 
         ValidateContentCore(modelState, model.Title, model.Summary, model.Content, slugService);
         ValidateCommaSeparatedList(modelState, hardwareUsed, "hardware item");
         ValidateCommaSeparatedList(modelState, softwareUsed, "software item");
         ValidateHttpsOrRootRelativeUrl(modelState, nameof(model.NetworkDiagramUrl), model.NetworkDiagramUrl);
+        ValidateKnowledgeUrl(modelState, nameof(model.KnowledgeUrl), model.KnowledgeUrl);
         ValidateEnum(modelState, nameof(model.Topic), model.Topic);
         ValidateEnum(modelState, nameof(model.Status), model.Status);
     }
@@ -380,6 +386,26 @@ public static partial class AdminContentValidator
             string.IsNullOrWhiteSpace(uri.Host))
         {
             modelState.AddModelError(key, "Use a valid HTTPS URL.");
+        }
+    }
+
+    private static void ValidateKnowledgeUrl(ModelStateDictionary modelState, string key, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+
+        if (value.Length > MaxUrlLength ||
+            !Uri.TryCreate(value, UriKind.Absolute, out var uri) ||
+            uri.Scheme != Uri.UriSchemeHttps ||
+            !string.Equals(uri.Host, "knowledge.emecworks.com", StringComparison.OrdinalIgnoreCase) ||
+            !uri.IsDefaultPort ||
+            !string.IsNullOrEmpty(uri.UserInfo) ||
+            !string.IsNullOrEmpty(uri.Query) ||
+            !string.IsNullOrEmpty(uri.Fragment))
+        {
+            modelState.AddModelError(
+                key,
+                "Use a clean https://knowledge.emecworks.com/... documentation URL without query parameters or fragments.");
         }
     }
 

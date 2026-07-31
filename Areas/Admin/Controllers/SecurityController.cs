@@ -38,7 +38,7 @@ public class SecurityController : AdminBaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("Id,Title,Summary,Content,ResearchType,TargetCategory,CveId,SeverityLevel,DisclosureStatus,GithubUrl,IsFeatured,Status")] SecurityResearch model,
+        [Bind("Id,Title,Summary,Content,ResearchType,TargetCategory,CveId,SeverityLevel,DisclosureStatus,GithubUrl,KnowledgeUrl,IsFeatured,Status")] SecurityResearch model,
         string? ToolsUsed, List<IFormFile>? Images)
     {
         ViewBag.ToolsString = ToolsUsed ?? string.Empty;
@@ -119,7 +119,7 @@ public class SecurityController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
         int id,
-        [Bind("Id,Title,Summary,Content,ResearchType,TargetCategory,CveId,SeverityLevel,DisclosureStatus,GithubUrl,IsFeatured,Status")] SecurityResearch model,
+        [Bind("Id,Title,Summary,Content,ResearchType,TargetCategory,CveId,SeverityLevel,DisclosureStatus,GithubUrl,KnowledgeUrl,IsFeatured,Status")] SecurityResearch model,
         string? ToolsUsed, List<IFormFile>? Images)
     {
         var existing = await _db.SecurityResearches
@@ -149,6 +149,7 @@ public class SecurityController : AdminBaseController
         existing.SeverityLevel = model.SeverityLevel;
         existing.DisclosureStatus = model.DisclosureStatus;
         existing.GithubUrl = model.GithubUrl;
+        existing.KnowledgeUrl = model.KnowledgeUrl;
         existing.Status = model.Status;
         if (existing.Status == VisibilityStatus.Public &&
             existing.DisclosureStatus == DisclosureStatus.PubliclyDisclosed &&

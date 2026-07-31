@@ -41,7 +41,7 @@ public class HomelabController : AdminBaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("Id,Title,Summary,Content,Topic,NetworkDiagramUrl,IsFeatured,IsMainLab,Status")] HomelabPost model,
+        [Bind("Id,Title,Summary,Content,Topic,NetworkDiagramUrl,KnowledgeUrl,IsFeatured,IsMainLab,Status")] HomelabPost model,
         string? HardwareUsed, string? SoftwareUsed, List<IFormFile>? Images)
     {
         ViewBag.HardwareString = HardwareUsed ?? string.Empty;
@@ -124,7 +124,7 @@ public class HomelabController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
     int id,
-    [Bind("Id,Title,Summary,Content,Topic,NetworkDiagramUrl,IsFeatured,IsMainLab,Status")] HomelabPost model,
+    [Bind("Id,Title,Summary,Content,Topic,NetworkDiagramUrl,KnowledgeUrl,IsFeatured,IsMainLab,Status")] HomelabPost model,
     string? HardwareUsed, string? SoftwareUsed, string? NetworkTopologyJson, List<IFormFile>? Images)
     {
         var existing = await _db.HomelabPosts.IgnoreQueryFilters().FirstOrDefaultAsync(h => h.Id == id);
@@ -169,6 +169,7 @@ public class HomelabController : AdminBaseController
         existing.Content = model.Content;
         existing.Topic = model.Topic;
         existing.NetworkDiagramUrl = model.NetworkDiagramUrl;
+        existing.KnowledgeUrl = model.KnowledgeUrl;
         existing.Status = model.Status;
         if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
             existing.PublishedAt = DateTime.UtcNow;

@@ -208,6 +208,13 @@
                     <span><span class="block text-sm font-medium text-teal-200">Main lab map</span><span class="mt-1 block text-xs leading-5 text-slate-600">Use this entry as the primary public homelab topology.</span></span>
                 </label>
 
+                <div>
+                    <label asp-for="KnowledgeUrl" class="admin-label">Knowledge documentation <span class="font-normal text-slate-600">(optional)</span></label>
+                    <input asp-for="KnowledgeUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://knowledge\.emecworks\.com/.+" title="Use a Knowledge URL such as https://knowledge.emecworks.com/homelab/system/." placeholder="https://knowledge.emecworks.com/homelab/system/" />
+                    <span asp-validation-for="KnowledgeUrl"></span>
+                    <p class="admin-hint">Publish the note first, then paste its public Knowledge address here.</p>
+                </div>
+
                 <div class="border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-slate-700">
                     <p>Created @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
                     <p class="mt-1">@Model.ViewCount unique views</p>

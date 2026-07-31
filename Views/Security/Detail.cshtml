@@ -8,7 +8,15 @@
         ? new List<string>()
         : System.Text.Json.JsonSerializer.Deserialize<List<string>>(Model.ToolsUsed) ?? new List<string>();
     var githubUrl = Model.GithubUrl?.Trim();
+    var knowledgeUrl = Model.KnowledgeUrl?.Trim();
     var hasSafeGithubUrl = Uri.TryCreate(githubUrl, UriKind.Absolute, out var githubUri) && githubUri.Scheme == Uri.UriSchemeHttps;
+    var hasSafeKnowledgeUrl = Uri.TryCreate(knowledgeUrl, UriKind.Absolute, out var knowledgeUri)
+        && knowledgeUri.Scheme == Uri.UriSchemeHttps
+        && string.Equals(knowledgeUri.Host, "knowledge.emecworks.com", StringComparison.OrdinalIgnoreCase)
+        && knowledgeUri.IsDefaultPort
+        && string.IsNullOrEmpty(knowledgeUri.UserInfo)
+        && string.IsNullOrEmpty(knowledgeUri.Query)
+        && string.IsNullOrEmpty(knowledgeUri.Fragment);
     var researchTypeLabel = Model.ResearchType switch
     {
         Portfolio.Models.Enums.ResearchType.MalwareAnalysis => "Malware Analysis",
@@ -46,10 +54,16 @@
             <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-400">@Model.Summary</p>
             <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600"><span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "Undated")</span><span>@Model.ReadingTimeMinutes min read</span><span>@Model.ViewCount unique @(Model.ViewCount == 1 ? "view" : "views")</span></div>
         </div>
-        @if (hasSafeGithubUrl)
-        {
-            <a href="@githubUrl" target="_blank" rel="noopener noreferrer" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-rose-300/20 bg-rose-300/[0.05] px-5 py-3 text-xs font-medium text-rose-200 transition hover:border-rose-300/40 hover:bg-rose-300/10">GitHub / PoC <span aria-hidden="true">↗</span></a>
-        }
+        <div class="flex flex-wrap gap-2 lg:max-w-72 lg:justify-end">
+            @if (hasSafeKnowledgeUrl)
+            {
+                <a href="@knowledgeUrl" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-rose-300/25 bg-rose-300/[0.05] px-5 py-3 text-xs font-medium text-rose-200 transition hover:border-rose-300/45 hover:bg-rose-300/10">Technical documentation <span aria-hidden="true">↗</span></a>
+            }
+            @if (hasSafeGithubUrl)
+            {
+                <a href="@githubUrl" target="_blank" rel="noopener noreferrer" class="focus-ring inline-flex items-center justify-center gap-2 rounded-md border border-white/10 px-5 py-3 text-xs font-medium text-slate-300 transition hover:border-rose-300/30 hover:text-white">GitHub / PoC <span aria-hidden="true">↗</span></a>
+            }
+        </div>
     </header>
 
     @if (!string.IsNullOrEmpty(Model.CoverImageUrl))

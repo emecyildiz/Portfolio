@@ -116,6 +116,12 @@
                         <input asp-for="LiveDemoUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." placeholder="https://..." />
                         <span asp-validation-for="LiveDemoUrl"></span>
                     </div>
+                    <div>
+                        <label asp-for="KnowledgeUrl" class="admin-label">Knowledge documentation <span class="font-normal text-slate-600">(optional)</span></label>
+                        <input asp-for="KnowledgeUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://knowledge\.emecworks\.com/.+" title="Use a Knowledge URL such as https://knowledge.emecworks.com/electronics/project/." placeholder="https://knowledge.emecworks.com/electronics/project/" />
+                        <span asp-validation-for="KnowledgeUrl"></span>
+                        <p class="admin-hint">Publish the note first, then paste its public Knowledge address here.</p>
+                    </div>
                 </div>
             </section>
             <div class="flex flex-col gap-2">

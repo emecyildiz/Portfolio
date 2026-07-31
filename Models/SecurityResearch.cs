@@ -30,6 +30,7 @@ namespace Portfolio.Models
 
         public string? CoverImageUrl { get; set; }
         public string? GithubUrl { get; set; }                    // Proof-of-concept repository
+        public string? KnowledgeUrl { get; set; }                 // Public technical documentation
 
         // Critical: research cannot reach the public endpoint unless it is PubliclyDisclosed.
         public DisclosureStatus DisclosureStatus { get; set; } = DisclosureStatus.Private;

@@ -44,7 +44,7 @@ public class ElectronicsController : AdminBaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,IsFeatured,Status")] Project model,
+        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,KnowledgeUrl,IsFeatured,Status")] Project model,
         string? Microcontroller, string? Components, string? SchematicUrl,
         string? ProgrammingLanguage, bool IsOpenSource,
         List<IFormFile>? Images)
@@ -141,7 +141,7 @@ public class ElectronicsController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
         int id,
-        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,IsFeatured,Status")] Project model,
+        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,KnowledgeUrl,IsFeatured,Status")] Project model,
         string? Microcontroller, string? Components, string? SchematicUrl,
         string? ProgrammingLanguage, bool IsOpenSource,
         List<IFormFile>? Images)
@@ -172,6 +172,7 @@ public class ElectronicsController : AdminBaseController
         existing.Content = model.Content;
         existing.LiveDemoUrl = model.LiveDemoUrl;
         existing.GithubUrl = model.GithubUrl;
+        existing.KnowledgeUrl = model.KnowledgeUrl;
         existing.Status = model.Status;
         if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
             existing.PublishedAt = DateTime.UtcNow;

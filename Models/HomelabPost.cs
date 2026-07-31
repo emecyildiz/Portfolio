@@ -27,6 +27,7 @@ namespace Portfolio.Models
         public string? NetworkDiagramUrl { get; set; }
         public string? NetworkTopology { get; set; }    // JSONB — interactive network map
         public string? CoverImageUrl { get; set; }
+        public string? KnowledgeUrl { get; set; }       // Public technical documentation
         public bool IsMainLab { get; set; } = false;
         public VisibilityStatus Status { get; set; } = VisibilityStatus.Draft;
         public bool IsFeatured { get; set; } = false;

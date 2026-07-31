@@ -40,7 +40,7 @@ public class WebAppsController : AdminBaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,IsFeatured,Status")] Project model,
+        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,KnowledgeUrl,IsFeatured,Status")] Project model,
         string? TechStack, int? TeamSize, string? MyRole,
         string? Subdomain, bool IsSchoolProject,
         List<IFormFile>? Images)
@@ -126,7 +126,7 @@ public class WebAppsController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
         int id,
-        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,IsFeatured,Status")] Project model,
+        [Bind("Id,Title,Summary,Content,LiveDemoUrl,GithubUrl,KnowledgeUrl,IsFeatured,Status")] Project model,
         string? TechStack, int? TeamSize, string? MyRole,
         string? Subdomain, bool IsSchoolProject,
         List<IFormFile>? Images)
@@ -155,6 +155,7 @@ public class WebAppsController : AdminBaseController
         existing.Content = model.Content;
         existing.LiveDemoUrl = model.LiveDemoUrl;
         existing.GithubUrl = model.GithubUrl;
+        existing.KnowledgeUrl = model.KnowledgeUrl;
         existing.Status = model.Status;
         if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
             existing.PublishedAt = DateTime.UtcNow;

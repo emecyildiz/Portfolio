@@ -120,6 +120,12 @@
                         <input asp-for="GithubUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://.+" title="Use an HTTPS URL." placeholder="https://github.com/..." />
                         <span asp-validation-for="GithubUrl"></span>
                     </div>
+                    <div>
+                        <label asp-for="KnowledgeUrl" class="admin-label">Knowledge documentation <span class="font-normal text-slate-600">(optional)</span></label>
+                        <input asp-for="KnowledgeUrl" type="url" class="admin-input" inputmode="url" autocomplete="url" pattern="https://knowledge\.emecworks\.com/.+" title="Use a Knowledge URL such as https://knowledge.emecworks.com/cybersecurity/research/." placeholder="https://knowledge.emecworks.com/cybersecurity/research/" />
+                        <span asp-validation-for="KnowledgeUrl"></span>
+                        <p class="admin-hint">Link only reviewed public documentation that is safe to disclose.</p>
+                    </div>
                     <div class="border border-rose-300/20 bg-rose-300/[0.05] p-4 text-xs leading-5 text-rose-200">
                         Public visibility requires both a Public status and a Publicly Disclosed disclosure status. Review the write-up for sensitive data before publishing.
                     </div>

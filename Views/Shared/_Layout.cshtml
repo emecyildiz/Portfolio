@@ -153,6 +153,7 @@
 
                 <a href="/blog" class="public-nav__link @(currentPath.StartsWith("/blog") ? "is-active" : "")">Notes</a>
                 <a href="/activity" class="public-nav__link @(currentPath.StartsWith("/activity") ? "is-active" : "")">Activity</a>
+                <a href="https://knowledge.emecworks.com/" class="public-nav__link">Knowledge <span aria-hidden="true">↗</span></a>
                 <button type="button" onclick="toggleSearch(true)" class="public-nav__link public-search-button" aria-label="Open search">Search <span aria-hidden="true">⌕</span></button>
                 <a href="/hire" class="public-contact-link @(currentPath.StartsWith("/hire") ? "is-active" : "")">Contact</a>
             </div>
@@ -201,6 +202,7 @@
                     }
                 }
                 <a href="/activity" class="public-mobile-link @(currentPath.StartsWith("/activity") ? "is-active" : "")">Activity</a>
+                <a href="https://knowledge.emecworks.com/" class="public-mobile-link">Knowledge <span aria-hidden="true">↗</span></a>
                 <button type="button" onclick="toggleSearch(true)" class="public-mobile-link text-left">Search</button>
                 <a href="/hire" class="public-mobile-contact">Contact / work request</a>
             </div>
@@ -239,6 +241,7 @@
             <div class="public-footer__base">
                 <p>Emecworks / independent work index</p>
                 <nav aria-label="Privacy controls" class="public-footer__privacy">
+                    <a href="https://knowledge.emecworks.com/">Knowledge</a>
                     <a href="/privacy">Privacy notice</a>
                     <button id="cookiePreferencesButton" type="button" aria-controls="analyticsConsent">
                         Cookie preferences

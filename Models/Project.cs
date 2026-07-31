@@ -22,6 +22,7 @@ namespace Portfolio.Models
         public string? CoverImageUrl { get; set; }
         public string? LiveDemoUrl { get; set; }                   // Public demo address
         public string? GithubUrl { get; set; }
+        public string? KnowledgeUrl { get; set; }                  // Public technical documentation
 
         // Category-specific JSON schema; see ExtraDataSchemas.cs.
         public string? ExtraData { get; set; }

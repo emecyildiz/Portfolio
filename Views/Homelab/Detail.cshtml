@@ -7,9 +7,17 @@
     var images = ViewBag.Images as List<Portfolio.Models.Media> ?? new();
     var related = ViewBag.Related as List<Portfolio.Models.HomelabPost> ?? new();
     var networkDiagramUrl = Model.NetworkDiagramUrl?.Trim();
+    var knowledgeUrl = Model.KnowledgeUrl?.Trim();
     var hasSafeNetworkDiagramUrl = !string.IsNullOrEmpty(networkDiagramUrl)
         && ((networkDiagramUrl.StartsWith('/') && !networkDiagramUrl.StartsWith("//") && Uri.TryCreate(networkDiagramUrl, UriKind.Relative, out _))
             || (Uri.TryCreate(networkDiagramUrl, UriKind.Absolute, out var diagramUri) && diagramUri.Scheme == Uri.UriSchemeHttps));
+    var hasSafeKnowledgeUrl = Uri.TryCreate(knowledgeUrl, UriKind.Absolute, out var knowledgeUri)
+        && knowledgeUri.Scheme == Uri.UriSchemeHttps
+        && string.Equals(knowledgeUri.Host, "knowledge.emecworks.com", StringComparison.OrdinalIgnoreCase)
+        && knowledgeUri.IsDefaultPort
+        && string.IsNullOrEmpty(knowledgeUri.UserInfo)
+        && string.IsNullOrEmpty(knowledgeUri.Query)
+        && string.IsNullOrEmpty(knowledgeUri.Fragment);
     var topologyJson = ViewBag.NetworkTopologyJson as string;
     Func<Portfolio.Models.Enums.HomelabTopic, string> topicLabel = topic => topic switch
     {
@@ -30,7 +38,7 @@
             <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-400">@Model.Summary</p>
             <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600"><span>@(Model.PublishedAt?.ToString("dd MMMM yyyy") ?? "Undated")</span><span>@Model.ReadingTimeMinutes min read</span><span>@Model.ViewCount unique @(Model.ViewCount == 1 ? "view" : "views")</span></div>
         </div>
-        <div class="rounded-xl border border-teal-300/15 bg-teal-300/[0.04] px-5 py-4 text-right"><p class="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-600">Infrastructure status</p><p class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-teal-200"><span class="h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_12px_rgba(94,234,212,.7)]"></span>Documented</p></div>
+        <div class="flex flex-col items-stretch gap-2 lg:items-end"><div class="rounded-xl border border-teal-300/15 bg-teal-300/[0.04] px-5 py-4 text-right"><p class="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-600">Infrastructure status</p><p class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-teal-200"><span class="h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_12px_rgba(94,234,212,.7)]"></span>Documented</p></div>@if (hasSafeKnowledgeUrl){<a href="@knowledgeUrl" class="focus-ring inline-flex items-center justify-center rounded-md border border-teal-300/25 bg-teal-300/[0.06] px-4 py-2.5 text-xs text-teal-200 transition hover:border-teal-300/45 hover:text-white">Technical documentation ↗</a>}</div>
     </header>
 
     @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
