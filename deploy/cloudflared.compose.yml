@@ -12,8 +12,12 @@ services:
       - no-new-privileges:true
     networks:
       - edge
+      - ratemet
 
 networks:
   edge:
     name: emecworks-edge
+    external: true
+  ratemet:
+    name: ratemet-edge
     external: true
