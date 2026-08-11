@@ -30,6 +30,14 @@ and observed for at least one collection cycle before another source is
 enabled. This prevents a broken or unexpectedly large feed from exhausting AI
 or Telegram quotas.
 
+`deploy/n8n/workflows/cti-source-collection.json` is the first production
+workflow. It runs every six hours, but its repository copy is intentionally
+inactive. It loads enabled sources from PostgreSQL, reads their RSS feeds,
+normalizes tracking parameters, enforces each source's HTTPS hostname
+allowlist, and passes metadata to the parameterized `cti.ingest_feed_item()`
+function. It does not fetch article pages, call Gemini, or send Telegram
+messages.
+
 ## Retention
 
 `cti.apply_retention()` implements the bounded server-side retention policy:
