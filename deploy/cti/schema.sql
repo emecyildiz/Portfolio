@@ -270,6 +270,7 @@ DECLARE
     source_record cti.sources%ROWTYPE;
     canonical_url_value text;
     hostname_value text;
+    port_value text;
     normalized_title_value text;
     normalized_feed_guid_value text;
     title_hash_value char(64);
@@ -290,10 +291,13 @@ BEGIN
 
     canonical_url_value := split_part(trim(original_url_value), '#', 1);
     hostname_value := lower(substring(canonical_url_value FROM '^https://([^/:?#]+)'));
+    port_value := substring(canonical_url_value FROM '^https://[^/:?#@]+:([0-9]+)');
 
     IF canonical_url_value = ''
        OR char_length(canonical_url_value) > 4000
        OR hostname_value IS NULL
+       OR canonical_url_value ~ '^https://[^/?#]*@'
+       OR (port_value IS NOT NULL AND port_value <> '443')
        OR NOT (hostname_value = ANY(source_record.allowed_hosts)) THEN
         RAISE EXCEPTION 'Article URL is not allowed for this CTI source.'
             USING ERRCODE = '22023';
@@ -493,4 +497,8 @@ SET feed_url = EXCLUDED.feed_url,
 
 INSERT INTO cti.schema_versions (version)
 VALUES (3)
+ON CONFLICT (version) DO NOTHING;
+
+INSERT INTO cti.schema_versions (version)
+VALUES (4)
 ON CONFLICT (version) DO NOTHING;

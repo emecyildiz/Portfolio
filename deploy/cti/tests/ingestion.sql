@@ -108,6 +108,34 @@ BEGIN
             NULL;
     END;
 
+    BEGIN
+        PERFORM * FROM cti.ingest_feed_item(
+            source_id_value,
+            'https://news.example.test:8443/advisories/one',
+            'Non-default Port Story',
+            'guid-port',
+            now()
+        );
+        RAISE EXCEPTION 'A non-default HTTPS port was accepted.';
+    EXCEPTION
+        WHEN SQLSTATE '22023' THEN
+            NULL;
+    END;
+
+    BEGIN
+        PERFORM * FROM cti.ingest_feed_item(
+            source_id_value,
+            'https://user@news.example.test/advisories/one',
+            'Embedded Credentials Story',
+            'guid-userinfo',
+            now()
+        );
+        RAISE EXCEPTION 'A URL containing user information was accepted.';
+    EXCEPTION
+        WHEN SQLSTATE '22023' THEN
+            NULL;
+    END;
+
     IF (SELECT count(*) FROM cti.articles) <> 1 THEN
         RAISE EXCEPTION 'Deduplication left an unexpected article count.';
     END IF;
