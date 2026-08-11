@@ -29,7 +29,20 @@
         <div class="flex flex-wrap gap-2 lg:max-w-80 lg:justify-end">@if (hasSafeKnowledgeUrl){<a href="@knowledgeUrl" class="focus-ring rounded-md border border-cyan/25 bg-cyan/[0.06] px-4 py-2.5 text-xs text-cyan transition hover:border-cyan/45 hover:text-white">Technical documentation ↗</a>}@if (hasSafeGithubUrl){<a href="@githubUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-white/10 px-4 py-2.5 text-xs text-slate-300 transition hover:border-cyan/30 hover:text-white">GitHub ↗</a>}@if (hasSafeLiveDemoUrl){<a href="@liveDemoUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md bg-signal px-4 py-2.5 text-xs font-semibold text-ink transition hover:bg-white">Live demo ↗</a>}@if (hasSafeSubdomain){<a href="https://@subdomain" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-cyan/20 bg-cyan/[0.05] px-4 py-2.5 text-xs text-cyan transition hover:border-cyan/40">@subdomain ↗</a>}</div>
     </header>
 
-    @if (!string.IsNullOrEmpty(Model.CoverImageUrl)){<figure class="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-panel"><img src="@Model.CoverImageUrl" alt="@Model.Title" class="max-h-[38rem] w-full object-cover" /></figure>}
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <figure class="mt-10 overflow-hidden rounded-2xl border border-white/[0.08] bg-panel">
+            <button type="button"
+                    data-lightbox-image
+                    data-lightbox-src="@Model.CoverImageUrl"
+                    data-lightbox-alt="@Model.Title cover image"
+                    data-lightbox-caption="@Model.Title"
+                    class="focus-ring group block w-full cursor-zoom-in"
+                    aria-label="Open @Model.Title cover image">
+                <img src="@Model.CoverImageUrl" alt="@Model.Title" class="max-h-[38rem] w-full object-cover transition duration-300 group-hover:scale-[1.01] group-hover:opacity-90" />
+            </button>
+        </figure>
+    }
 
     <section class="technical-frame surface mt-10 rounded-2xl p-5 sm:p-7">
         <p class="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">Project specification</p>
@@ -43,9 +56,42 @@
 
     <div class="mx-auto mt-12 max-w-3xl prose prose-lg prose-invert prose-headings:font-semibold prose-headings:tracking-[-0.025em] prose-headings:text-white prose-p:leading-8 prose-p:text-slate-400 prose-a:text-cyan prose-a:no-underline hover:prose-a:text-white prose-code:rounded prose-code:bg-raised prose-code:px-1.5 prose-code:py-0.5 prose-code:text-signal prose-pre:border prose-pre:border-white/[0.08] prose-pre:bg-panel prose-blockquote:border-cyan prose-blockquote:text-slate-400 prose-strong:text-white prose-li:text-slate-400">@Html.Raw(ViewBag.ContentHtml)</div>
 
-    @if (images.Any()){<section class="mt-16 border-t border-white/[0.07] pt-10"><p class="mb-5 font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">Interface gallery / @images.Count.ToString("D2")</p><div class="grid grid-cols-2 gap-3 md:grid-cols-3">@foreach (var image in images){<img src="@image.Url" alt="@image.AltText" loading="lazy" class="aspect-[4/3] w-full rounded-xl border border-white/[0.08] object-cover transition hover:border-cyan/30" />}</div></section>}
+    @if (images.Any())
+    {
+        <section class="mt-16 border-t border-white/[0.07] pt-10">
+            <p class="mb-5 font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">Interface gallery / @images.Count.ToString("D2")</p>
+            <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+                @foreach (var galleryImage in images)
+                {
+                    var galleryAlt = string.IsNullOrWhiteSpace(galleryImage.AltText) ? $"{Model.Title} interface screenshot" : galleryImage.AltText;
+                    var galleryCaption = string.IsNullOrWhiteSpace(galleryImage.Caption) ? galleryAlt : galleryImage.Caption;
+                    <figure>
+                        <button type="button"
+                                data-lightbox-image
+                                data-lightbox-src="@galleryImage.Url"
+                                data-lightbox-alt="@galleryAlt"
+                                data-lightbox-caption="@galleryCaption"
+                                class="focus-ring group block w-full cursor-zoom-in rounded-xl"
+                                aria-label="Open @galleryAlt">
+                            <img src="@galleryImage.Url" alt="@galleryAlt" loading="lazy" class="aspect-[4/3] w-full rounded-xl border border-white/[0.08] object-cover transition duration-300 group-hover:scale-[1.02] group-hover:border-cyan/40 group-hover:opacity-90" />
+                        </button>
+                        @if (!string.IsNullOrWhiteSpace(galleryImage.Caption))
+                        {
+                            <figcaption class="mt-2 text-center text-xs text-slate-600">@galleryImage.Caption</figcaption>
+                        }
+                    </figure>
+                }
+            </div>
+        </section>
+    }
 
     @if (related.Any()){<section class="mt-20 border-t border-white/[0.07] pt-10"><div class="mb-6 flex items-end justify-between gap-4"><div><p class="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">Continue exploring</p><h2 class="mt-2 text-2xl font-semibold text-white">Related applications</h2></div><a href="/webapps" class="focus-ring rounded-sm text-sm text-slate-500 hover:text-white">All software →</a></div><div class="grid gap-3 md:grid-cols-3">@foreach (var item in related){<a href="/webapps/@item.Slug" class="focus-ring card-lift surface group rounded-xl p-5 hover:border-cyan/30"><h3 class="text-sm font-medium text-white transition group-hover:text-cyan">@item.Title</h3><p class="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">@item.Summary</p></a>}</div></section>}
 
     <footer class="mt-14 border-t border-white/[0.07] pt-8"><a href="/webapps" class="focus-ring inline-flex items-center gap-2 rounded-sm font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500 transition hover:text-cyan"><span aria-hidden="true">←</span> Back to software</a></footer>
 </article>
+
+@await Html.PartialAsync("_ImageLightbox")
+
+@section Scripts {
+    <script src="~/js/image-lightbox.js" asp-append-version="true"></script>
+}
