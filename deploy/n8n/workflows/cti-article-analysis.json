@@ -156,9 +156,7 @@
           "jsonOutput": true,
           "builtInTools": {},
           "options": {
-            "maxOutputTokens": 700,
-            "temperature": 0.1,
-            "thinkingBudget": 0
+            "maxOutputTokens": 2048
           }
         },
         "credentials": {
