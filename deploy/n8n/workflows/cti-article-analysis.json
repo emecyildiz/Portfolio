@@ -157,7 +157,8 @@
           "builtInTools": {},
           "options": {
             "maxOutputTokens": 700,
-            "temperature": 0.1
+            "temperature": 0.1,
+            "thinkingBudget": 0
           }
         },
         "credentials": {
