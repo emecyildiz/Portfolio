@@ -1,10 +1,11 @@
 [Unit]
-Description=Back up the Emecworks portfolio and n8n data
+Description=Back up the Emecworks portfolio, n8n, and CTI data
 Requires=docker.service
 After=docker.service
 ConditionPathExists=/etc/emecworks/portfolio.env
 ConditionPathExists=/etc/emecworks/n8n-db.env
 ConditionPathExists=/etc/emecworks/n8n-app.env
+ConditionPathExists=/etc/emecworks/cti-db.env
 ConditionPathIsDirectory=/var/lib/emecworks/n8n-files
 
 [Service]
@@ -19,6 +20,6 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
 ProtectSystem=strict
-ReadOnlyPaths=/etc/emecworks/portfolio.env /etc/emecworks/n8n-db.env /etc/emecworks/n8n-app.env /var/lib/emecworks/n8n-files
+ReadOnlyPaths=/etc/emecworks/portfolio.env /etc/emecworks/n8n-db.env /etc/emecworks/n8n-app.env /etc/emecworks/cti-db.env /var/lib/emecworks/n8n-files
 ReadWritePaths=/var/backups/emecworks /run/lock
 TimeoutStartSec=30min

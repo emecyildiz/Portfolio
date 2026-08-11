@@ -1,0 +1,37 @@
+name: emecworks-cti
+
+services:
+  db:
+    image: postgres:16-alpine@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777
+    env_file:
+      - /etc/emecworks/cti-db.env
+    volumes:
+      - cti_pgdata:/var/lib/postgresql/data
+      - ./cti/init-database.sh:/docker-entrypoint-initdb.d/010-init-database.sh:ro
+      - ./cti/schema.sql:/opt/emecworks-cti/schema.sql:ro
+    restart: unless-stopped
+    stop_grace_period: 60s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      cti:
+        aliases:
+          - cti-db
+
+volumes:
+  cti_pgdata:
+
+networks:
+  cti:
+    name: emecworks-cti
+    internal: true

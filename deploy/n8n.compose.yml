@@ -54,6 +54,7 @@ services:
       edge:
         aliases:
           - n8n-app
+      cti:
 
   task-runners:
     image: docker.io/n8nio/runners:2.30.5-distroless@sha256:54a20704fc1812b69bead6f3259bea04cd99b8cc466277d44c33a5a08bd2e0a5
@@ -96,4 +97,7 @@ networks:
     internal: true
   edge:
     name: emecworks-edge
+    external: true
+  cti:
+    name: emecworks-cti
     external: true

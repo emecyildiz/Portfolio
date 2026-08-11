@@ -85,6 +85,7 @@ trap cleanup EXIT
 
 required_files=(
     /etc/emecworks/cloudflared.env
+    /etc/emecworks/cti-db.env
     /etc/emecworks/n8n-app.env
     /etc/emecworks/n8n-db.env
     /etc/emecworks/n8n-runners.env
@@ -128,7 +129,10 @@ if [[ -z "`$latest_ratemet_backup" ]]; then
 fi
 
 sudo test -f "/var/backups/emecworks/`${latest_backup}/SHA256SUMS"
+sudo test -f "/var/backups/emecworks/`${latest_backup}/MANIFEST"
+sudo test -f "/var/backups/emecworks/`${latest_backup}/cti-database.dump"
 sudo test -f "/var/backups/emecworks/ratemet/`${latest_ratemet_backup}/SHA256SUMS"
+sudo grep -qx 'backup_format=3' "/var/backups/emecworks/`${latest_backup}/MANIFEST"
 sudo sh -c "cd '/var/backups/emecworks/`${latest_backup}' && sha256sum -c SHA256SUMS >/dev/null"
 sudo sh -c "cd '/var/backups/emecworks/ratemet/`${latest_ratemet_backup}' && sha256sum -c SHA256SUMS >/dev/null"
 
@@ -136,6 +140,7 @@ sudo tar \
     -C / \
     -czf "`$temporary_archive" \
     etc/emecworks/cloudflared.env \
+    etc/emecworks/cti-db.env \
     etc/emecworks/n8n-app.env \
     etc/emecworks/n8n-db.env \
     etc/emecworks/n8n-runners.env \

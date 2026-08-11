@@ -6,10 +6,12 @@ umask 077
 readonly portfolio_env_file="/etc/emecworks/portfolio.env"
 readonly n8n_db_env_file="/etc/emecworks/n8n-db.env"
 readonly n8n_app_env_file="/etc/emecworks/n8n-app.env"
+readonly cti_db_env_file="/etc/emecworks/cti-db.env"
 readonly backup_dir="/var/backups/emecworks"
 readonly retention_days="${BACKUP_RETENTION_DAYS:-7}"
 readonly portfolio_db_container="emecworks-db-1"
 readonly n8n_db_container="emecworks-n8n-db-1"
+readonly cti_db_container="emecworks-cti-db-1"
 readonly portfolio_uploads_volume="emecworks_uploads"
 readonly portfolio_dataprotection_volume="emecworks_dataprotection"
 readonly n8n_data_volume="emecworks-n8n_n8n_data"
@@ -21,7 +23,11 @@ if [[ ! "$retention_days" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
-for required_file in "$portfolio_env_file" "$n8n_db_env_file" "$n8n_app_env_file"; do
+for required_file in \
+    "$portfolio_env_file" \
+    "$n8n_db_env_file" \
+    "$n8n_app_env_file" \
+    "$cti_db_env_file"; do
     if [[ ! -r "$required_file" ]]; then
         echo "Required environment file is not readable: $required_file" >&2
         exit 1
@@ -63,13 +69,18 @@ PORTFOLIO_POSTGRES_DB="$(read_env_value "$portfolio_env_file" POSTGRES_DB)"
 N8N_POSTGRES_USER="$(read_env_value "$n8n_db_env_file" POSTGRES_USER)"
 N8N_POSTGRES_DB="$(read_env_value "$n8n_db_env_file" POSTGRES_DB)"
 N8N_ENCRYPTION_KEY="$(read_env_value "$n8n_app_env_file" N8N_ENCRYPTION_KEY)"
+CTI_POSTGRES_USER="$(read_env_value "$cti_db_env_file" POSTGRES_USER)"
+CTI_POSTGRES_DB="$(read_env_value "$cti_db_env_file" POSTGRES_DB)"
 readonly PORTFOLIO_POSTGRES_USER PORTFOLIO_POSTGRES_DB
 readonly N8N_POSTGRES_USER N8N_POSTGRES_DB N8N_ENCRYPTION_KEY
+readonly CTI_POSTGRES_USER CTI_POSTGRES_DB
 
 validate_postgres_identifier "$PORTFOLIO_POSTGRES_USER" "Portfolio POSTGRES_USER"
 validate_postgres_identifier "$PORTFOLIO_POSTGRES_DB" "Portfolio POSTGRES_DB"
 validate_postgres_identifier "$N8N_POSTGRES_USER" "n8n POSTGRES_USER"
 validate_postgres_identifier "$N8N_POSTGRES_DB" "n8n POSTGRES_DB"
+validate_postgres_identifier "$CTI_POSTGRES_USER" "CTI POSTGRES_USER"
+validate_postgres_identifier "$CTI_POSTGRES_DB" "CTI POSTGRES_DB"
 
 if (( ${#N8N_ENCRYPTION_KEY} < 32 )); then
     echo "N8N_ENCRYPTION_KEY is unexpectedly short." >&2
@@ -161,6 +172,7 @@ verify_database_dump() {
 
 require_healthy_container "$portfolio_db_container"
 require_healthy_container "$n8n_db_container"
+require_healthy_container "$cti_db_container"
 
 dump_database \
     "$portfolio_db_container" \
@@ -173,6 +185,12 @@ dump_database \
     "$N8N_POSTGRES_USER" \
     "$N8N_POSTGRES_DB" \
     "${work_dir}/n8n-database.dump"
+
+dump_database \
+    "$cti_db_container" \
+    "$CTI_POSTGRES_USER" \
+    "$CTI_POSTGRES_DB" \
+    "${work_dir}/cti-database.dump"
 
 archive_volume \
     "$portfolio_uploads_volume" \
@@ -192,6 +210,7 @@ archive_directory \
 
 verify_database_dump "portfolio-database.dump"
 verify_database_dump "n8n-database.dump"
+verify_database_dump "cti-database.dump"
 
 for archive in \
     portfolio-uploads.tar.gz \
@@ -206,12 +225,14 @@ readonly encryption_key_fingerprint="$(
 )"
 
 {
-    printf 'backup_format=2\n'
+    printf 'backup_format=3\n'
     printf 'created_utc=%s\n' "$timestamp"
     printf 'portfolio_db_image=%s\n' \
         "$(docker inspect -f '{{.Config.Image}}' "$portfolio_db_container")"
     printf 'n8n_db_image=%s\n' \
         "$(docker inspect -f '{{.Config.Image}}' "$n8n_db_container")"
+    printf 'cti_db_image=%s\n' \
+        "$(docker inspect -f '{{.Config.Image}}' "$cti_db_container")"
     printf 'n8n_image=%s\n' \
         "$(docker inspect -f '{{.Config.Image}}' emecworks-n8n-n8n-1)"
     printf 'n8n_encryption_key_sha256=%s\n' "$encryption_key_fingerprint"
@@ -222,6 +243,7 @@ readonly encryption_key_fingerprint="$(
     sha256sum \
         portfolio-database.dump \
         n8n-database.dump \
+        cti-database.dump \
         portfolio-uploads.tar.gz \
         portfolio-dataprotection.tar.gz \
         n8n-data.tar.gz \
