@@ -18,6 +18,18 @@ portfolio database.
 - Feed and article URLs must be checked against each source's `allowed_hosts`
   before any HTTP request is made.
 
+## Source rollout
+
+Sources are enabled deliberately, one at a time. The initial production source
+is The Hacker News. Its RSS endpoint and permitted article hostnames are stored
+in `cti.sources`; n8n must load them from the database instead of accepting an
+arbitrary feed or article URL from workflow input.
+
+Every new source must be added through a reviewed migration, tested manually,
+and observed for at least one collection cycle before another source is
+enabled. This prevents a broken or unexpectedly large feed from exhausting AI
+or Telegram quotas.
+
 ## Retention
 
 `cti.apply_retention()` implements the bounded server-side retention policy:
