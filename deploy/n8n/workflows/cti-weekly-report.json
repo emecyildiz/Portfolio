@@ -6,6 +6,14 @@
     "active": false,
     "nodes": [
       {
+        "id": "46b1b763-eb6a-448a-9818-8f8eb94f683e",
+        "name": "Manual Test",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [0, 320],
+        "parameters": {}
+      },
+      {
         "id": "1041c693-8937-49b2-aaf4-10444100e7fc",
         "name": "Every Monday Morning",
         "type": "n8n-nodes-base.scheduleTrigger",
@@ -21,14 +29,6 @@
             ]
           }
         }
-      },
-      {
-        "id": "46b1b763-eb6a-448a-9818-8f8eb94f683e",
-        "name": "Manual Test",
-        "type": "n8n-nodes-base.manualTrigger",
-        "typeVersion": 1,
-        "position": [0, 320],
-        "parameters": {}
       },
       {
         "id": "ae55b801-e524-4fe0-9c1c-b9cff568c859",
