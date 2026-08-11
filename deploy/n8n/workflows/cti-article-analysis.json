@@ -93,7 +93,7 @@
               "response": {
                 "neverError": false,
                 "responseFormat": "text",
-                "outputPropertyName": "html"
+                "outputPropertyName": "data"
               }
             },
             "timeout": 15000
@@ -109,8 +109,6 @@
         "position": [1040, 80],
         "parameters": {
           "operation": "extractHtmlContent",
-          "sourceData": "json",
-          "jsonPropertyName": "html",
           "extractionValues": {
             "values": [
               {
