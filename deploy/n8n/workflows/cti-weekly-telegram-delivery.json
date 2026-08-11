@@ -69,6 +69,35 @@
         "parameters": {
           "chatId": "6552428480",
           "text": "={{ $json.message }}",
+          "replyMarkup": "inlineKeyboard",
+          "inlineKeyboard": {
+            "rows": [
+              {
+                "row": {
+                  "buttons": [
+                    { "text": "🦠 Malware", "additionalFields": { "callback_data": "cti:category:malware" } },
+                    { "text": "🧩 Vulnerabilities", "additionalFields": { "callback_data": "cti:category:vulnerability" } }
+                  ]
+                }
+              },
+              {
+                "row": {
+                  "buttons": [
+                    { "text": "🔓 Data Breaches", "additionalFields": { "callback_data": "cti:category:data_breach" } },
+                    { "text": "🛰️ Threat Intel", "additionalFields": { "callback_data": "cti:category:threat_intelligence" } }
+                  ]
+                }
+              },
+              {
+                "row": {
+                  "buttons": [
+                    { "text": "📚 Other", "additionalFields": { "callback_data": "cti:category:other" } },
+                    { "text": "🏠 Menu", "additionalFields": { "callback_data": "cti:menu" } }
+                  ]
+                }
+              }
+            ]
+          },
           "additionalFields": {
             "appendAttribution": false,
             "disable_web_page_preview": true,
