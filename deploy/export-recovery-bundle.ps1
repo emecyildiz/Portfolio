@@ -89,6 +89,7 @@ required_files=(
     /etc/emecworks/n8n-db.env
     /etc/emecworks/n8n-runners.env
     /etc/emecworks/portfolio.env
+    /etc/emecworks/ratemet.env
 )
 
 for required_file in "`${required_files[@]}"; do
@@ -112,6 +113,25 @@ if [[ -z "`$latest_backup" ]]; then
     exit 1
 fi
 
+latest_ratemet_backup="`$(sudo find /var/backups/emecworks/ratemet \
+    -mindepth 1 \
+    -maxdepth 1 \
+    -type d \
+    -name '????????T??????Z' \
+    -printf '%f\n' |
+    sort |
+    tail -n 1)"
+
+if [[ -z "`$latest_ratemet_backup" ]]; then
+    echo "No completed Ratemet backup was found." >&2
+    exit 1
+fi
+
+sudo test -f "/var/backups/emecworks/`${latest_backup}/SHA256SUMS"
+sudo test -f "/var/backups/emecworks/ratemet/`${latest_ratemet_backup}/SHA256SUMS"
+sudo sh -c "cd '/var/backups/emecworks/`${latest_backup}' && sha256sum -c SHA256SUMS >/dev/null"
+sudo sh -c "cd '/var/backups/emecworks/ratemet/`${latest_ratemet_backup}' && sha256sum -c SHA256SUMS >/dev/null"
+
 sudo tar \
     -C / \
     -czf "`$temporary_archive" \
@@ -120,7 +140,9 @@ sudo tar \
     etc/emecworks/n8n-db.env \
     etc/emecworks/n8n-runners.env \
     etc/emecworks/portfolio.env \
-    "var/backups/emecworks/`${latest_backup}"
+    etc/emecworks/ratemet.env \
+    "var/backups/emecworks/`${latest_backup}" \
+    "var/backups/emecworks/ratemet/`${latest_ratemet_backup}"
 
 sudo chown ubuntu:ubuntu "`$temporary_archive"
 sudo chmod 0600 "`$temporary_archive"
