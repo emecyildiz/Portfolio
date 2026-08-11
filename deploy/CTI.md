@@ -7,6 +7,8 @@ portfolio database.
 ## Security boundary
 
 - `cti-db` has no published or exposed host port.
+- The Compose service uses the unique name `cti-db`; a generic `db` service
+  name would collide with n8n's own PostgreSQL DNS alias on the shared network.
 - The `emecworks-cti` Docker network is internal.
 - n8n joins that network and connects as the fixed low-privilege role
   `cti_n8n`.
