@@ -6,15 +6,35 @@ The production monitoring stack has independent layers:
    health state.
 2. The `Emecworks Health Monitor` n8n workflow checks portfolio and database
    readiness through the private Docker network.
-3. The `n8n Workflow Error Alerts` workflow sends sanitized workflow failures
+3. The `Ratemet Health Monitor` n8n workflow checks the public Ratemet health
+   endpoint and verifies both application and database status.
+4. The `n8n Workflow Error Alerts` workflow sends sanitized workflow failures
    to Telegram.
-4. The host log monitor scans only the portfolio web container for new error
+5. The host log monitor scans only the portfolio web container for new error
    signatures and sends a sanitized payload to an authenticated n8n webhook.
-5. The `Emecworks Weekly Analytics Report` n8n workflow sends a privacy-safe
+6. The `Emecworks Weekly Analytics Report` n8n workflow sends a privacy-safe
    summary of the last seven complete UTC days to Telegram every Monday.
 
 The n8n container is not given access to `/var/run/docker.sock`. The host-side
 log monitor remains narrowly scoped to `emecworks-web-1`.
+
+## Ratemet health monitor
+
+The active `Ratemet Health Monitor` workflow runs every five minutes and sends
+an HTTP request to:
+
+```text
+https://ratemet.emecworks.com/health
+```
+
+The response is healthy only when the HTTP status is `200` and the JSON body
+contains both `status: ok` and `database: ok`. A single transient failure is
+ignored. Two consecutive failures produce one Telegram alert, and a later
+healthy response produces one recovery notification.
+
+The workflow uses `n8n Workflow Error Alerts` as its error workflow. It reaches
+Ratemet through the public HTTPS endpoint, so the n8n container does not join
+`ratemet-edge` and the existing Docker network boundary remains intact.
 
 ## n8n log webhook
 
