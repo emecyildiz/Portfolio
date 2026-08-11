@@ -54,6 +54,15 @@ token usage and the analyzed article are committed together. HTTP or parsing
 failures, which do not consume AI quota, and actual AI/rate-limit failures are
 distinguished by `cti.defer_article_analysis()`.
 
+`deploy/n8n/workflows/cti-article-analysis.json` runs at most once every 30
+minutes and claims one article. It repeats the HTTPS host allowlist check,
+disables HTTP redirects, applies a 15-second fetch timeout, extracts only the
+reviewed CSS selector, removes data URIs and links deterministically, and caps
+the AI input at 16,000 characters. Gemini receives untrusted article text as
+data, returns only classification metadata and a short Turkish summary, and
+its output is validated against the database enums and length limits before
+storage. Every known failure path releases or defers the claimed job.
+
 ## Retention
 
 `cti.apply_retention()` implements the bounded server-side retention policy:
