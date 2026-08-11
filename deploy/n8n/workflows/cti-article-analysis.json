@@ -40,7 +40,7 @@
           "operation": "executeQuery",
           "query": "SELECT article_id, canonical_url, title, source_name, content_selector, allowed_hosts, attempt FROM cti.claim_analysis_jobs($1, $2, $3);",
           "options": {
-            "queryReplacement": "={{ [1, 20, 400] }}"
+            "queryReplacement": "={{ [1, 19, 392] }}"
           }
         },
         "credentials": {
