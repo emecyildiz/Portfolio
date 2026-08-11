@@ -3,6 +3,13 @@
     const triggers = Array.from(document.querySelectorAll('[data-lightbox-image]'));
     if (!dialog || triggers.length === 0) return;
 
+    // The page entrance animation leaves a transform on <main>. A fixed element
+    // inside that transformed container is positioned against the page instead
+    // of the viewport, so keep the viewer directly under <body>.
+    if (dialog.parentElement !== document.body) {
+        document.body.appendChild(dialog);
+    }
+
     const image = dialog.querySelector('#imageLightboxImage');
     const caption = dialog.querySelector('#imageLightboxCaption');
     const counter = dialog.querySelector('[data-lightbox-counter]');
@@ -39,24 +46,24 @@
         counter.textContent = `${currentIndex + 1} / ${items.length}`;
 
         const hasMultipleImages = items.length > 1;
-        previousButton.classList.toggle('hidden', !hasMultipleImages);
-        nextButton.classList.toggle('hidden', !hasMultipleImages);
+        previousButton.hidden = !hasMultipleImages;
+        nextButton.hidden = !hasMultipleImages;
     };
 
     const open = (index, trigger) => {
         currentIndex = index;
         previousFocus = trigger;
         render();
-        dialog.classList.remove('hidden');
-        dialog.classList.add('flex');
+        dialog.hidden = false;
+        dialog.classList.add('is-open');
         dialog.setAttribute('aria-hidden', 'false');
         document.body.classList.add('overflow-hidden');
         closeButton.focus();
     };
 
     const close = () => {
-        dialog.classList.add('hidden');
-        dialog.classList.remove('flex');
+        dialog.classList.remove('is-open');
+        dialog.hidden = true;
         dialog.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('overflow-hidden');
         image.src = '';

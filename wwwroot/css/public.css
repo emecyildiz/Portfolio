@@ -1192,6 +1192,138 @@ html {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Full-viewport project image viewer. These dedicated selectors deliberately
+   avoid the public theme's generic Tailwind color overrides. */
+.public-site .image-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 4.5rem 4.75rem 2rem;
+    overflow: hidden;
+    background: rgba(7, 9, 13, .94) !important;
+    color: #fff !important;
+    backdrop-filter: blur(8px);
+}
+
+.public-site .image-lightbox.is-open {
+    display: flex;
+}
+
+.public-site .image-lightbox__figure {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    max-width: 90rem;
+    max-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+}
+
+.public-site .image-lightbox__image {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: calc(100vh - 9rem);
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 4px !important;
+    object-fit: contain;
+    opacity: 1;
+    visibility: visible;
+    filter: none !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .55);
+}
+
+.public-site .image-lightbox__caption {
+    max-width: 48rem;
+    color: #e5e7eb !important;
+    font-size: .875rem;
+    line-height: 1.5rem;
+    text-align: center;
+}
+
+.public-site .image-lightbox__counter {
+    color: #94a3b8 !important;
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: .625rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.public-site .image-lightbox__close,
+.public-site .image-lightbox__navigation {
+    position: absolute;
+    z-index: 2;
+    border: 1px solid rgba(255, 255, 255, .25) !important;
+    background: rgba(0, 0, 0, .7) !important;
+    color: #fff !important;
+    transition: border-color .18s ease, background-color .18s ease;
+}
+
+.public-site .image-lightbox__close:hover,
+.public-site .image-lightbox__navigation:hover {
+    border-color: rgba(255, 255, 255, .65) !important;
+    background: rgba(20, 24, 28, .9) !important;
+}
+
+.public-site .image-lightbox__close {
+    top: 1rem;
+    right: 1rem;
+    padding: .65rem .8rem;
+    border-radius: 3px !important;
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: .625rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.public-site .image-lightbox__navigation {
+    top: 50%;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px !important;
+    font-size: 1.25rem;
+    transform: translateY(-50%);
+}
+
+.public-site .image-lightbox__navigation--previous {
+    left: 1rem;
+}
+
+.public-site .image-lightbox__navigation--next {
+    right: 1rem;
+}
+
+@media (max-width: 640px) {
+    .public-site .image-lightbox {
+        padding: 4.25rem .75rem 5rem;
+    }
+
+    .public-site .image-lightbox__image {
+        max-height: calc(100vh - 11rem);
+    }
+
+    .public-site .image-lightbox__navigation {
+        top: auto;
+        bottom: 1rem;
+        transform: none;
+    }
+
+    .public-site .image-lightbox__navigation--previous {
+        left: calc(50% - 3.25rem);
+    }
+
+    .public-site .image-lightbox__navigation--next {
+        right: calc(50% - 3.25rem);
+    }
+}
+
 @media (max-width: 900px) {
     .public-nav {
         min-height: 70px;
