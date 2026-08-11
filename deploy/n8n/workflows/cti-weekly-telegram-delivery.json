@@ -120,7 +120,7 @@
         "position": [1080, 80],
         "parameters": {
           "mode": "runOnceForEachItem",
-          "jsCode": "const claim = $('Claim Weekly Telegram Delivery').item.json;\nconst messageId = Number($json.message_id);\nif (!Number.isSafeInteger(messageId) || messageId < 1) throw new Error('Telegram returned an invalid message receipt.');\nreturn { json: { delivery_id: Number(claim.delivery_id), external_message_id: String(messageId) } };"
+          "jsCode": "const claim = $('Claim Weekly Telegram Delivery').item.json;\nconst messageId = Number($json?.result?.message_id ?? $json?.message_id);\nif (!Number.isSafeInteger(messageId) || messageId < 1) throw new Error('Telegram returned an invalid message receipt.');\nreturn { json: { delivery_id: Number(claim.delivery_id), external_message_id: String(messageId) } };"
         },
         "onError": "continueErrorOutput"
       },
