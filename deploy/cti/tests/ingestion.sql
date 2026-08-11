@@ -144,6 +144,10 @@ BEGIN
         RAISE EXCEPTION 'Deduplication left an unexpected occurrence count.';
     END IF;
 
+    IF (SELECT count(*) FROM cti.analysis_jobs) <> 1 THEN
+        RAISE EXCEPTION 'A new article did not receive exactly one analysis job.';
+    END IF;
+
     IF has_table_privilege('cti_n8n', 'cti.articles', 'DELETE') THEN
         RAISE EXCEPTION 'The n8n role unexpectedly has direct DELETE permission.';
     END IF;
@@ -154,6 +158,58 @@ BEGIN
         'EXECUTE'
     ) THEN
         RAISE EXCEPTION 'The n8n role cannot execute the ingestion function.';
+    END IF;
+END;
+$$;
+
+DO $$
+DECLARE
+    claimed_record record;
+    claimed_count integer;
+BEGIN
+    SELECT * INTO claimed_record
+    FROM cti.claim_analysis_jobs(3, 20);
+
+    IF claimed_record.article_id IS NULL OR claimed_record.attempt <> 1 THEN
+        RAISE EXCEPTION 'The analysis queue did not claim the pending article.';
+    END IF;
+
+    SELECT count(*) INTO claimed_count
+    FROM cti.claim_analysis_jobs(3, 20);
+
+    IF claimed_count <> 0 THEN
+        RAISE EXCEPTION 'A processing analysis job was claimed twice.';
+    END IF;
+
+    PERFORM cti.complete_article_analysis(
+        claimed_record.article_id,
+        'vulnerability',
+        'high',
+        'Test Turkish summary.',
+        'Test cleaned article content.',
+        0.950,
+        'test-model',
+        100,
+        25
+    );
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM cti.analysis_jobs
+        WHERE article_id = claimed_record.article_id
+          AND status = 'completed'
+    ) THEN
+        RAISE EXCEPTION 'The completed analysis job state was not persisted.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM cti.ai_usage
+        WHERE article_id = claimed_record.article_id
+          AND request_status = 'success'
+          AND total_tokens = 125
+    ) THEN
+        RAISE EXCEPTION 'Successful AI usage was not recorded.';
     END IF;
 END;
 $$;

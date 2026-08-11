@@ -2,8 +2,8 @@
 
 DO $$
 BEGIN
-    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 4 THEN
-        RAISE EXCEPTION 'CTI schema version 4 is not installed.';
+    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 5 THEN
+        RAISE EXCEPTION 'CTI schema version 5 is not installed.';
     END IF;
 
     IF has_table_privilege('cti_n8n', 'cti.articles', 'DELETE') THEN
@@ -27,6 +27,14 @@ BEGIN
           AND allowed_hosts @> ARRAY['thehackernews.com', 'www.thehackernews.com']
     ) THEN
         RAISE EXCEPTION 'The initial CTI source is missing or invalid.';
+    END IF;
+
+    IF NOT has_function_privilege(
+        'cti_n8n',
+        'cti.claim_analysis_jobs(integer,integer)',
+        'EXECUTE'
+    ) THEN
+        RAISE EXCEPTION 'The n8n role cannot claim analysis jobs.';
     END IF;
 END;
 $$;

@@ -38,6 +38,21 @@ allowlist, and passes metadata to the parameterized `cti.ingest_feed_item()`
 function. It does not fetch article pages, call Gemini, or send Telegram
 messages.
 
+## Analysis queue and quota gate
+
+Every newly inserted article receives one `analysis_jobs` row through a
+database trigger. `cti.claim_analysis_jobs(batch_size, daily_limit)` is the
+only supported way for an n8n analysis workflow to reserve work. It enforces a
+maximum batch size of five, a caller-provided daily ceiling capped at 100,
+atomic row locking, stale-lock recovery, and no more than five attempts per
+article. The production workflow will start with a conservative batch size of
+three and an application ceiling of 20 AI requests per UTC day.
+
+Successful calls must finish through `cti.complete_article_analysis()` so
+token usage and the analyzed article are committed together. HTTP or parsing
+failures, which do not consume AI quota, and actual AI/rate-limit failures are
+distinguished by `cti.defer_article_analysis()`.
+
 ## Retention
 
 `cti.apply_retention()` implements the bounded server-side retention policy:
