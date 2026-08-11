@@ -2,8 +2,8 @@
 
 DO $$
 BEGIN
-    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 5 THEN
-        RAISE EXCEPTION 'CTI schema version 5 is not installed.';
+    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 6 THEN
+        RAISE EXCEPTION 'CTI schema version 6 is not installed.';
     END IF;
 
     IF has_table_privilege('cti_n8n', 'cti.articles', 'DELETE') THEN
@@ -31,7 +31,7 @@ BEGIN
 
     IF NOT has_function_privilege(
         'cti_n8n',
-        'cti.claim_analysis_jobs(integer,integer)',
+        'cti.claim_analysis_jobs(integer,integer,integer)',
         'EXECUTE'
     ) THEN
         RAISE EXCEPTION 'The n8n role cannot claim analysis jobs.';

@@ -41,12 +41,13 @@ messages.
 ## Analysis queue and quota gate
 
 Every newly inserted article receives one `analysis_jobs` row through a
-database trigger. `cti.claim_analysis_jobs(batch_size, daily_limit)` is the
+database trigger. `cti.claim_analysis_jobs(batch_size, daily_limit,
+monthly_limit)` is the
 only supported way for an n8n analysis workflow to reserve work. It enforces a
-maximum batch size of five, a caller-provided daily ceiling capped at 100,
-atomic row locking, stale-lock recovery, and no more than five attempts per
-article. The production workflow will start with a conservative batch size of
-three and an application ceiling of 20 AI requests per UTC day.
+maximum batch size of five, caller-provided daily and monthly ceilings,
+serialized claims, only one in-flight AI analysis, stale-lock recovery, and no
+more than five attempts per article. The production workflow starts with one
+article per execution, 20 AI requests per UTC day, and 400 per UTC month.
 
 Successful calls must finish through `cti.complete_article_analysis()` so
 token usage and the analyzed article are committed together. HTTP or parsing

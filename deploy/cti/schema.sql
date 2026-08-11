@@ -155,8 +155,9 @@ CREATE INDEX IF NOT EXISTS ix_ai_usage_requested_at
     ON cti.ai_usage (requested_at DESC);
 
 CREATE OR REPLACE FUNCTION cti.claim_analysis_jobs(
-    batch_size_value integer DEFAULT 3,
-    daily_limit_value integer DEFAULT 20
+    batch_size_value integer DEFAULT 1,
+    daily_limit_value integer DEFAULT 20,
+    monthly_limit_value integer DEFAULT 400
 )
 RETURNS TABLE(
     article_id bigint,
@@ -174,7 +175,9 @@ AS $$
 DECLARE
     reference_time timestamptz := clock_timestamp();
     utc_day_start timestamptz;
-    used_slots integer;
+    utc_month_start timestamptz;
+    used_daily_slots integer;
+    used_monthly_slots integer;
     active_reservations integer;
     available_slots integer;
 BEGIN
@@ -188,7 +191,16 @@ BEGIN
             USING ERRCODE = '22023';
     END IF;
 
+    IF monthly_limit_value NOT BETWEEN daily_limit_value AND 5000 THEN
+        RAISE EXCEPTION 'Analysis monthly limit must be between the daily limit and 5000.'
+            USING ERRCODE = '22023';
+    END IF;
+
+    PERFORM pg_advisory_xact_lock(hashtextextended('cti.claim_analysis_jobs', 0));
+
     utc_day_start := date_trunc('day', reference_time AT TIME ZONE 'UTC')
+        AT TIME ZONE 'UTC';
+    utc_month_start := date_trunc('month', reference_time AT TIME ZONE 'UTC')
         AT TIME ZONE 'UTC';
 
     UPDATE cti.analysis_jobs AS job
@@ -204,19 +216,30 @@ BEGIN
       AND job.locked_at < reference_time - interval '30 minutes';
 
     SELECT count(*)
-    INTO used_slots
+    INTO used_daily_slots
     FROM cti.ai_usage AS usage
     WHERE usage.purpose = 'article_analysis'
       AND usage.requested_at >= utc_day_start;
+
+    SELECT count(*)
+    INTO used_monthly_slots
+    FROM cti.ai_usage AS usage
+    WHERE usage.purpose = 'article_analysis'
+      AND usage.requested_at >= utc_month_start;
 
     SELECT count(*)
     INTO active_reservations
     FROM cti.analysis_jobs AS job
     WHERE job.status = 'processing';
 
+    IF active_reservations > 0 THEN
+        RETURN;
+    END IF;
+
     available_slots := LEAST(
         batch_size_value,
-        GREATEST(daily_limit_value - used_slots - active_reservations, 0)
+        GREATEST(daily_limit_value - used_daily_slots, 0),
+        GREATEST(monthly_limit_value - used_monthly_slots, 0)
     );
 
     IF available_slots = 0 THEN
@@ -750,7 +773,7 @@ REVOKE ALL ON FUNCTION cti.apply_retention() FROM PUBLIC;
 REVOKE ALL ON FUNCTION cti.ingest_feed_item(bigint, text, text, text, timestamptz)
     FROM PUBLIC;
 REVOKE ALL ON FUNCTION cti.enqueue_article_analysis() FROM PUBLIC;
-REVOKE ALL ON FUNCTION cti.claim_analysis_jobs(integer, integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION cti.claim_analysis_jobs(integer, integer, integer) FROM PUBLIC;
 REVOKE ALL ON FUNCTION cti.complete_article_analysis(
     bigint, text, text, text, text, numeric, text, integer, integer
 ) FROM PUBLIC;
@@ -765,7 +788,7 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA cti TO cti_n8n;
 GRANT EXECUTE ON FUNCTION cti.apply_retention() TO cti_n8n;
 GRANT EXECUTE ON FUNCTION cti.ingest_feed_item(bigint, text, text, text, timestamptz)
     TO cti_n8n;
-GRANT EXECUTE ON FUNCTION cti.claim_analysis_jobs(integer, integer) TO cti_n8n;
+GRANT EXECUTE ON FUNCTION cti.claim_analysis_jobs(integer, integer, integer) TO cti_n8n;
 GRANT EXECUTE ON FUNCTION cti.complete_article_analysis(
     bigint, text, text, text, text, numeric, text, integer, integer
 ) TO cti_n8n;
@@ -818,5 +841,5 @@ VALUES (4)
 ON CONFLICT (version) DO NOTHING;
 
 INSERT INTO cti.schema_versions (version)
-VALUES (5)
+VALUES (6)
 ON CONFLICT (version) DO NOTHING;

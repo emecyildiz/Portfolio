@@ -168,14 +168,14 @@ DECLARE
     claimed_count integer;
 BEGIN
     SELECT * INTO claimed_record
-    FROM cti.claim_analysis_jobs(3, 20);
+    FROM cti.claim_analysis_jobs(1, 20, 400);
 
     IF claimed_record.article_id IS NULL OR claimed_record.attempt <> 1 THEN
         RAISE EXCEPTION 'The analysis queue did not claim the pending article.';
     END IF;
 
     SELECT count(*) INTO claimed_count
-    FROM cti.claim_analysis_jobs(3, 20);
+    FROM cti.claim_analysis_jobs(1, 20, 400);
 
     IF claimed_count <> 0 THEN
         RAISE EXCEPTION 'A processing analysis job was claimed twice.';
@@ -210,6 +210,21 @@ BEGIN
           AND total_tokens = 125
     ) THEN
         RAISE EXCEPTION 'Successful AI usage was not recorded.';
+    END IF;
+
+    PERFORM cti.ingest_feed_item(
+        (SELECT id FROM cti.sources WHERE name = 'Test Source'),
+        'https://news.example.test/advisories/monthly-cap',
+        'Monthly Capacity Test',
+        'guid-monthly-cap',
+        now()
+    );
+
+    SELECT count(*) INTO claimed_count
+    FROM cti.claim_analysis_jobs(1, 1, 1);
+
+    IF claimed_count <> 0 THEN
+        RAISE EXCEPTION 'The monthly AI request ceiling was not enforced.';
     END IF;
 END;
 $$;
