@@ -85,6 +85,7 @@ trap cleanup EXIT
 
 required_files=(
     /etc/emecworks/cloudflared.env
+    /etc/emecworks/cti-dashboard.env
     /etc/emecworks/cti-db.env
     /etc/emecworks/n8n-app.env
     /etc/emecworks/n8n-db.env
@@ -140,6 +141,7 @@ sudo tar \
     -C / \
     -czf "`$temporary_archive" \
     etc/emecworks/cloudflared.env \
+    etc/emecworks/cti-dashboard.env \
     etc/emecworks/cti-db.env \
     etc/emecworks/n8n-app.env \
     etc/emecworks/n8n-db.env \

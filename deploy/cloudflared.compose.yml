@@ -13,6 +13,7 @@ services:
     networks:
       - edge
       - ratemet
+      - cti
 
 networks:
   edge:
@@ -20,4 +21,7 @@ networks:
     external: true
   ratemet:
     name: ratemet-edge
+    external: true
+  cti:
+    name: emecworks-cti
     external: true

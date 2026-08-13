@@ -28,6 +28,48 @@ services:
         aliases:
           - cti-db
 
+  cti-dashboard:
+    build:
+      context: ./cti-dashboard
+      dockerfile: Dockerfile
+    env_file:
+      - /etc/emecworks/cti-dashboard.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      CtiDatabase__Host: cti-db
+      CtiDatabase__Name: cti
+      CtiDatabase__Username: cti_dashboard
+    depends_on:
+      cti-db:
+        condition: service_healthy
+    expose:
+      - "8080"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    pids_limit: 128
+    mem_limit: 192m
+    cpus: 0.50
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://127.0.0.1:8080/health/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - cti
+
 volumes:
   cti_pgdata:
 

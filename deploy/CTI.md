@@ -13,8 +13,9 @@ portfolio database.
 - n8n joins that network and connects as the fixed low-privilege role
   `cti_n8n`.
 - The PostgreSQL owner password is never stored in n8n.
-- A future private dashboard must use its own database role; it must not reuse
-  either the owner or n8n credentials.
+- The private dashboard uses the dedicated `cti_dashboard` role and can select
+  only from two restricted views. It cannot read base tables, call workflow
+  functions, or write CTI data.
 - Feed and article URLs must be checked against each source's `allowed_hosts`
   before any HTTP request is made.
 
@@ -93,3 +94,50 @@ workflow will call it once per night and send an alert if it fails.
 The Emecworks backup and recovery scripts include `cti-database.dump` and
 `/etc/emecworks/cti-db.env`. Deploy the database and the matching backup files
 as one change so the scheduled backup never runs against a partial setup.
+
+## Private dashboard
+
+`deploy/cti-dashboard` is a separate ASP.NET Core service. It is not part of
+the public portfolio application, does not publish a host port, and joins only
+the internal `emecworks-cti` network. The Cloudflare Tunnel container also
+joins this network so it can reach the panel; the panel itself receives no
+general-purpose egress network.
+
+The first version is deliberately read-only:
+
+- analyzed articles from the current 30-day metadata window;
+- title and Turkish-summary search;
+- category and severity filters;
+- individual article records with original-source links;
+- ready or sent report archives that have not expired.
+
+The service sends `noindex`, private-cache, CSP, framing, referrer, and MIME
+hardening headers. In production it rejects every non-health request that does
+not contain Cloudflare Access's authenticated-user header. This application
+check is defense in depth; Cloudflare Access must still protect the hostname.
+
+### Dashboard installation
+
+1. Generate a third random database password. Add it as
+   `CTI_DASHBOARD_PASSWORD` to `/etc/emecworks/cti-db.env`.
+2. Create `/etc/emecworks/cti-dashboard.env` containing only the same
+   `CTI_DASHBOARD_PASSWORD` value plus `CTI_ACCESS_EMAIL`, which must match the
+   single email allowed by Cloudflare Access. Set both files to `root:root`
+   and `0600`.
+3. Apply `deploy/cti/migrations/010-private-dashboard.sql` as the CTI owner,
+   passing the password through the psql variable `cti_dashboard_password`.
+4. Build and start `cti-dashboard` through `deploy/cti.compose.yml`.
+5. Add the tunnel route `cti.emecworks.com` to
+   `http://cti-dashboard:8080`.
+6. Create a Cloudflare Access self-hosted application for
+   `cti.emecworks.com`. Its Allow policy must contain only the owner's email;
+   use One-time PIN as the required login method and keep the session short.
+7. Verify that an unauthenticated private-browser request shows Cloudflare
+   Access, an authorized request loads the dashboard, and
+   `https://cti.emecworks.com/health/ready` is healthy through the tunnel.
+8. Export a new encrypted recovery bundle because the new environment file is
+   required for disaster recovery.
+
+Do not add dashboard notes or administrative writes by expanding this role.
+If a write feature is ever justified, it must use a separate narrowly scoped
+function and a new reviewed migration.

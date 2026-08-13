@@ -16,7 +16,7 @@ powershell -ExecutionPolicy Bypass -File .\deploy\export-recovery-bundle.ps1
 The script:
 
 1. Verifies and packages the newest completed Emecworks and Ratemet backups
-   together with the seven production environment files on the VPS.
+   together with the eight production environment files on the VPS.
 2. Downloads that temporary package over SSH.
 3. Uses 7-Zip header encryption and asks for a password in the terminal.
 4. Tests the encrypted archive.
