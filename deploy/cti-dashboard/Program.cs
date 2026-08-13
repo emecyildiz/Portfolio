@@ -132,7 +132,7 @@ app.MapGet("/", async (
         currentPage,
         (int)Math.Ceiling(totalCount / (double)pageSize),
         totalCount,
-        GetAuthenticatedEmail(context));
+        GetAuthenticatedIdentity(context));
     return Results.Content(HtmlPages.Index(model), "text/html; charset=utf-8");
 });
 
@@ -166,7 +166,7 @@ app.MapGet("/articles/{id:long}", async (
         reader.GetDateTime(6),
         reader.IsDBNull(7) ? null : reader.GetDateTime(7),
         reader.GetFieldValue<string[]>(8));
-    return Results.Content(HtmlPages.Article(article, GetAuthenticatedEmail(context)), "text/html; charset=utf-8");
+    return Results.Content(HtmlPages.Article(article, GetAuthenticatedIdentity(context)), "text/html; charset=utf-8");
 });
 
 app.MapGet("/reports", async (
@@ -196,7 +196,7 @@ app.MapGet("/reports", async (
     }
 
     return Results.Content(
-        HtmlPages.Reports(reports, GetAuthenticatedEmail(context)),
+        HtmlPages.Reports(reports, GetAuthenticatedIdentity(context)),
         "text/html; charset=utf-8");
 });
 
@@ -215,8 +215,10 @@ static string NormalizeEnum(string? value, IReadOnlyCollection<string> allowed)
     return allowed.Contains(normalized) ? normalized : string.Empty;
 }
 
-static string GetAuthenticatedEmail(HttpContext context) =>
-    context.Request.Headers["Cf-Access-Authenticated-User-Email"].FirstOrDefault() ?? "local development";
+static string GetAuthenticatedIdentity(HttpContext context) =>
+    string.IsNullOrWhiteSpace(context.Request.Headers["Cf-Access-Authenticated-User-Email"].FirstOrDefault())
+        ? "Local development"
+        : "Authenticated owner";
 
 internal sealed record ArticleListItem(
     long Id, string Title, string Category, string Severity, string Summary,
@@ -256,7 +258,7 @@ internal static class HtmlPages
         return Layout("CTI Intelligence", model.AuthenticatedEmail, $$"""
             <section class="hero"><p class="eyebrow">PRIVATE THREAT INTELLIGENCE</p><h1>Intelligence inbox</h1><p>Analyzed security news retained for the current research window.</p></section>
             <form class="filters" method="get">
-              <label>Search<input type="search" name="q" value="{{E(model.Query)}}" maxlength="120" placeholder="Title or Turkish summary"></label>
+              <label>Search<input type="search" name="q" value="{{E(model.Query)}}" maxlength="120" placeholder="Title or executive summary"></label>
               <label>Category<select name="category">{{Options(CategoryOptions, model.Category)}}</select></label>
               <label>Severity<select name="severity">{{Options(SeverityOptions, model.Severity)}}</select></label>
               <button type="submit">Apply filters</button><a class="reset" href="/">Reset</a>

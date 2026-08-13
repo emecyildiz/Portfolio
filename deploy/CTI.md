@@ -60,7 +60,7 @@ minutes and claims one article. It repeats the HTTPS host allowlist check,
 disables HTTP redirects, applies a 15-second fetch timeout, extracts only the
 reviewed CSS selector, removes data URIs and links deterministically, and caps
 the AI input at 16,000 characters. Gemini receives untrusted article text as
-data, returns only classification metadata and a short Turkish summary, and
+data, returns only classification metadata and a short English summary, and
 its output is validated against the database enums and length limits before
 storage. Every known failure path releases or defers the claimed job.
 
@@ -106,7 +106,7 @@ general-purpose egress network.
 The first version is deliberately read-only:
 
 - analyzed articles from the current 30-day metadata window;
-- title and Turkish-summary search;
+- title and English-summary search;
 - category and severity filters;
 - individual article records with original-source links;
 - ready or sent report archives that have not expired.
