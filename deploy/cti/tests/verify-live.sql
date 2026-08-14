@@ -2,8 +2,8 @@
 
 DO $$
 BEGIN
-    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 10 THEN
-        RAISE EXCEPTION 'CTI schema version 10 is not installed.';
+    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 11 THEN
+        RAISE EXCEPTION 'CTI schema version 11 is not installed.';
     END IF;
 
     IF has_table_privilege('cti_n8n', 'cti.articles', 'DELETE') THEN
@@ -27,6 +27,19 @@ BEGIN
           AND allowed_hosts @> ARRAY['thehackernews.com', 'www.thehackernews.com']
     ) THEN
         RAISE EXCEPTION 'The initial CTI source is missing or invalid.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM cti.sources
+        WHERE name = 'CISA Cybersecurity Advisories'
+          AND enabled = true
+          AND feed_url = 'https://www.cisa.gov/cybersecurity-advisories/all.xml'
+          AND allowed_hosts @> ARRAY['cisa.gov', 'www.cisa.gov']
+          AND content_selector = '.l-page-section--rich-text .l-page-section__content'
+          AND trust_score = 95
+    ) THEN
+        RAISE EXCEPTION 'The CISA CTI source is missing or invalid.';
     END IF;
 
     IF NOT has_function_privilege(
