@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -287,7 +288,7 @@ internal static class HtmlPages
             : string.Join("", reports.Select(report => $$"""
                 <details class="report">
                   <summary><span><strong>{{E(report.Title)}}</strong><small>{{D(report.WindowStart)}} — {{D(report.WindowEnd)}}</small></span><span class="status">{{E(report.Status)}}</span></summary>
-                  <div class="report-body"><pre>{{E(report.Content)}}</pre><p>Generated {{D(report.GeneratedAt)}}{{(report.SentAt is null ? "" : $" · Sent {D(report.SentAt.Value)}")}}</p></div>
+                  <div class="report-body"><div class="report-markdown">{{RenderReportMarkdown(report.Content, report.Title)}}</div><p class="report-timestamps">Generated {{D(report.GeneratedAt)}}{{(report.SentAt is null ? "" : $" · Sent {D(report.SentAt.Value)}")}}</p></div>
                 </details>
                 """));
         return Layout("Weekly reports", email, $$"""
@@ -296,8 +297,76 @@ internal static class HtmlPages
             """);
     }
 
+    private static string RenderReportMarkdown(string content, string reportTitle)
+    {
+        var output = new StringBuilder();
+        var paragraph = new List<string>();
+        var firstMeaningfulLine = true;
+
+        void FlushParagraph()
+        {
+            if (paragraph.Count == 0) return;
+            output.Append("<p>").Append(E(string.Join(" ", paragraph))).Append("</p>");
+            paragraph.Clear();
+        }
+
+        foreach (var rawLine in content.Replace("\r\n", "\n", StringComparison.Ordinal)
+                     .Replace('\r', '\n').Split('\n'))
+        {
+            var line = rawLine.Trim();
+            if (line.Length == 0)
+            {
+                FlushParagraph();
+                continue;
+            }
+
+            var headingLevel = 0;
+            while (headingLevel < line.Length && headingLevel < 3 && line[headingLevel] == '#')
+            {
+                headingLevel++;
+            }
+
+            if (headingLevel > 0 && line.Length > headingLevel && line[headingLevel] == ' ')
+            {
+                FlushParagraph();
+                var heading = line[(headingLevel + 1)..].Trim();
+                if (!(firstMeaningfulLine && string.Equals(heading, reportTitle, StringComparison.Ordinal)))
+                {
+                    var htmlLevel = headingLevel + 1;
+                    output.Append("<h").Append(htmlLevel).Append('>')
+                        .Append(E(heading))
+                        .Append("</h").Append(htmlLevel).Append('>');
+                }
+
+                firstMeaningfulLine = false;
+                continue;
+            }
+
+            if (line.Length > 2 && line[0] == '<' && line[^1] == '>' &&
+                Uri.TryCreate(line[1..^1], UriKind.Absolute, out var link) &&
+                string.Equals(link.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            {
+                FlushParagraph();
+                var safeUrl = E(link.AbsoluteUri);
+                output.Append("<p class=\"report-source\"><a href=\"")
+                    .Append(safeUrl)
+                    .Append("\" target=\"_blank\" rel=\"noopener noreferrer\">")
+                    .Append(safeUrl)
+                    .Append("</a></p>");
+                firstMeaningfulLine = false;
+                continue;
+            }
+
+            paragraph.Add(line);
+            firstMeaningfulLine = false;
+        }
+
+        FlushParagraph();
+        return output.ToString();
+    }
+
     private static string Layout(string title, string email, string content) => $$"""
-        <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>{{E(title)}} — Emecworks CTI</title><link rel="stylesheet" href="/app.css"></head>
+        <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>{{E(title)}} — Emecworks CTI</title><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/reports.css"></head>
         <body><header><a class="brand" href="/"><b>Emecworks</b><span>CTI OPERATIONS</span></a><nav><a href="/">Articles</a><a href="/reports">Reports</a></nav><span class="identity">{{E(email)}}</span></header><main>{{content}}</main><footer>Private research system · Content remains untrusted until independently verified.</footer></body></html>
         """;
 
