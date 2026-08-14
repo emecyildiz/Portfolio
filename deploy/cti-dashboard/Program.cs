@@ -366,7 +366,7 @@ internal static class HtmlPages
     }
 
     private static string Layout(string title, string email, string content) => $$"""
-        <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>{{E(title)}} — Emecworks CTI</title><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/reports.css"></head>
+        <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#18211d"><title>{{E(title)}} — Emecworks CTI</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/reports.css"></head>
         <body><header><a class="brand" href="/"><b>Emecworks</b><span>CTI OPERATIONS</span></a><nav><a href="/">Articles</a><a href="/reports">Reports</a></nav><span class="identity">{{E(email)}}</span></header><main>{{content}}</main><footer>Private research system · Content remains untrusted until independently verified.</footer></body></html>
         """;
 
