@@ -320,6 +320,7 @@ internal static class HtmlPages
               <div><span>Token split</span><strong>{{usage.MonthPromptTokens.ToString("N0", CultureInfo.InvariantCulture)}} input</strong><small>{{usage.MonthOutputTokens.ToString("N0", CultureInfo.InvariantCulture)}} output</small></div>
               <div><span>Workload</span><strong>{{usage.MonthArticleRequests.ToString("N0", CultureInfo.InvariantCulture)}} articles · {{usage.MonthReportRequests.ToString("N0", CultureInfo.InvariantCulture)}} reports</strong><small>{{usage.MonthFailedRequests.ToString("N0", CultureInfo.InvariantCulture)}} failed/rate-limited · {{E(lastRequest)}}</small></div>
             </section>
+            <p class="count">Token totals include provider metadata captured after usage tracking was enabled; historical requests are not reconstructed.</p>
             <form class="filters" method="get">
               <label>Search<input type="search" name="q" value="{{E(model.Query)}}" maxlength="120" placeholder="Title or executive summary"></label>
               <label>Source<select name="source">{{SourceOptions(model.AvailableSources, model.Source)}}</select></label>
