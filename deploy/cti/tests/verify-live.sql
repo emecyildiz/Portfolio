@@ -2,8 +2,8 @@
 
 DO $$
 BEGIN
-    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 11 THEN
-        RAISE EXCEPTION 'CTI schema version 11 is not installed.';
+    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 12 THEN
+        RAISE EXCEPTION 'CTI schema version 12 is not installed.';
     END IF;
 
     IF has_table_privilege('cti_n8n', 'cti.articles', 'DELETE') THEN
@@ -16,6 +16,14 @@ BEGIN
         'EXECUTE'
     ) THEN
         RAISE EXCEPTION 'The n8n role cannot execute the ingestion function.';
+    END IF;
+
+    IF NOT has_function_privilege(
+        'cti_n8n',
+        'cti.record_source_check(bigint,boolean,text)',
+        'EXECUTE'
+    ) THEN
+        RAISE EXCEPTION 'The n8n role cannot record source health.';
     END IF;
 
     IF NOT EXISTS (

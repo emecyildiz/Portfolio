@@ -58,12 +58,35 @@
         }
       },
       {
+        "id": "3a99670c-57cf-4c9a-b8bd-69bec3f909dc",
+        "name": "Start Source Check",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          500,
+          200
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH checked AS MATERIALIZED (SELECT cti.record_source_check($1, false, 'feed_read_failed')) SELECT source.id AS source_id, source.name AS source_name, source.feed_url, source.allowed_hosts FROM cti.sources AS source CROSS JOIN checked WHERE source.id = $1 AND source.enabled = true;",
+          "options": {
+            "queryReplacement": "={{ [$json.source_id] }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "CTIPostgres0811",
+            "name": "CTI PostgreSQL"
+          }
+        }
+      },
+      {
         "id": "557623be-a586-419f-8cf0-50c862c90a02",
         "name": "Read Reviewed Feeds",
         "type": "n8n-nodes-base.rssFeedRead",
         "typeVersion": 1.2,
         "position": [
-          520,
+          740,
           200
         ],
         "parameters": {
@@ -77,7 +100,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          780,
+          1000,
           200
         ],
         "parameters": {
@@ -91,7 +114,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1040,
+          1260,
           200
         ],
         "parameters": {
@@ -99,6 +122,29 @@
           "query": "SELECT article_id, is_new, occurrence_added FROM cti.ingest_feed_item($1, $2, $3, $4, $5::timestamptz);",
           "options": {
             "queryReplacement": "={{ [$json.source_id, $json.original_url, $json.title, $json.feed_guid, $json.published_at] }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "CTIPostgres0811",
+            "name": "CTI PostgreSQL"
+          }
+        }
+      },
+      {
+        "id": "bb987e69-908f-4382-8a47-438f6bea8080",
+        "name": "Record Source Success",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1000,
+          20
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT cti.record_source_check($1, true, NULL);",
+          "options": {
+            "queryReplacement": "={{ [$('Load Active Sources').item.json.source_id] }}"
           }
         },
         "credentials": {
@@ -136,6 +182,17 @@
         "main": [
           [
             {
+              "node": "Start Source Check",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Start Source Check": {
+        "main": [
+          [
+            {
               "node": "Read Reviewed Feeds",
               "type": "main",
               "index": 0
@@ -148,6 +205,11 @@
           [
             {
               "node": "Validate Feed Item",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Record Source Success",
               "type": "main",
               "index": 0
             }

@@ -25,6 +25,34 @@ BEGIN
     FROM cti.sources
     WHERE name = 'Test Source';
 
+    PERFORM cti.record_source_check(source_id_value, false, 'feed_read_failed');
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM cti.sources
+        WHERE id = source_id_value
+          AND last_checked_at IS NOT NULL
+          AND last_error_at IS NOT NULL
+          AND last_error_code = 'feed_read_failed'
+          AND last_success_at IS NULL
+    ) THEN
+        RAISE EXCEPTION 'Failed source health was not recorded.';
+    END IF;
+
+    PERFORM cti.record_source_check(source_id_value, true, NULL);
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM cti.sources
+        WHERE id = source_id_value
+          AND last_checked_at IS NOT NULL
+          AND last_success_at IS NOT NULL
+          AND last_error_at IS NOT NULL
+          AND last_error_code IS NULL
+    ) THEN
+        RAISE EXCEPTION 'Successful source health was not recorded.';
+    END IF;
+
     SELECT * INTO result_record
     FROM cti.ingest_feed_item(
         source_id_value,

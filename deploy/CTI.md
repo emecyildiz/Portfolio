@@ -41,6 +41,13 @@ allowlist, and passes metadata to the parameterized `cti.ingest_feed_item()`
 function. It does not fetch article pages, call Gemini, or send Telegram
 messages.
 
+Before each feed request, the workflow records the source check as pending
+failure through `cti.record_source_check()`. A successful RSS response clears
+the current error and advances both `last_checked_at` and `last_success_at`.
+If the RSS node fails, the provisional `feed_read_failed` state remains and the
+normal n8n error workflow still raises the operational alert. Raw remote error
+messages are never stored in the source table.
+
 ## Analysis queue and quota gate
 
 Every newly inserted article receives one `analysis_jobs` row through a
