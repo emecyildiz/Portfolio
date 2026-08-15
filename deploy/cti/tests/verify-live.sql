@@ -2,8 +2,8 @@
 
 DO $$
 BEGIN
-    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 12 THEN
-        RAISE EXCEPTION 'CTI schema version 12 is not installed.';
+    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 13 THEN
+        RAISE EXCEPTION 'CTI schema version 13 is not installed.';
     END IF;
 
     IF has_table_privilege('cti_n8n', 'cti.articles', 'DELETE') THEN

@@ -32,11 +32,25 @@ BEGIN
         FROM cti.sources
         WHERE id = source_id_value
           AND last_checked_at IS NOT NULL
+          AND last_error_at IS NULL
+          AND last_error_code = 'feed_read_failed'
+          AND last_success_at IS NULL
+    ) THEN
+        RAISE EXCEPTION 'Provisional source failure was not recorded safely.';
+    END IF;
+
+    PERFORM cti.record_source_check(source_id_value, false, 'feed_read_failed');
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM cti.sources
+        WHERE id = source_id_value
+          AND last_checked_at IS NOT NULL
           AND last_error_at IS NOT NULL
           AND last_error_code = 'feed_read_failed'
           AND last_success_at IS NULL
     ) THEN
-        RAISE EXCEPTION 'Failed source health was not recorded.';
+        RAISE EXCEPTION 'Previous source failure was not finalized.';
     END IF;
 
     PERFORM cti.record_source_check(source_id_value, true, NULL);

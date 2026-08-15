@@ -1440,7 +1440,10 @@ BEGIN
 
         UPDATE cti.sources
         SET last_checked_at = reference_time,
-            last_error_at = reference_time,
+            last_error_at = CASE
+                WHEN last_error_code IS NOT NULL THEN last_checked_at
+                ELSE last_error_at
+            END,
             last_error_code = error_code_value,
             updated_at = reference_time
         WHERE id = source_id_value
@@ -1665,4 +1668,8 @@ ON CONFLICT (version) DO NOTHING;
 
 INSERT INTO cti.schema_versions (version)
 VALUES (12)
+ON CONFLICT (version) DO NOTHING;
+
+INSERT INTO cti.schema_versions (version)
+VALUES (13)
 ON CONFLICT (version) DO NOTHING;

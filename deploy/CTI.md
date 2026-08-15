@@ -45,8 +45,10 @@ Before each feed request, the workflow records the source check as pending
 failure through `cti.record_source_check()`. A successful RSS response clears
 the current error and advances both `last_checked_at` and `last_success_at`.
 If the RSS node fails, the provisional `feed_read_failed` state remains and the
-normal n8n error workflow still raises the operational alert. Raw remote error
-messages are never stored in the source table.
+normal n8n error workflow still raises the operational alert. The provisional
+marker does not create a false `last_error_at`; a failure is finalized on the
+next collection attempt if the previous marker was never cleared. Raw remote
+error messages are never stored in the source table.
 
 ## Analysis queue and quota gate
 
