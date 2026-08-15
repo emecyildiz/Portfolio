@@ -65,3 +65,4 @@ ON CONFLICT DO NOTHING;
 
 SELECT count(*) AS visible_articles FROM cti.dashboard_articles;
 SELECT count(*) AS visible_reports FROM cti.dashboard_reports;
+SELECT * FROM cti.dashboard_ai_usage;

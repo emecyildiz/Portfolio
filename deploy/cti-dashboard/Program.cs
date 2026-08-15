@@ -108,6 +108,29 @@ app.MapGet("/", async (
         }
     }
 
+    await using var usageCommand = dataSource.CreateCommand("""
+        SELECT today_requests, today_tokens, month_requests, month_prompt_tokens,
+               month_output_tokens, month_total_tokens, month_article_requests,
+               month_report_requests, month_failed_requests, last_requested_at
+        FROM cti.dashboard_ai_usage;
+        """);
+    await using var usageReader = await usageCommand.ExecuteReaderAsync(cancellationToken);
+    if (!await usageReader.ReadAsync(cancellationToken))
+    {
+        throw new InvalidOperationException("The CTI AI usage summary is unavailable.");
+    }
+    var aiUsage = new AiUsageSummary(
+        usageReader.GetInt64(0),
+        usageReader.GetInt64(1),
+        usageReader.GetInt64(2),
+        usageReader.GetInt64(3),
+        usageReader.GetInt64(4),
+        usageReader.GetInt64(5),
+        usageReader.GetInt64(6),
+        usageReader.GetInt64(7),
+        usageReader.GetInt64(8),
+        usageReader.IsDBNull(9) ? null : usageReader.GetDateTime(9));
+
     await using var command = dataSource.CreateCommand("""
         SELECT id, title, category, severity, summary_tr, canonical_url, published_at, source_names,
                count(*) OVER() AS total_count
@@ -155,6 +178,7 @@ app.MapGet("/", async (
         currentPage,
         (int)Math.Ceiling(totalCount / (double)pageSize),
         totalCount,
+        aiUsage,
         GetAuthenticatedIdentity(context));
     return Results.Content(HtmlPages.Index(model), "text/html; charset=utf-8");
 });
@@ -250,7 +274,14 @@ internal sealed record ArticleListItem(
 internal sealed record ArticleIndexModel(
     IReadOnlyList<ArticleListItem> Articles, string Query, string Source,
     IReadOnlyList<string> AvailableSources, string Category, string Severity,
-    int Page, int TotalPages, long TotalCount, string AuthenticatedEmail);
+    int Page, int TotalPages, long TotalCount, AiUsageSummary AiUsage,
+    string AuthenticatedEmail);
+
+internal sealed record AiUsageSummary(
+    long TodayRequests, long TodayTokens, long MonthRequests,
+    long MonthPromptTokens, long MonthOutputTokens, long MonthTotalTokens,
+    long MonthArticleRequests, long MonthReportRequests, long MonthFailedRequests,
+    DateTime? LastRequestedAt);
 
 internal sealed record ArticleDetail(
     long Id, string Title, string Category, string Severity, string Summary,
@@ -279,8 +310,16 @@ internal static class HtmlPages
                 """));
         var previous = model.Page > 1 ? PageLink("Previous", model, model.Page - 1) : string.Empty;
         var next = model.Page < model.TotalPages ? PageLink("Next", model, model.Page + 1) : string.Empty;
+        var usage = model.AiUsage;
+        var lastRequest = usage.LastRequestedAt is null ? "No recorded request" : D(usage.LastRequestedAt.Value);
         return Layout("CTI Intelligence", model.AuthenticatedEmail, $$"""
             <section class="hero"><p class="eyebrow">PRIVATE THREAT INTELLIGENCE</p><h1>Intelligence inbox</h1><p>Analyzed security news retained for the current research window.</p></section>
+            <section class="usage-summary" aria-label="AI usage summary">
+              <div><span>Today</span><strong>{{usage.TodayRequests.ToString("N0", CultureInfo.InvariantCulture)}} requests</strong><small>{{usage.TodayTokens.ToString("N0", CultureInfo.InvariantCulture)}} tokens</small></div>
+              <div><span>UTC month</span><strong>{{usage.MonthRequests.ToString("N0", CultureInfo.InvariantCulture)}} requests</strong><small>{{usage.MonthTotalTokens.ToString("N0", CultureInfo.InvariantCulture)}} tokens</small></div>
+              <div><span>Token split</span><strong>{{usage.MonthPromptTokens.ToString("N0", CultureInfo.InvariantCulture)}} input</strong><small>{{usage.MonthOutputTokens.ToString("N0", CultureInfo.InvariantCulture)}} output</small></div>
+              <div><span>Workload</span><strong>{{usage.MonthArticleRequests.ToString("N0", CultureInfo.InvariantCulture)}} articles · {{usage.MonthReportRequests.ToString("N0", CultureInfo.InvariantCulture)}} reports</strong><small>{{usage.MonthFailedRequests.ToString("N0", CultureInfo.InvariantCulture)}} failed/rate-limited · {{E(lastRequest)}}</small></div>
+            </section>
             <form class="filters" method="get">
               <label>Search<input type="search" name="q" value="{{E(model.Query)}}" maxlength="120" placeholder="Title or executive summary"></label>
               <label>Source<select name="source">{{SourceOptions(model.AvailableSources, model.Source)}}</select></label>
