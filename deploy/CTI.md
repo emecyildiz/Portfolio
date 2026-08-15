@@ -109,7 +109,7 @@ The first version is deliberately read-only:
 
 - analyzed articles from the current 30-day metadata window;
 - title and English-summary search;
-- category and severity filters;
+- source, category, and severity filters, with source attribution on each result;
 - individual article records with original-source links;
 - ready or sent report archives that have not expired.
 

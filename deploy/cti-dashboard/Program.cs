@@ -78,6 +78,7 @@ app.MapGet("/", async (
     HttpContext context,
     NpgsqlDataSource dataSource,
     string? q,
+    string? source,
     string? category,
     string? severity,
     int? page,
@@ -86,22 +87,40 @@ app.MapGet("/", async (
     const int pageSize = 20;
     var currentPage = Math.Clamp(page ?? 1, 1, 1000);
     var normalizedQuery = NormalizeFilter(q, 120);
+    var normalizedSource = NormalizeFilter(source, 200);
     var normalizedCategory = NormalizeEnum(category,
         ["malware", "vulnerability", "data_breach", "threat_intelligence", "other"]);
     var normalizedSeverity = NormalizeEnum(severity,
         ["critical", "high", "medium", "low", "unknown"]);
 
+    var availableSources = new List<string>();
+    await using (var sourceCommand = dataSource.CreateCommand("""
+        SELECT DISTINCT source_name
+        FROM cti.dashboard_articles
+        CROSS JOIN LATERAL unnest(source_names) AS source_name
+        ORDER BY source_name;
+        """))
+    await using (var sourceReader = await sourceCommand.ExecuteReaderAsync(cancellationToken))
+    {
+        while (await sourceReader.ReadAsync(cancellationToken))
+        {
+            availableSources.Add(sourceReader.GetString(0));
+        }
+    }
+
     await using var command = dataSource.CreateCommand("""
-        SELECT id, title, category, severity, summary_tr, canonical_url, published_at,
+        SELECT id, title, category, severity, summary_tr, canonical_url, published_at, source_names,
                count(*) OVER() AS total_count
         FROM cti.dashboard_articles
         WHERE (@query = '' OR title ILIKE '%' || @query || '%' OR summary_tr ILIKE '%' || @query || '%')
+          AND (@source = '' OR @source = ANY(source_names))
           AND (@category = '' OR category = @category)
           AND (@severity = '' OR severity = @severity)
         ORDER BY published_at DESC, id DESC
         LIMIT @limit OFFSET @offset;
         """);
     command.Parameters.AddWithValue("query", normalizedQuery);
+    command.Parameters.AddWithValue("source", normalizedSource);
     command.Parameters.AddWithValue("category", normalizedCategory);
     command.Parameters.AddWithValue("severity", normalizedSeverity);
     command.Parameters.AddWithValue("limit", pageSize);
@@ -113,7 +132,7 @@ app.MapGet("/", async (
     {
         while (await reader.ReadAsync(cancellationToken))
         {
-            totalCount = reader.GetInt64(7);
+            totalCount = reader.GetInt64(8);
             articles.Add(new ArticleListItem(
                 reader.GetInt64(0),
                 reader.GetString(1),
@@ -121,13 +140,16 @@ app.MapGet("/", async (
                 reader.GetString(3),
                 reader.GetString(4),
                 reader.GetString(5),
-                reader.GetDateTime(6)));
+                reader.GetDateTime(6),
+                reader.GetFieldValue<string[]>(7)));
         }
     }
 
     var model = new ArticleIndexModel(
         articles,
         normalizedQuery,
+        normalizedSource,
+        availableSources,
         normalizedCategory,
         normalizedSeverity,
         currentPage,
@@ -223,10 +245,11 @@ static string GetAuthenticatedIdentity(HttpContext context) =>
 
 internal sealed record ArticleListItem(
     long Id, string Title, string Category, string Severity, string Summary,
-    string Url, DateTime PublishedAt);
+    string Url, DateTime PublishedAt, string[] Sources);
 
 internal sealed record ArticleIndexModel(
-    IReadOnlyList<ArticleListItem> Articles, string Query, string Category, string Severity,
+    IReadOnlyList<ArticleListItem> Articles, string Query, string Source,
+    IReadOnlyList<string> AvailableSources, string Category, string Severity,
     int Page, int TotalPages, long TotalCount, string AuthenticatedEmail);
 
 internal sealed record ArticleDetail(
@@ -248,7 +271,7 @@ internal static class HtmlPages
             ? "<div class=\"empty\">No matching analyzed articles were found.</div>"
             : string.Join("", model.Articles.Select(article => $$"""
                 <article class="record">
-                  <div class="record-meta"><span class="tag {{E(article.Category)}}">{{E(Label(article.Category))}}</span><span class="severity {{E(article.Severity)}}">{{E(article.Severity)}}</span><time>{{D(article.PublishedAt)}}</time></div>
+                  <div class="record-meta"><span class="tag {{E(article.Category)}}">{{E(Label(article.Category))}}</span><span class="severity {{E(article.Severity)}}">{{E(article.Severity)}}</span><span>{{E(string.Join(", ", article.Sources))}}</span><time>{{D(article.PublishedAt)}}</time></div>
                   <h2><a href="/articles/{{article.Id}}">{{E(article.Title)}}</a></h2>
                   <p>{{E(article.Summary)}}</p>
                   <a class="source" href="{{E(article.Url)}}" target="_blank" rel="noopener noreferrer">Open original source ↗</a>
@@ -260,6 +283,7 @@ internal static class HtmlPages
             <section class="hero"><p class="eyebrow">PRIVATE THREAT INTELLIGENCE</p><h1>Intelligence inbox</h1><p>Analyzed security news retained for the current research window.</p></section>
             <form class="filters" method="get">
               <label>Search<input type="search" name="q" value="{{E(model.Query)}}" maxlength="120" placeholder="Title or executive summary"></label>
+              <label>Source<select name="source">{{SourceOptions(model.AvailableSources, model.Source)}}</select></label>
               <label>Category<select name="category">{{Options(CategoryOptions, model.Category)}}</select></label>
               <label>Severity<select name="severity">{{Options(SeverityOptions, model.Severity)}}</select></label>
               <button type="submit">Apply filters</button><a class="reset" href="/">Reset</a>
@@ -376,6 +400,7 @@ internal static class HtmlPages
         {
             ["page"] = page.ToString(CultureInfo.InvariantCulture),
             ["q"] = model.Query,
+            ["source"] = model.Source,
             ["category"] = model.Category,
             ["severity"] = model.Severity
         };
@@ -387,6 +412,12 @@ internal static class HtmlPages
     private static string Options(IEnumerable<(string Value, string Label)> options, string selected) =>
         string.Join("", options.Select(option =>
             $"<option value=\"{E(option.Value)}\"{(option.Value == selected ? " selected" : "")}>{E(option.Label)}</option>"));
+
+    private static string SourceOptions(IEnumerable<string> sources, string selected) =>
+        Options(
+            new[] { (Value: string.Empty, Label: "All sources") }
+                .Concat(sources.Select(source => (Value: source, Label: source))),
+            selected);
 
     private static string Label(string value) => value switch
     {
