@@ -2,8 +2,8 @@
 
 DO $$
 BEGIN
-    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 14 THEN
-        RAISE EXCEPTION 'CTI schema version 14 is not installed.';
+    IF COALESCE((SELECT max(version) FROM cti.schema_versions), 0) < 15 THEN
+        RAISE EXCEPTION 'CTI schema version 15 is not installed.';
     END IF;
 
     IF has_table_privilege('cti_n8n', 'cti.articles', 'DELETE') THEN
@@ -48,6 +48,19 @@ BEGIN
           AND trust_score = 95
     ) THEN
         RAISE EXCEPTION 'The CISA CTI source is missing or invalid.';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM cti.sources
+        WHERE name = 'Microsoft Security Blog'
+          AND enabled = true
+          AND feed_url = 'https://www.microsoft.com/en-us/security/blog/feed/'
+          AND allowed_hosts = ARRAY['www.microsoft.com']
+          AND content_selector = '.entry-content'
+          AND trust_score = 90
+    ) THEN
+        RAISE EXCEPTION 'The Microsoft Security Blog CTI source is missing or invalid.';
     END IF;
 
     IF NOT has_function_privilege(

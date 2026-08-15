@@ -24,9 +24,12 @@ portfolio database.
 Sources are enabled deliberately, one at a time. The initial production source
 is The Hacker News. The second reviewed source is CISA Cybersecurity
 Advisories, using CISA's official all-advisories RSS feed and a selector scoped
-to the advisory body. RSS endpoints, permitted article hostnames, and content
-selectors are stored in `cti.sources`; n8n must load them from the database
-instead of accepting an arbitrary feed or article URL from workflow input.
+to the advisory body. The third reviewed source is Microsoft Security Blog,
+using Microsoft's official RSS feed, an exact `www.microsoft.com` hostname
+allowlist, and the article's `.entry-content` container. RSS endpoints,
+permitted article hostnames, and content selectors are stored in `cti.sources`;
+n8n must load them from the database instead of accepting an arbitrary feed or
+article URL from workflow input.
 
 Every new source must be added through a reviewed migration, tested manually,
 and observed for at least one collection cycle before another source is
