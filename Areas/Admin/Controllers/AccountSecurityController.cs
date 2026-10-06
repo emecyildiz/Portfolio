@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Portfolio.Data;
 using Portfolio.Models.ViewModels;
+using Portfolio.Services;
 
 namespace Portfolio.Areas.Admin.Controllers;
 
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 public class AccountSecurityController : AdminBaseController
 {
     private const string AuthenticatorIssuer = "Portfolio Admin";
@@ -34,12 +36,32 @@ public class AccountSecurityController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("AdminLoginLimit")]
-    public async Task<IActionResult> EnableAuthenticator(ManageTwoFactorViewModel model)
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting(AdminMfaRateLimit.PolicyName)]
+    public async Task<IActionResult> ShowAuthenticatorSetup([FromForm] string? currentPassword)
     {
         var user = await GetCurrentUserAsync();
         if (user == null)
             return Challenge();
+
+        if (!await RequireCurrentPasswordAsync(user, currentPassword))
+            return RedirectToAction(nameof(Index));
+
+        return View(nameof(Index), await BuildManageModelAsync(user, includeSetupKey: true));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting(AdminMfaRateLimit.PolicyName)]
+    public async Task<IActionResult> EnableAuthenticator(
+        ManageTwoFactorViewModel model,
+        [FromForm] string? currentPassword)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null)
+            return Challenge();
+
+        if (!await RequireCurrentPasswordAsync(user, currentPassword))
+            return RedirectToAction(nameof(Index));
 
         if (await _userManager.GetTwoFactorEnabledAsync(user))
         {
@@ -48,7 +70,7 @@ public class AccountSecurityController : AdminBaseController
         }
 
         if (!ModelState.IsValid)
-            return View(nameof(Index), await BuildManageModelAsync(user, model.AuthenticatorCode));
+            return View(nameof(Index), await BuildManageModelAsync(user, model.AuthenticatorCode, includeSetupKey: true));
 
         var verificationCode = NormalizeAuthenticatorCode(model.AuthenticatorCode);
         var isValid = await _userManager.VerifyTwoFactorTokenAsync(
@@ -61,14 +83,14 @@ public class AccountSecurityController : AdminBaseController
             ModelState.AddModelError(
                 nameof(model.AuthenticatorCode),
                 "The verification code is invalid. Check the authenticator clock and try again.");
-            return View(nameof(Index), await BuildManageModelAsync(user, model.AuthenticatorCode));
+            return View(nameof(Index), await BuildManageModelAsync(user, model.AuthenticatorCode, includeSetupKey: true));
         }
 
         var enableResult = await _userManager.SetTwoFactorEnabledAsync(user, true);
         if (!enableResult.Succeeded)
         {
             AddIdentityErrors(enableResult);
-            return View(nameof(Index), await BuildManageModelAsync(user, model.AuthenticatorCode));
+            return View(nameof(Index), await BuildManageModelAsync(user, model.AuthenticatorCode, includeSetupKey: true));
         }
 
         var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(
@@ -86,11 +108,15 @@ public class AccountSecurityController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> GenerateRecoveryCodes()
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting(AdminMfaRateLimit.PolicyName)]
+    public async Task<IActionResult> GenerateRecoveryCodes([FromForm] string? currentPassword)
     {
         var user = await GetCurrentUserAsync();
         if (user == null)
             return Challenge();
+
+        if (!await RequireCurrentPasswordAsync(user, currentPassword))
+            return RedirectToAction(nameof(Index));
 
         if (!await _userManager.GetTwoFactorEnabledAsync(user))
         {
@@ -112,15 +138,14 @@ public class AccountSecurityController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("AdminLoginLimit")]
-    public async Task<IActionResult> ResetAuthenticator(string? currentPassword)
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting(AdminMfaRateLimit.PolicyName)]
+    public async Task<IActionResult> ResetAuthenticator([FromForm] string? currentPassword)
     {
         var user = await GetCurrentUserAsync();
         if (user == null)
             return Challenge();
 
-        if (string.IsNullOrEmpty(currentPassword) ||
-            !await _userManager.CheckPasswordAsync(user, currentPassword))
+        if (!await RequireCurrentPasswordAsync(user, currentPassword))
         {
             TempData["Error"] = "The current password is incorrect. The authenticator was not reset.";
             return RedirectToAction(nameof(Index));
@@ -148,9 +173,24 @@ public class AccountSecurityController : AdminBaseController
     private async Task<IdentityUser?> GetCurrentUserAsync() =>
         await _userManager.GetUserAsync(User);
 
+    private async Task<bool> RequireCurrentPasswordAsync(IdentityUser user, string? currentPassword)
+    {
+        // Never carry the submitted proof into rendered fields or subsequent requests.
+        ModelState.Remove(nameof(currentPassword));
+        if (!string.IsNullOrEmpty(currentPassword) &&
+            await _userManager.CheckPasswordAsync(user, currentPassword))
+        {
+            return true;
+        }
+
+        TempData["Error"] = "Enter your current password to manage two-factor authentication.";
+        return false;
+    }
+
     private async Task<ManageTwoFactorViewModel> BuildManageModelAsync(
         IdentityUser user,
-        string? authenticatorCode = null)
+        string? authenticatorCode = null,
+        bool includeSetupKey = false)
     {
         var isEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
         var model = new ManageTwoFactorViewModel
@@ -162,7 +202,8 @@ public class AccountSecurityController : AdminBaseController
             AuthenticatorCode = authenticatorCode ?? string.Empty
         };
 
-        if (isEnabled)
+        // Only a password-proven POST may opt in; GET and rejected requests stay secret-free.
+        if (isEnabled || !includeSetupKey)
             return model;
 
         var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
