@@ -49,7 +49,7 @@ services:
       - TicketEmail__PublicBaseUrl=${TICKET_EMAIL_PUBLIC_BASE_URL:-https://emecworks.com}
       - TicketEmail__DailySendLimit=${TICKET_EMAIL_DAILY_SEND_LIMIT:-80}
       - TicketEmail__MaxPendingItems=${TICKET_EMAIL_MAX_PENDING_ITEMS:-120}
-      - Turnstile__Enabled=${TURNSTILE_ENABLED:-false}
+      - Turnstile__Enabled=${TURNSTILE_ENABLED:-true}
       - Turnstile__SiteKey=${TURNSTILE_SITE_KEY:-}
       - Turnstile__SecretKey=${TURNSTILE_SECRET_KEY:-}
       - Turnstile__ExpectedHostname=${TURNSTILE_EXPECTED_HOSTNAME:-emecworks.com}
