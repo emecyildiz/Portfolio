@@ -105,6 +105,7 @@ namespace Portfolio.Models
         public string? CoverImageUrl { get; set; }
         public string? GithubUrl { get; set; }
         public string? LiveDemoUrl { get; set; }
+        public string? KnowledgeUrl { get; set; }                // Public technical documentation
 
         public VisibilityStatus Status { get; set; } = VisibilityStatus.Draft;
         public bool IsFeatured { get; set; } = false;

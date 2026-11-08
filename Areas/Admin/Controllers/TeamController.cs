@@ -42,7 +42,7 @@ public class TeamController : AdminBaseController
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-    [Bind("Id,Title,Summary,Content,EventName,EventDate,EventUrl,MyRole,Outcome,GithubUrl,LiveDemoUrl,IsFeatured,Status")] TeamProject model,
+    [Bind("Id,Title,Summary,Content,EventName,EventDate,EventUrl,MyRole,Outcome,GithubUrl,LiveDemoUrl,KnowledgeUrl,IsFeatured,Status")] TeamProject model,
     string? TeamMembersJson, List<IFormFile>? Images)
     {
         AdminContentValidator.ValidateTeam(ModelState, model, _slugService);
@@ -137,7 +137,7 @@ public class TeamController : AdminBaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
         int id,
-        [Bind("Id,Title,Summary,Content,EventName,EventDate,EventUrl,MyRole,Outcome,GithubUrl,LiveDemoUrl,IsFeatured,Status")] TeamProject model,
+        [Bind("Id,Title,Summary,Content,EventName,EventDate,EventUrl,MyRole,Outcome,GithubUrl,LiveDemoUrl,KnowledgeUrl,IsFeatured,Status")] TeamProject model,
         string? TeamMembersJson, List<IFormFile>? Images)
     {
         var existing = await _db.TeamProjects.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Id == id);
@@ -174,6 +174,7 @@ public class TeamController : AdminBaseController
         existing.Outcome    = model.Outcome;
         existing.GithubUrl  = model.GithubUrl;
         existing.LiveDemoUrl = model.LiveDemoUrl;
+        existing.KnowledgeUrl = model.KnowledgeUrl;
         existing.Status     = model.Status;
         if (existing.Status == VisibilityStatus.Public && existing.PublishedAt == null)
             existing.PublishedAt = DateTime.UtcNow;

@@ -1176,6 +1176,9 @@ namespace Portfolio.Migrations
                     b.Property<bool>("IsFeatured")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("KnowledgeUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("LiveDemoUrl")
                         .HasColumnType("text");
 

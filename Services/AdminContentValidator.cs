@@ -164,6 +164,7 @@ public static partial class AdminContentValidator
         model.Outcome = NormalizeOptional(model.Outcome);
         model.GithubUrl = NormalizeOptional(model.GithubUrl);
         model.LiveDemoUrl = NormalizeOptional(model.LiveDemoUrl);
+        model.KnowledgeUrl = NormalizeOptional(model.KnowledgeUrl);
 
         ValidateContentCore(modelState, model.Title, model.Summary, model.Content, slugService);
         ValidateOptionalText(modelState, nameof(model.EventName), model.EventName, 300);
@@ -172,6 +173,7 @@ public static partial class AdminContentValidator
         ValidateHttpsUrl(modelState, nameof(model.EventUrl), model.EventUrl);
         ValidateHttpsUrl(modelState, nameof(model.GithubUrl), model.GithubUrl);
         ValidateHttpsUrl(modelState, nameof(model.LiveDemoUrl), model.LiveDemoUrl);
+        ValidateKnowledgeUrl(modelState, nameof(model.KnowledgeUrl), model.KnowledgeUrl);
         ValidateEnum(modelState, nameof(model.Status), model.Status);
     }
 

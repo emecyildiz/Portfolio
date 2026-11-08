@@ -7,9 +7,17 @@
     var githubUrl = Model.GithubUrl?.Trim();
     var liveDemoUrl = Model.LiveDemoUrl?.Trim();
     var eventUrl = Model.EventUrl?.Trim();
+    var knowledgeUrl = Model.KnowledgeUrl?.Trim();
     var hasSafeGithubUrl = Uri.TryCreate(githubUrl, UriKind.Absolute, out var githubUri) && githubUri.Scheme == Uri.UriSchemeHttps;
     var hasSafeLiveDemoUrl = Uri.TryCreate(liveDemoUrl, UriKind.Absolute, out var liveDemoUri) && liveDemoUri.Scheme == Uri.UriSchemeHttps;
     var hasSafeEventUrl = Uri.TryCreate(eventUrl, UriKind.Absolute, out var eventUri) && eventUri.Scheme == Uri.UriSchemeHttps;
+    var hasSafeKnowledgeUrl = Uri.TryCreate(knowledgeUrl, UriKind.Absolute, out var knowledgeUri)
+        && knowledgeUri.Scheme == Uri.UriSchemeHttps
+        && string.Equals(knowledgeUri.Host, "knowledge.emecworks.com", StringComparison.OrdinalIgnoreCase)
+        && knowledgeUri.IsDefaultPort
+        && string.IsNullOrEmpty(knowledgeUri.UserInfo)
+        && string.IsNullOrEmpty(knowledgeUri.Query)
+        && string.IsNullOrEmpty(knowledgeUri.Fragment);
 }
 
 <article class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
@@ -27,6 +35,7 @@
             </div>
         </div>
         <div class="flex flex-wrap gap-2 lg:max-w-48 lg:justify-end">
+            @if (hasSafeKnowledgeUrl){<a href="@knowledgeUrl" class="focus-ring rounded-md border border-orange-300/20 bg-orange-300/[0.05] px-4 py-2.5 text-xs text-orange-200 transition hover:border-orange-300/40">Technical documentation <span aria-hidden="true">↗</span></a>}
             @if (hasSafeGithubUrl){<a href="@githubUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-white/10 px-4 py-2.5 text-xs text-slate-300 transition hover:border-orange-300/30 hover:text-white">GitHub ↗</a>}
             @if (hasSafeLiveDemoUrl){<a href="@liveDemoUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md bg-signal px-4 py-2.5 text-xs font-semibold text-ink transition hover:bg-white">Demo ↗</a>}
             @if (hasSafeEventUrl){<a href="@eventUrl" target="_blank" rel="noopener noreferrer" class="focus-ring rounded-md border border-orange-300/20 bg-orange-300/[0.05] px-4 py-2.5 text-xs text-orange-200 transition hover:border-orange-300/40">Event ↗</a>}
