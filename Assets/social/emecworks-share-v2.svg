@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Emecworks — Emeç Yıldız</title>
+  <desc id="desc">Security research and systems engineering. An editorial cream and green card with an architectural E monogram.</desc>
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#f3f0e7" stroke-opacity=".065"/></pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#f3f0e7"/>
+  <rect x="802" width="398" height="630" fill="#18211d"/>
+  <rect x="802" width="398" height="630" fill="url(#grid)"/>
+  <path d="M56 62H744" stroke="#18211d" stroke-width="2"/>
+  <circle cx="65" cy="96" r="5" fill="#bd452f"/>
+  <text x="84" y="102" fill="#667069" font-family="Consolas,monospace" font-size="16" letter-spacing="2">INDEPENDENT RESEARCH &amp; ENGINEERING</text>
+  <text x="51" y="243" fill="#18211d" font-family="Georgia,serif" font-weight="bold" font-size="96" letter-spacing="-5">Emecworks</text>
+  <path d="M58 279H125" stroke="#bd452f" stroke-width="5"/>
+  <text x="56" y="343" fill="#18211d" font-family="Arial,sans-serif" font-size="34">Security research.</text>
+  <text x="56" y="388" fill="#18211d" font-family="Arial,sans-serif" font-size="34">Systems engineering.</text>
+  <text x="56" y="456" fill="#667069" font-family="Arial,sans-serif" font-size="25">Emeç Yıldız</text>
+  <path d="M56 518H744" stroke="#cec8ba"/>
+  <text x="56" y="551" fill="#667069" font-family="Consolas,monospace" font-size="15" letter-spacing=".3">SECURITY / ELECTRONICS / INFRASTRUCTURE / SOFTWARE</text>
+  <text x="56" y="587" fill="#18211d" font-family="Arial,sans-serif" font-size="18">emecworks.com</text>
+  <g fill="none" stroke="#89998c" stroke-width="1">
+    <rect x="866" y="149" width="268" height="322" stroke-dasharray="4 7" opacity=".55"/>
+    <path d="M843 181H1160M843 438H1160M897 124V494M1103 124V494" opacity=".4"/>
+    <path d="M842 305H896M1104 223H1160M1064 307H1160M1104 395H1160"/>
+  </g>
+  <path d="M897 181H1103V228H948V282H1064V329H948V391H1103V438H897Z" fill="#f3f0e7"/>
+  <circle cx="1103" cy="181" r="13" fill="#bd452f"/>
+  <g fill="#18211d" stroke="#a8b4a7" stroke-width="2"><circle cx="844" cy="305" r="5"/><circle cx="1160" cy="223" r="5"/><circle cx="1160" cy="307" r="5"/><circle cx="1160" cy="395" r="5"/></g>
+  <text x="843" y="102" fill="#a8b4a7" font-family="Consolas,monospace" font-size="14" letter-spacing="2">EMEC / WORKS</text>
+  <path d="M843 518H1158" stroke="#526056"/>
+  <text x="843" y="553" fill="#f3f0e7" font-family="Consolas,monospace" font-size="16">BUILD. INSPECT. DOCUMENT.</text>
+</svg>

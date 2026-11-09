@@ -865,10 +865,12 @@ html {
 
 .record-row__date,
 .record-row__type {
+    min-width: 0;
     color: var(--faint);
     font-family: 'IBM Plex Mono', Consolas, monospace;
     font-size: .56rem;
     line-height: 1.55;
+    overflow-wrap: anywhere;
     text-transform: uppercase;
 }
 
@@ -1454,7 +1456,8 @@ html {
     }
 
     .record-row {
-        grid-template-columns: 3.6rem minmax(0, 1fr);
+        grid-template-columns: 4.25rem minmax(0, 1fr);
+        gap: .75rem;
     }
 
     .record-row__arrow {
