@@ -1,6 +1,6 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM node:22-alpine AS client-assets
+FROM node:22.23.4-alpine AS client-assets
 WORKDIR /src
 COPY ["package.json", "package-lock.json", "./"]
 RUN npm ci
