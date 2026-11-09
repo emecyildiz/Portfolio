@@ -42,7 +42,7 @@ public interface IMediaService
 public class MediaService : IMediaService
 {
     private static readonly HashSet<string> AllowedEntityTypes =
-        ["project", "security_research", "homelab_post", "blog_post", "team_project"];
+        ["project", "security_research", "homelab_post", "homelab_topology", "blog_post", "team_project"];
 
     private readonly AppDbContext _db;
     private readonly IWebHostEnvironment _env;
@@ -282,6 +282,7 @@ public class MediaService : IMediaService
         "project" => _db.Projects.IgnoreQueryFilters().AnyAsync(p => p.Id == entityId),
         "security_research" => _db.SecurityResearches.IgnoreQueryFilters().AnyAsync(s => s.Id == entityId),
         "homelab_post" => _db.HomelabPosts.IgnoreQueryFilters().AnyAsync(h => h.Id == entityId),
+        "homelab_topology" => _db.HomelabPosts.IgnoreQueryFilters().AnyAsync(h => h.Id == entityId),
         "blog_post" => _db.BlogPosts.IgnoreQueryFilters().AnyAsync(b => b.Id == entityId),
         "team_project" => _db.TeamProjects.IgnoreQueryFilters().AnyAsync(t => t.Id == entityId),
         _ => Task.FromResult(false)

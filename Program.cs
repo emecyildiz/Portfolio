@@ -26,7 +26,7 @@ var turnstileOptions = new TurnstileOptions();
 builder.Configuration
     .GetSection(TurnstileOptions.SectionName)
     .Bind(turnstileOptions);
-turnstileOptions.Validate(builder.Environment.IsProduction());
+turnstileOptions.Validate(requireProtection: !builder.Environment.IsDevelopment());
 var adminPath = string.IsNullOrWhiteSpace(configuredAdminPath)
     ? builder.Environment.IsDevelopment()
         ? "panel"
@@ -112,6 +112,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRateLimiter(options =>
 {
+    AdminMfaRateLimit.Configure(options);
+
     options.AddPolicy("ContactFormLimit", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -193,6 +195,7 @@ builder.Services.AddScoped<IReadingTimeService, ReadingTimeService>();
 builder.Services.AddScoped<IViewCountService, ViewCountService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
+builder.Services.AddScoped<UploadAccessPolicy>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddSingleton<IGeoLocationService, GeoLocationService>();
 builder.Services.AddSingleton<IAnalyticsIpHasher, AnalyticsIpHasher>();
@@ -302,7 +305,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.UseRouting();
 
@@ -399,6 +401,8 @@ app.Use(async (context, next) =>
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<UploadAccessMiddleware>();
+app.UseStaticFiles();
 app.UseRateLimiter();
 
 app.MapControllers();

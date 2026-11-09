@@ -708,6 +708,7 @@
 
         const formData = new FormData();
         formData.append('icon', file);
+        formData.append('postId', '@Model.Id');
 
         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
@@ -747,6 +748,7 @@
         inputEl.disabled = true;
         const formData = new FormData();
         formData.append('image', file);
+        formData.append('postId', '@Model.Id');
         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
         try {

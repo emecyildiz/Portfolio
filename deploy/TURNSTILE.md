@@ -4,6 +4,12 @@ Turnstile protects the public work-request form before a ticket or confirmation
 email is created. It complements the honeypot and request limits; it does not
 replace them.
 
+Turnstile is mandatory outside the `Development` environment, including
+Production and Staging. Startup rejects disabled verification or missing widget
+configuration before the application starts accepting requests. Production
+Compose defaults `TURNSTILE_ENABLED` to `true`; explicitly setting it to `false`
+does not bypass the startup check. Configure the widget before deployment.
+
 ## Production widget
 
 Create a Managed Turnstile widget in the Cloudflare dashboard:
@@ -54,3 +60,18 @@ closed: if Siteverify cannot be reached, no ticket or email job is created.
 Leave Turnstile disabled for normal local development. For an explicit
 integration test, use Cloudflare's official always-pass test site key and
 secret only in the local `.env`; never use the test keys in production.
+
+The tracked `.env.example` and `docker-compose.yml` are local Development
+configuration, not production-ready settings. Use the production environment
+file and `docker-compose.prod.yml` for public deployment.
+
+## Availability limits
+
+Successful verification is required before any public contact or confirmation
+email job is stored. This prevents proof-free distributed submissions from
+filling the shared ticket budget. The existing 60-ticket rolling-day, per-IP and
+per-email limits remain in place; Turnstile is an abuse barrier, not sender
+identity or email ownership verification. Enough senders who pass verification
+can still fill the shared budget. A verified overflow channel/reserved-capacity
+policy is a separate product decision; quota count-and-save concurrency is also
+not made atomic by this configuration guard.

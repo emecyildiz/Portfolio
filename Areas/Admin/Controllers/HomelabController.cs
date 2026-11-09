@@ -254,6 +254,7 @@ public class HomelabController : AdminBaseController
         if (post == null) return NotFound();
 
         var images = await _media.GetByEntityAsync("homelab_post", id);
+        images.AddRange(await _media.GetByEntityAsync("homelab_topology", id));
         foreach (var img in images)
             await _media.DeleteAsync(img.Id);
 
@@ -264,8 +265,10 @@ public class HomelabController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UploadIcon(IFormFile icon)
+    public async Task<IActionResult> UploadIcon(IFormFile icon, int postId)
     {
+        if (postId <= 0 || !await _db.HomelabPosts.IgnoreQueryFilters().AnyAsync(h => h.Id == postId))
+            return NotFound();
         if (icon == null || icon.Length == 0)
             return Json(new { success = false, message = "No file was selected." });
 
@@ -277,23 +280,16 @@ public class HomelabController : AdminBaseController
         if (validatedUpload == null)
             return Json(new { success = false, message = "The file must be a valid PNG or WebP icon." });
 
-        var uniqueName = $"{Guid.NewGuid()}{validatedUpload.Extension}";
-        var relativePath = Path.Combine("uploads", "network-icons", uniqueName);
-        var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
-
-        Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
-
-        await using var stream = new FileStream(physicalPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        await icon.CopyToAsync(stream);
-
-        var url = "/" + relativePath.Replace('\\', '/');
-        return Json(new { success = true, url });
+        var media = await _media.SaveAsync(icon, "homelab_topology", postId);
+        return Json(new { success = true, url = media.Url });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UploadDeviceImage(IFormFile image)
+    public async Task<IActionResult> UploadDeviceImage(IFormFile image, int postId)
     {
+        if (postId <= 0 || !await _db.HomelabPosts.IgnoreQueryFilters().AnyAsync(h => h.Id == postId))
+            return NotFound();
         if (image == null || image.Length == 0)
             return Json(new { success = false, message = "No file was selected." });
 
@@ -311,18 +307,8 @@ public class HomelabController : AdminBaseController
             });
         }
 
-        var uniqueName = $"{Guid.NewGuid()}{validatedUpload.Extension}";
-        var relativePath = Path.Combine("uploads", "network-devices", uniqueName);
-        var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
-
-        Directory.CreateDirectory(Path.GetDirectoryName(physicalPath)!);
-
-        await using var stream = new FileStream(
-            physicalPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        await image.CopyToAsync(stream);
-
-        var url = "/" + relativePath.Replace('\\', '/');
-        return Json(new { success = true, url });
+        var media = await _media.SaveAsync(image, "homelab_topology", postId);
+        return Json(new { success = true, url = media.Url });
     }
 
     [HttpGet]

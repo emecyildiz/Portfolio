@@ -133,7 +133,7 @@ The tracked [`.env.example`](.env.example) file documents the local configuratio
 | `ANALYTICS_HASH_KEY` | Pseudonymous daily visitor counting |
 | `PRIVACY_*` | Public operator and hosting disclosure |
 | `TICKET_EMAIL_*` | Optional request-confirmation and reply email delivery |
-| `TURNSTILE_*` | Optional public-form bot protection |
+| `TURNSTILE_*` | Required public-form bot protection outside Development; optional for local development |
 
 Production secrets are stored outside the repository. Do not add API keys, passwords, database dumps, recovery archives, uploaded private material, or real environment files to Git.
 

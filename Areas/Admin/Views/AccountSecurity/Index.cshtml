@@ -23,7 +23,7 @@
         <section class="admin-surface p-5 sm:p-6" aria-labelledby="authenticator-setup-heading">
             <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-signal">Step 1</p>
             <h3 id="authenticator-setup-heading" class="mt-2 text-lg font-semibold text-white">Add the account to your authenticator</h3>
-            <p class="mt-2 text-sm leading-6 text-slate-500">Choose manual setup in Microsoft Authenticator, Google Authenticator, Aegis, 2FAS, or another TOTP-compatible app.</p>
+            <p class="mt-2 text-sm leading-6 text-slate-500">Confirm your current password before viewing the setup key. Then choose manual setup in a TOTP-compatible authenticator app.</p>
 
             @if (!string.IsNullOrWhiteSpace(Model.SharedKey))
             {
@@ -44,22 +44,36 @@
             }
             else
             {
-                <p class="mt-6 border border-rose-300/20 bg-rose-300/[0.05] p-4 text-sm text-rose-200">An authenticator key could not be generated. Review the validation message and try again.</p>
+                <form method="post" asp-action="ShowAuthenticatorSetup" class="mt-6">
+                    @Html.AntiForgeryToken()
+                    <label for="setupCurrentPassword" class="admin-label">Current password</label>
+                    <input type="password" name="currentPassword" id="setupCurrentPassword" autocomplete="current-password" required class="admin-input" />
+                    <button type="submit" class="focus-ring mt-5 border border-cyan/25 px-5 py-2.5 text-sm text-cyan transition hover:bg-cyan/10">Show authenticator setup</button>
+                </form>
             }
         </section>
 
         <aside class="admin-surface h-fit p-5 sm:p-6" aria-labelledby="authenticator-verify-heading">
             <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-cyan">Step 2</p>
             <h3 id="authenticator-verify-heading" class="mt-2 text-lg font-semibold text-white">Verify and enable</h3>
-            <p class="mt-2 text-sm leading-6 text-slate-500">Enter the current 6-digit code. The server accepts standards-based time windows; your device clock must be accurate.</p>
+            <p class="mt-2 text-sm leading-6 text-slate-500">Enter your current password again and the 6-digit code. Your device clock must be accurate.</p>
 
+            @if (!string.IsNullOrWhiteSpace(Model.SharedKey))
+            {
             <form method="post" asp-action="EnableAuthenticator" class="mt-6">
                 @Html.AntiForgeryToken()
+                <label for="enableCurrentPassword" class="admin-label">Current password</label>
+                <input type="password" name="currentPassword" id="enableCurrentPassword" autocomplete="current-password" required class="admin-input mb-4" />
                 <label asp-for="AuthenticatorCode" class="admin-label"></label>
                 <input asp-for="AuthenticatorCode" class="admin-input font-mono tracking-[0.25em]" autocomplete="one-time-code" inputmode="numeric" maxlength="16" />
                 <span asp-validation-for="AuthenticatorCode"></span>
                 <button type="submit" class="focus-ring mt-5 w-full bg-signal px-6 py-2.5 text-sm font-semibold text-ink transition hover:bg-white" @(!string.IsNullOrWhiteSpace(Model.SharedKey) ? null : "disabled")>Enable two-factor authentication</button>
             </form>
+            }
+            else
+            {
+                <p class="mt-6 text-sm leading-6 text-slate-400">Show the setup key in step 1 before enabling two-factor authentication.</p>
+            }
         </aside>
     </div>
 }
@@ -76,6 +90,8 @@ else
             }
             <form method="post" asp-action="GenerateRecoveryCodes" class="mt-6" onsubmit="return confirm('Generate new recovery codes and invalidate every previous code?');">
                 @Html.AntiForgeryToken()
+                <label for="recoveryCurrentPassword" class="admin-label">Current password</label>
+                <input type="password" name="currentPassword" id="recoveryCurrentPassword" autocomplete="current-password" required class="admin-input mb-4" />
                 <button type="submit" class="focus-ring border border-cyan/25 px-5 py-2.5 text-sm text-cyan transition hover:bg-cyan/10">Generate new recovery codes</button>
             </form>
         </section>

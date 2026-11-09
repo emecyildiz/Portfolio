@@ -173,7 +173,7 @@ public class HireController : BaseController
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> TrackTicket(string ticketNumber)
     {
-        if (!Guid.TryParse(ticketNumber, out var guid))
+        if (!Guid.TryParse(ticketNumber, out var guid) || guid == Guid.Empty)
         {
             TempData["TrackError"] = "The ticket number format is invalid.";
             return RedirectToAction("Index", "Hire", new { area = "" });

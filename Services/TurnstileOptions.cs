@@ -12,10 +12,17 @@ public sealed class TurnstileOptions
     public string ExpectedHostname { get; set; } = string.Empty;
     public string ExpectedAction { get; set; } = "contact";
 
-    public void Validate(bool isProduction)
+    public void Validate(bool requireProtection)
     {
         if (!Enabled)
+        {
+            if (requireProtection)
+            {
+                throw new InvalidOperationException(
+                    "Turnstile must be enabled outside Development before accepting public contact requests.");
+            }
             return;
+        }
 
         if (string.IsNullOrWhiteSpace(SiteKey))
             throw new InvalidOperationException("Turnstile:SiteKey is required when Turnstile is enabled.");
@@ -23,10 +30,10 @@ public sealed class TurnstileOptions
         if (string.IsNullOrWhiteSpace(SecretKey))
             throw new InvalidOperationException("Turnstile:SecretKey is required when Turnstile is enabled.");
 
-        if (isProduction && string.IsNullOrWhiteSpace(ExpectedHostname))
+        if (requireProtection && string.IsNullOrWhiteSpace(ExpectedHostname))
         {
             throw new InvalidOperationException(
-                "Turnstile:ExpectedHostname is required when Turnstile is enabled in production.");
+                "Turnstile:ExpectedHostname is required outside Development.");
         }
 
         var hostNameType = Uri.CheckHostName(ExpectedHostname);
