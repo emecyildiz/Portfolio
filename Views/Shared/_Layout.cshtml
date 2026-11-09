@@ -20,7 +20,8 @@
         var requestOrigin = $"{Context.Request.Scheme}://{Context.Request.Host}";
         var canonicalUrl = $"{requestOrigin}{Context.Request.Path}";
         var ogImage = (ViewBag.OgImage as string)?.Trim();
-        var fullOgImage = $"{requestOrigin}/og-default.png";
+        var fullOgImage = $"{requestOrigin}/emecworks-share-v2.png";
+        var usesDefaultOgImage = true;
         if (!string.IsNullOrWhiteSpace(ogImage))
         {
             var isSafeInternalImage = ogImage.StartsWith('/') &&
@@ -29,9 +30,15 @@
             var isSafeExternalImage = Uri.TryCreate(ogImage, UriKind.Absolute, out var absoluteOgImage) &&
                                       absoluteOgImage.Scheme == Uri.UriSchemeHttps;
             if (isSafeInternalImage)
+            {
                 fullOgImage = $"{requestOrigin}{ogImage}";
+                usesDefaultOgImage = false;
+            }
             else if (isSafeExternalImage)
+            {
                 fullOgImage = ogImage;
+                usesDefaultOgImage = false;
+            }
         }
     }
     <title>@documentTitle</title>
@@ -43,6 +50,14 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="@canonicalUrl" />
     <meta property="og:image" content="@fullOgImage" />
+    @if (usesDefaultOgImage)
+    {
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Emecworks — Emeç Yıldız. Security research and systems engineering." />
+        <meta name="twitter:image:alt" content="Emecworks — Emeç Yıldız. Security research and systems engineering." />
+    }
     <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="@siteName" />
 

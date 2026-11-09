@@ -15,6 +15,23 @@
                                 absoluteCurrentFocusUrl.Scheme == Uri.UriSchemeHttps;
         hasSafeCurrentFocusUrl = isSafeInternalPath || isSafeExternalUrl;
     }
+    Func<Portfolio.Models.Enums.ResearchType, string> researchTypeLabel = type => type switch
+    {
+        Portfolio.Models.Enums.ResearchType.MalwareAnalysis => "Malware Analysis",
+        Portfolio.Models.Enums.ResearchType.HardwareVuln => "Hardware Vulnerability",
+        Portfolio.Models.Enums.ResearchType.RFSecurity => "RF Security",
+        Portfolio.Models.Enums.ResearchType.WebSecurity => "Web Security",
+        Portfolio.Models.Enums.ResearchType.NetworkSecurity => "Network Security",
+        Portfolio.Models.Enums.ResearchType.MobileSecurity => "Mobile Security",
+        _ => "Other"
+    };
+    Func<Portfolio.Models.Enums.HomelabTopic, string> homelabTopicLabel = topic => topic switch
+    {
+        Portfolio.Models.Enums.HomelabTopic.NetworkSetup => "Network Setup",
+        Portfolio.Models.Enums.HomelabTopic.ServerManagement => "Server Management",
+        Portfolio.Models.Enums.HomelabTopic.VPN => "VPN",
+        _ => topic.ToString()
+    };
 }
 
 <section class="home-lead public-container">
@@ -144,7 +161,7 @@
                         @foreach (var research in Model.FeaturedSecurity)
                         {
                             <a href="/security/@research.Slug" class="record-row focus-ring">
-                                <span class="record-row__type">@research.ResearchType<br />@research.SeverityLevel</span>
+                                <span class="record-row__type">@researchTypeLabel(research.ResearchType)<br />@research.SeverityLevel</span>
                                 <span>
                                     <span class="record-row__title">@research.Title</span>
                                     <span class="record-row__summary">@research.Summary</span>
@@ -170,7 +187,7 @@
                         @foreach (var lab in Model.FeaturedHomelab)
                         {
                             <a href="/homelab/@lab.Slug" class="record-row focus-ring">
-                                <span class="record-row__type">@lab.Topic<br />@lab.ReadingTimeMinutes min</span>
+                                <span class="record-row__type">@homelabTopicLabel(lab.Topic)<br />@lab.ReadingTimeMinutes min</span>
                                 <span>
                                     <span class="record-row__title">@lab.Title</span>
                                     <span class="record-row__summary">@lab.Summary</span>
